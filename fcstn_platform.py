@@ -8,6 +8,11 @@ from typing import Dict, Optional, List
 import logging
 from dataclasses import dataclass
 import time
+import sys
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
 # Core module imports
 from src.core.fractal_engine.mandelbrot import MandelbrotGenerator, FractalParameters

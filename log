@@ -1,0 +1,234 @@
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+MacBook-Air-de-FMF:fcstn fmf$ ls
+LICENSE                 QUICKSTART.md           bci_processor.py        experimental_roadmap.md metric_tensor.py        requirements.txt
+PACKAGE_OVERVIEW.md     README.md               coalition_formation.py  fcstn_platform.py       neurogaming_demo.py     test_fcstn.py
+PROJECT_SUMMARY.md      architecture.md         deploy.sh               mandelbrot.py           platform_config.yaml
+MacBook-Air-de-FMF:fcstn fmf$ ./deploy.sh
+bash: ./deploy.sh: Permission denied
+MacBook-Air-de-FMF:fcstn fmf$ chmod +x deploy.sh
+MacBook-Air-de-FMF:fcstn fmf$ ./deploy.sh
+====================================
+FCSTN Platform Deployment
+====================================
+
+Checking Python version...
+[✓] Python 3.9.6 (>= 3.9 required)
+
+Checking for GPU support...
+[!] No NVIDIA GPU detected. Will use CPU mode (slower)
+
+Creating virtual environment...
+[✓] Virtual environment created
+
+Upgrading pip...
+[✓] Pip upgraded
+
+Installing dependencies...
+[✓] Installing core dependencies...
+[✓] Installing scientific computing packages...
+[✓] Installing graphics packages...
+[✓] Installing BCI packages...
+[✓] Installing ML frameworks...
+[✓] Installing networking packages...
+[✓] Installing utilities...
+
+Installing development dependencies...
+[✓] Development dependencies installed
+
+Creating directory structure...
+[✓] Directories created
+
+Running tests...
+=============================================================== test session starts ===============================================================
+platform darwin -- Python 3.9.6, pytest-8.4.2, pluggy-1.6.0 -- /Users/fmf/Downloads/fcstn/venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/fmf/Downloads/fcstn
+plugins: asyncio-1.2.0, cov-7.1.0
+asyncio: mode=strict, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 0 items                                                                                                                                 
+
+============================================================== no tests ran in 0.00s ==============================================================
+ERROR: file or directory not found: tests/
+
+[!] Some tests failed. Check output above.
+
+====================================
+Deployment Summary
+====================================
+
+[✓] Virtual environment: /Users/fmf/Downloads/fcstn/venv
+[✓] Python version: 3.9.6
+[!] GPU support: Disabled (CPU mode)
+[✓] Core modules: Installed
+[✓] Tests: Completed
+
+====================================
+Next Steps
+====================================
+
+1. Activate the virtual environment:
+   source venv/bin/activate
+
+2. Run the demo:
+   python examples/neurogaming_demo.py
+
+3. Or start the platform:
+   python src/fcstn_platform.py
+
+4. Configure settings:
+   Edit config/platform_config.yaml
+
+5. Run tests:
+   pytest tests/ -v
+
+[✓] Created activation helper: ./activate.sh
+
+[✓] Deployment complete!
+MacBook-Air-de-FMF:fcstn fmf$ source venv/bin/activate
+(venv) MacBook-Air-de-FMF:fcstn fmf$ python neurogaming_demo.py
+Traceback (most recent call last):
+  File "/Users/fmf/Downloads/fcstn/neurogaming_demo.py", line 24, in <module>
+    from core.fractal_engine.mandelbrot import MandelbrotGenerator, FractalParameters, create_color_mapping
+ModuleNotFoundError: No module named 'core'
+(venv) MacBook-Air-de-FMF:fcstn fmf$ python fcstn_platform.py
+Traceback (most recent call last):
+  File "/Users/fmf/Downloads/fcstn/fcstn_platform.py", line 13, in <module>
+    from src.core.fractal_engine.mandelbrot import MandelbrotGenerator, FractalParameters
+ModuleNotFoundError: No module named 'src'
+(venv) MacBook-Air-de-FMF:fcstn fmf$ python neurogaming_demo.py
+2026-03-30 14:53:10,150 - root - WARNING - CuPy not available. Falling back to CPU computation.
+
+======================================================================
+FCSTN Neurogaming Example
+Brain-Responsive Gaming Environment Demonstration
+======================================================================
+
+[1] Running 60-second gameplay session...
+2026-03-30 14:53:13,690 - NeurogameEnvironment - INFO - Initializing FCSTN components...
+2026-03-30 14:53:13,690 - root - INFO - Mandelbrot Generator initialized (GPU: False)
+2026-03-30 14:53:13,690 - root - INFO - Metric Computer initialized with 3D
+2026-03-30 14:53:13,690 - root - INFO - BCI Processor initialized (sampling rate: 250.0 Hz)
+2026-03-30 14:53:13,690 - root - INFO - NDAN Interface initialized
+2026-03-30 14:53:13,690 - NeurogameEnvironment - INFO - Neurogame environment initialized
+2026-03-30 14:53:13,690 - NeurogameEnvironment - INFO - Starting 60s gameplay session...
+2026-03-30 14:53:14,010 - NeurogameEnvironment - INFO - t=0.0s | Attention=0.03 | Difficulty=0.94 | State=fatigued
+2026-03-30 14:53:17,231 - NeurogameEnvironment - INFO - t=5.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:20,092 - NeurogameEnvironment - INFO - t=10.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:23,480 - NeurogameEnvironment - INFO - t=15.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:27,876 - NeurogameEnvironment - INFO - t=20.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:32,908 - NeurogameEnvironment - INFO - t=25.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:38,573 - NeurogameEnvironment - INFO - t=30.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:41,853 - NeurogameEnvironment - INFO - t=35.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:45,039 - NeurogameEnvironment - INFO - t=40.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:48,583 - NeurogameEnvironment - INFO - t=45.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:52,110 - NeurogameEnvironment - INFO - t=50.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:55,347 - NeurogameEnvironment - INFO - t=55.0s | Attention=0.03 | Difficulty=0.50 | State=fatigued
+2026-03-30 14:53:58,278 - NeurogameEnvironment - INFO - Session complete!
+
+[2] Generating visualization...
+Session visualization saved to outputs/neurogame_session.png
+
+[3] Demonstrating multi-player coalition formation...
+2026-03-30 14:54:00,198 - CoalitionDemo - INFO - Demonstrating coalition formation...
+2026-03-30 14:54:00,200 - root - INFO - Coalition game initialized with 9 agents
+2026-03-30 14:54:00,201 - root - INFO - Converged after 4 iterations
+2026-03-30 14:54:00,201 - CoalitionDemo - INFO - 
+Coalition Formation Results:
+2026-03-30 14:54:00,201 - CoalitionDemo - INFO -   Total coalitions: 6
+2026-03-30 14:54:00,201 - CoalitionDemo - INFO -   Total network value: 2900.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   Average coalition size: 1.50
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   Coalition types: {'infrastructure': 4, 'compute': 2}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO - 
+Detailed Coalition Structure:
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_Player1 (infrastructure):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'Player1'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 35.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 10, 'bandwidth': 5, 'latency': 20}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_Player2 (infrastructure):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'Player2'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 40.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 10, 'bandwidth': 5, 'latency': 25}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_VR_HMD_1 (infrastructure):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'VR_HMD_1'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 95.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 40, 'bandwidth': 50, 'latency': 5}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_VR_HMD_2 (infrastructure):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'VR_HMD_2'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 95.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 40, 'bandwidth': 50, 'latency': 5}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_merged_1 (compute):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'EdgeServer_2', 'GameAI_2'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 540.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 260, 'latency': 25, 'bandwidth': 225}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_merged_2 (compute):
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Members: {'CloudGPU', 'GameAI_1', 'EdgeServer_1'}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Value: 2095.00
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -     Resources: {'compute': 1250, 'latency': 75, 'bandwidth': 720}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO - 
+Resource Allocations:
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_Player1: {'compute': 6.211180124223602, 'bandwidth': 2.3696682464454977, 'latency': 12.903225806451612}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_Player2: {'compute': 6.211180124223602, 'bandwidth': 2.3696682464454977, 'latency': 16.129032258064516}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_VR_HMD_1: {'compute': 24.844720496894407, 'bandwidth': 23.696682464454973, 'latency': 3.225806451612903}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_VR_HMD_2: {'compute': 24.844720496894407, 'bandwidth': 23.696682464454973, 'latency': 3.225806451612903}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_merged_1: {'compute': 161.49068322981367, 'bandwidth': 106.6350710900474, 'latency': 16.129032258064516}
+2026-03-30 14:54:00,202 - CoalitionDemo - INFO -   C_merged_2: {'compute': 776.3975155279503, 'bandwidth': 341.2322274881517, 'latency': 48.38709677419355}
+
+[4] Generating example fractal environments...
+2026-03-30 14:54:00,322 - root - INFO - Mandelbrot Generator initialized (GPU: False)
+2026-03-30 14:54:00,607 - root - INFO - Mandelbrot Generator initialized (GPU: False)
+2026-03-30 14:54:00,790 - root - INFO - Mandelbrot Generator initialized (GPU: False)
+Cognitive environments saved to outputs/cognitive_environments.png
+
+======================================================================
+Demonstration Complete!
+======================================================================
+
+Generated outputs:
+  - neurogame_session.png: Session metrics visualization
+  - cognitive_environments.png: Example environments for different states
+
+Key findings:
+  - Environment automatically adapts to player's cognitive state
+  - Difficulty scales implicitly based on attention and engagement
+  - Coalition formation optimizes distributed resource allocation
+  - Fractal complexity correlates with cognitive engagement
+(venv) MacBook-Air-de-FMF:fcstn fmf$ python fcstn_platform.py
+WARNING:root:CuPy not available. Falling back to CPU computation.
+
+============================================================
+FCSTN Platform Demonstration
+============================================================
+
+
+[1] Processing BCI signal...
+  Attention: 0.026
+  Engagement: 0.050
+  Cognitive State: fatigued
+
+[2] Adapting environment to cognitive state...
+  Fractal zoom: 1.03
+  Curvature scale: 1.10
+
+[3] Generating virtual environment...
+  Generation time: 163488.43 ms
+  Fractal field shape: (1080, 1920)
+
+[4] Performance Metrics:
+  fps: 0.0
+  latency_ms: 14.36 ms
+  frame_count: 2
+  adaptation_accuracy: 0.0
+
+[5] Coalition Network:
+  Coalitions formed: 3
+  Total network value: 385.00
+  Coalition types: {'infrastructure': 2, 'compute': 1}
+
+============================================================
+Demo complete. Platform ready for XR deployment.
+============================================================
+
+(venv) MacBook-Air-de-FMF:fcstn fmf$ 

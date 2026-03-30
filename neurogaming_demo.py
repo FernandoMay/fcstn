@@ -19,14 +19,14 @@ logging.basicConfig(
 
 # Import FCSTN modules
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent / 'src'))
 
-from core.fractal_engine.mandelbrot import MandelbrotGenerator, FractalParameters, create_color_mapping
-from core.geometry_engine.metric_tensor import MetricTensorComputer, MetricConfig
-from core.ndan_interface.bci_processor import (
+from src.core.fractal_engine.mandelbrot import MandelbrotGenerator, FractalParameters, create_color_mapping
+from src.core.geometry_engine.metric_tensor import MetricTensorComputer, MetricConfig
+from src.core.ndan_interface.bci_processor import (
     NDANInterface, generate_synthetic_eeg, CognitiveState
 )
-from core.coalition_network.coalition_formation import (
+from src.core.coalition_network.coalition_formation import (
     Agent, AgentType, CoalitionFormationGame, ResourceManager
 )
 
@@ -247,8 +247,8 @@ def plot_session_metrics(metrics):
     ax3.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('/mnt/user-data/outputs/neurogame_session.png', dpi=150)
-    print("Session visualization saved to neurogame_session.png")
+    plt.savefig('outputs/neurogame_session.png', dpi=150)
+    print("Session visualization saved to outputs/neurogame_session.png")
 
 
 def demonstrate_coalition_formation():
@@ -365,8 +365,8 @@ def main():
         axes[idx].axis('off')
     
     plt.tight_layout()
-    plt.savefig('/mnt/user-data/outputs/cognitive_environments.png', dpi=150)
-    print("Cognitive environments saved to cognitive_environments.png")
+    plt.savefig('outputs/cognitive_environments.png', dpi=150)
+    print("Cognitive environments saved to outputs/cognitive_environments.png")
     
     print("\n" + "="*70)
     print("Demonstration Complete!")
