@@ -1,0 +1,230 @@
+# FCSTN Platform Configuration
+# Production-ready settings for deployment
+
+# Environment
+environment: production  # development | staging | production
+debug_mode: false
+log_level: INFO  # DEBUG | INFO | WARNING | ERROR
+
+# Fractal Generation
+fractal:
+  engine: gpu  # cpu | gpu
+  resolution:
+    width: 1920
+    height: 1080
+  max_iterations: 256
+  zoom_range: [0.1, 100.0]
+  escape_radius: 2.0
+  color_scheme: twilight  # Any matplotlib colormap
+  
+  # Performance
+  gpu_device: 0  # CUDA device ID
+  batch_size: 1
+  cache_enabled: true
+  cache_size_mb: 512
+
+# Metric Geometry
+geometry:
+  dimensions: 3
+  grid_resolution: [64, 64, 64]
+  curvature_scale: 1.0
+  metric_type: adaptive  # minkowski | schwarzschild | adaptive
+  
+  # Schwarzschild parameters (if metric_type: schwarzschild)
+  black_hole_mass: 1.0
+  
+  # Computation
+  precision: float32  # float32 | float64
+  christoffel_enabled: true
+  curvature_computation: on_demand  # always | on_demand | never
+
+# NeuroDigital Interface (NDAN)
+ndan:
+  enabled: true
+  bci_sampling_rate: 250.0  # Hz
+  signal_window_seconds: 5.0
+  
+  # Signal processing
+  preprocessing:
+    notch_filter: 60.0  # Hz (powerline frequency)
+    bandpass_low: 0.5   # Hz
+    bandpass_high: 100.0  # Hz
+    artifact_threshold_std: 5.0
+  
+  # Feature extraction
+  features:
+    alpha_band: [8.0, 13.0]
+    beta_band: [13.0, 30.0]
+    theta_band: [4.0, 8.0]
+    gamma_band: [30.0, 100.0]
+  
+  # Cognitive state estimation
+  classification:
+    model_type: rule_based  # rule_based | ml | deep_learning
+    attention_threshold: 0.7
+    fatigue_threshold: 0.3
+  
+  # Feedback control
+  feedback:
+    update_rate_hz: 10.0
+    smoothing_window: 5
+    adaptation_strength: 1.0  # 0.0 to 1.0
+
+# Coalition Network
+coalition:
+  enabled: true
+  algorithm: merge_and_split  # merge_and_split | nash_equilibrium
+  
+  # Optimization
+  max_iterations: 50
+  convergence_threshold: 0.01
+  update_interval_seconds: 5.0
+  
+  # Resource management
+  resources:
+    compute_pool: 500  # Arbitrary units
+    bandwidth_pool: 300
+    memory_pool: 1024  # MB
+  
+  # Agent types
+  agent_capabilities:
+    human:
+      - perception
+      - decision_making
+    ai_agent:
+      - inference
+      - adaptation
+      - learning
+    xr_device:
+      - rendering
+      - display
+      - tracking
+    edge_node:
+      - processing
+      - storage
+      - communication
+    cloud_node:
+      - processing
+      - storage
+      - ml_training
+
+# XR Integration
+xr:
+  runtime: openvr  # openvr | openxr | custom
+  
+  # Display
+  eye_resolution: [1832, 1920]  # per eye
+  refresh_rate: 90  # Hz
+  fov_degrees: 110
+  
+  # Tracking
+  tracking_space: room_scale  # seated | standing | room_scale
+  controllers_enabled: true
+  hand_tracking: false
+  
+  # Rendering
+  render_scale: 1.0
+  msaa_samples: 4
+  async_reprojection: true
+  
+  # Performance
+  adaptive_quality: true
+  min_fps: 60
+  target_fps: 90
+
+# Performance Targets
+performance:
+  # Rendering
+  target_fps: 60
+  min_fps: 45
+  
+  # Latency (milliseconds)
+  target_total_latency_ms: 50.0
+  max_neural_processing_latency_ms: 100.0
+  max_geometry_generation_latency_ms: 33.0
+  
+  # Adaptation
+  min_adaptation_accuracy: 0.70
+  target_adaptation_accuracy: 0.85
+  
+  # Coalition
+  max_coalition_formation_time_s: 5.0
+  target_coalition_formation_time_s: 2.0
+
+# Storage
+storage:
+  # Cognitive data
+  store_cognitive_history: true
+  max_history_entries: 1000
+  cognitive_data_retention_days: 30
+  
+  # Environment snapshots
+  save_environment_snapshots: true
+  snapshot_interval_minutes: 10
+  max_snapshots: 100
+  
+  # Paths
+  data_directory: ./data
+  cache_directory: ./cache
+  logs_directory: ./logs
+  snapshots_directory: ./snapshots
+
+# Networking
+network:
+  # API
+  api_enabled: true
+  api_host: 0.0.0.0
+  api_port: 8000
+  api_workers: 4
+  
+  # WebSocket
+  websocket_enabled: true
+  websocket_port: 8001
+  
+  # D2D Communication
+  d2d_protocol: grpc  # grpc | websocket | custom
+  d2d_port: 50051
+  discovery_enabled: true
+  
+  # Security
+  tls_enabled: false
+  auth_required: false
+
+# Monitoring
+monitoring:
+  prometheus_enabled: true
+  prometheus_port: 9090
+  
+  metrics:
+    - fps
+    - latency_ms
+    - cpu_usage
+    - gpu_usage
+    - memory_usage
+    - network_bandwidth
+    - coalition_value
+    - adaptation_accuracy
+  
+  alerts:
+    low_fps_threshold: 45
+    high_latency_threshold_ms: 100.0
+    high_cpu_threshold: 90.0
+    high_memory_threshold: 90.0
+
+# Experimental Features
+experimental:
+  # Advanced geometry
+  wormhole_generation: false
+  time_dilation_effects: false
+  
+  # Multi-user
+  multi_user_sync: false
+  max_concurrent_users: 10
+  
+  # AI enhancements
+  procedural_content_ai: false
+  predictive_adaptation: false
+  
+  # Scientific visualization
+  physics_simulation: false
+  data_overlay: false
