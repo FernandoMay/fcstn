@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FCSTN Interactive Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <div class="logo">FCSTN <span style="font-size:1rem; font-weight:400; color:var(--text-dim)">v2.0 Interactive</span></div>
+            <div class="status">
+                <span class="pulse"></span> System Active (WS: <span id="ws-status" style="color:var(--warn)">Connecting</span>)
+            </div>
+        </header>
+        
+        <main>
+            <!-- Left panel: Visualizations -->
+            <div class="left-panel">
+                <div class="card fractal-card">
+                    <h2>Space-Time Geometry <span style="font-size:0.8rem; font-weight: normal; color:var(--text-dim)">(Drag to pan, scroll to zoom)</span></h2>
+                    <div class="fractal-container" id="fractal-container">
+                        <img id="fractal-img" src="/api/fractal" alt="Fractal Generation">
+                        <div class="overlay-stats">
+                            <div>Pos: <span id="lbl-pos">-0.50, 0.00</span></div>
+                            <div>Zoom: <span id="lbl-zoom">1.00x</span></div>
+                            <div>Iter: <span id="lbl-iter">128</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card network-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+                        <h2 style="margin:0;">Coalition Network</h2>
+                        <div class="coalition-controls">
+                            <button id="btn-add-agent" class="btn btn-sm btn-primary">+ Agent</button>
+                            <button id="btn-rem-agent" class="btn btn-sm btn-warn">- Agent</button>
+                        </div>
+                    </div>
+                    <div id="network-container"></div>
+                </div>
+            </div>
+            
+            <!-- Right panel: Metrics & Controls -->
+            <div class="right-panel">
+                <div class="card control-card">
+                    <h2>Cognitive Override</h2>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="chk-override">
+                        <span class="slider round"></span>
+                        <span class="toggle-label">Enable Manual Override</span>
+                    </label>
+                    
+                    <div class="sliders-container" id="sliders-container" style="opacity: 0.5; pointer-events: none;">
+                        <div class="slider-group">
+                            <div class="metric-header">
+                                <span>Attention</span>
+                                <span id="val-attention-slider">0.50</span>
+                            </div>
+                            <input type="range" id="slide-attention" min="0" max="1" step="0.05" value="0.5">
+                        </div>
+                        <div class="slider-group">
+                            <div class="metric-header">
+                                <span>Engagement</span>
+                                <span id="val-engagement-slider">0.50</span>
+                            </div>
+                            <input type="range" id="slide-engagement" min="0" max="1" step="0.05" value="0.5">
+                        </div>
+                        <div class="slider-group">
+                            <div class="metric-header">
+                                <span>Workload</span>
+                                <span id="val-workload-slider">0.50</span>
+                            </div>
+                            <input type="range" id="slide-workload" min="0" max="1" step="0.05" value="0.5">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card metrics-card">
+                    <h2>Live Metrics</h2>
+                    <div class="state-value" id="cognitive-state">INITIALIZING</div>
+                    
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Attention</span>
+                            <span id="val-attention">0.00</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" id="bar-attention" style="width: 0%"></div></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Engagement</span>
+                            <span id="val-engagement">0.00</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill fill-accent" id="bar-engagement" style="width: 0%"></div></div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-header">
+                            <span>Workload</span>
+                            <span id="val-workload">0.00</span>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill fill-warn" id="bar-workload" style="width: 0%"></div></div>
+                    </div>
+                </div>
+                
+                <div class="card logs-card">
+                    <h2>System Feed</h2>
+                    <div class="terminal" id="terminal-logs">
+                        <div class="log-entry">> Establishing real-time connection...</div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
