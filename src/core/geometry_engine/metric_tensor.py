@@ -11,6 +11,43 @@ from scipy.integrate import odeint
 import logging
 
 
+class MetricArray:
+    """
+    Thin wrapper around a NumPy array that preserves tuple-based spatial indexing.
+
+    Tests and example code in this project use `metric.g[(x, y, z), i, j]`, which
+    NumPy interprets as advanced indexing. This wrapper normalizes that access into
+    `metric.g[x, y, z, i, j]` while still behaving like an array elsewhere.
+    """
+
+    def __init__(self, array: np.ndarray):
+        self._array = array
+
+    def _normalize_key(self, key):
+        if (
+            isinstance(key, tuple)
+            and key
+            and isinstance(key[0], tuple)
+        ):
+            return (*key[0], *key[1:])
+        return key
+
+    def __getitem__(self, key):
+        return self._array[self._normalize_key(key)]
+
+    def __setitem__(self, key, value):
+        self._array[self._normalize_key(key)] = value
+
+    def __array__(self, dtype=None):
+        return np.asarray(self._array, dtype=dtype)
+
+    def __getattr__(self, name):
+        return getattr(self._array, name)
+
+    def copy(self) -> np.ndarray:
+        return self._array.copy()
+
+
 @dataclass
 class MetricConfig:
     """Configuration for metric tensor computation"""
@@ -33,7 +70,7 @@ class MetricTensor:
         Args:
             components: 4D array [x, y, z, i, j] representing g_ij at each point
         """
-        self.g = components
+        self.g = MetricArray(components)
         self.shape = components.shape[:-2]  # Spatial grid shape
         self.dim = components.shape[-1]
         

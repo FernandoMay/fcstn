@@ -121,6 +121,10 @@ class BCIProcessor:
         threshold = 5 * np.std(data)
         artifact_mask = np.abs(data) > threshold
         data[artifact_mask] = np.median(data)
+
+        # Recenter after filtering and artifact suppression so downstream features
+        # operate on a baseline-corrected signal.
+        data = data - np.mean(data, axis=1, keepdims=True)
         
         return data
     
@@ -148,7 +152,7 @@ class BCIProcessor:
             idx_band = np.logical_and(freqs >= freq_band[0], freqs <= freq_band[1])
             
             # Integrate power in band
-            band_power = np.trapz(psd[idx_band], freqs[idx_band])
+            band_power = np.trapezoid(psd[idx_band], freqs[idx_band])
             powers.append(band_power)
         
         return float(np.mean(powers))

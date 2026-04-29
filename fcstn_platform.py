@@ -31,7 +31,7 @@ class PlatformConfig:
     fractal_max_iterations: int = 256
     
     # Geometry parameters
-    geometry_resolution: tuple = (64, 64, 64)
+    geometry_resolution: tuple = (16, 16, 16)
     curvature_scale: float = 1.0
     
     # NDAN parameters
@@ -174,7 +174,7 @@ class FCSTPlatform:
         logging.debug(f"Environment adapted: zoom={env_params['fractal_zoom']:.2f}, "
                      f"curvature={env_params['curvature_scale']:.2f}")
     
-    def generate_environment(self) -> Dict:
+    def generate_environment(self, record_metrics: bool = True) -> Dict:
         """
         Generate complete virtual environment.
         
@@ -197,10 +197,11 @@ class FCSTPlatform:
             'generation_time_ms': (time.time() - start_time) * 1000
         }
         
-        # Update FPS metric
-        self.metrics['frame_count'] += 1
-        self.metrics['fps'] = 1000.0 / environment['generation_time_ms']
-        
+        # Update FPS metrics for externally requested frames.
+        if record_metrics:
+            self.metrics['frame_count'] += 1
+            self.metrics['fps'] = 1000.0 / environment['generation_time_ms']
+
         return environment
     
     def run_coalition_optimization(self):
@@ -228,7 +229,7 @@ class FCSTPlatform:
         logging.info("FCSTN Platform started")
         
         # Initial environment generation
-        self.generate_environment()
+        self.generate_environment(record_metrics=False)
         
         # Initial coalition formation
         if self.config.enable_coalition_formation:

@@ -19,8 +19,8 @@ This guide will get you up and running with the FCSTN platform quickly.
 cd fcstn/
 
 # Run deployment script
-chmod +x scripts/deploy.sh
-./scripts/deploy.sh
+chmod +x deploy.sh
+./deploy.sh
 
 # Activate environment
 source venv/bin/activate
@@ -51,7 +51,7 @@ pip install pytest
 ### 1. Platform Demo
 
 ```bash
-python src/fcstn_platform.py
+python fcstn_platform.py
 ```
 
 **What it does:**
@@ -92,7 +92,7 @@ FCSTN Platform Demonstration
 ### 2. Neurogaming Demo
 
 ```bash
-python examples/neurogaming_demo.py
+python neurogaming_demo.py
 ```
 
 **What it does:**
@@ -201,7 +201,7 @@ print(f"Total value: {stats['total_value']:.2f}")
 ### Complete Pipeline
 
 ```python
-from src.fcstn_platform import FCSTPlatform
+from fcstn_platform import FCSTPlatform
 
 # Initialize platform
 platform = FCSTPlatform()

@@ -91,7 +91,7 @@ class MandelbrotGenerator:
         if self.use_gpu:
             M = cp.asnumpy(M)
         
-        return M
+        return M.T
     
     def generate_smooth(self) -> np.ndarray:
         """
@@ -135,7 +135,7 @@ class MandelbrotGenerator:
         if self.use_gpu:
             M = cp.asnumpy(M)
         
-        return M
+        return M.T
     
     def generate_multiscale(self, num_scales: int = 5) -> dict:
         """
@@ -246,7 +246,7 @@ class JuliaSetGenerator:
         if self.use_gpu:
             M = cp.asnumpy(M)
         
-        return M
+        return M.T
 
 
 def create_color_mapping(fractal_field: np.ndarray, colormap: str = 'twilight') -> np.ndarray:
