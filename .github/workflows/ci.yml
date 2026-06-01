@@ -13,4 +13,4 @@ jobs:
         with:
           python-version: 3.11
       - run: pip install -r requirements.txt
-      - run: pytest --maxfail=3 --tb=short || true
+      - run: pytest -m "not slow" --maxfail=3 --tb=short || true

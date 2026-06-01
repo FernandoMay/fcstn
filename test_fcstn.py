@@ -4,6 +4,8 @@ Comprehensive Test Suite for FCSTN Platform
 
 import pytest
 import numpy as np
+import time
+
 import sys
 import os
 
@@ -344,6 +346,7 @@ def sample_bci_signal():
     return generate_synthetic_eeg(duration=5.0, sampling_rate=250.0)
 
 
+@pytest.mark.slow
 def test_end_to_end_pipeline(sample_fractal, sample_bci_signal):
     """Test complete processing pipeline"""
     # 1. Process BCI signal

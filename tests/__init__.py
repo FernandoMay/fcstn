@@ -1,3 +1,0 @@
-"""
-FCSTN Test Suite
-"""
