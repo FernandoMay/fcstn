@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FCSTN - Scientific Poster</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+@page { size: A0 landscape; margin: 0; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --primary: #00f0ff; --accent: #ff0055; --warn: #ffb800; --bg: #0f111a;
+  --card: rgba(25,28,41,0.8); --border: rgba(255,255,255,0.1);
+}
+body {
+  font-family: 'Outfit', sans-serif; background: var(--bg); color: white;
+  width: 1400px; height: 1000px; overflow: hidden;
+  background-image: radial-gradient(circle at 20% 30%, rgba(0,240,255,0.05), transparent 40%),
+                    radial-gradient(circle at 80% 60%, rgba(255,0,85,0.05), transparent 40%);
+  padding: 30px;
+}
+.poster { width: 100%; height: 100%; display: grid; grid-template-columns: 1.5fr 1fr 1fr; grid-template-rows: auto 1fr auto; gap: 15px; }
+header { grid-column: 1 / -1; text-align: center; padding: 15px; border-bottom: 2px solid var(--primary); }
+header h1 { font-size: 3em; font-weight: 800; background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+header p { color: #8b9bb4; font-size: 1em; }
+.card { background: var(--card); backdrop-filter: blur(10px); border: 1px solid var(--border); border-radius: 16px; padding: 20px; }
+.card h2 { color: var(--primary); font-size: 1.2em; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+.card p, .card li { font-size: 0.85em; line-height: 1.5; color: #c0c8d8; }
+.tag { display: inline-block; background: var(--primary); color: #000; padding: 2px 10px; border-radius: 12px; font-size: 0.7em; font-weight: 700; margin: 2px; }
+.tag-a { background: var(--accent); color: #fff; }
+.tag-w { background: var(--warn); color: #000; }
+.code { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric { text-align: center; padding: 10px; }
+.metric-val { font-size: 2em; font-weight: 900; color: var(--primary); }
+.metric-lbl { font-size: 0.7em; color: #8b9bb4; }
+footer { grid-column: 1 / -1; text-align: center; padding: 10px; border-top: 1px solid var(--border); font-size: 0.8em; color: #8b9bb4; }
+.layer-strip { display: flex; gap: 5px; }
+.layer { flex: 1; padding: 8px; text-align: center; border-radius: 8px; font-size: 0.7em; font-weight: 600; }
+.l1 { background: linear-gradient(135deg, rgba(0,240,255,0.3), rgba(0,240,255,0.1)); border: 1px solid var(--primary); }
+.l2 { background: linear-gradient(135deg, rgba(255,0,85,0.3), rgba(255,0,85,0.1)); border: 1px solid var(--accent); }
+.l3 { background: linear-gradient(135deg, rgba(255,184,0,0.3), rgba(255,184,0,0.1)); border: 1px solid var(--warn); }
+.l4 { background: linear-gradient(135deg, rgba(0,255,170,0.3), rgba(0,255,170,0.1)); border: 1px solid #00ffaa; }
+</style>
+</head>
+<body>
+<div class="poster">
+  <header>
+    <h1>Fractal Cognitive Space-Time Networks</h1>
+    <p>A Framework for AI-Generated Cognitive Virtual Environments over NeuroDigital Infrastructure</p>
+    <p style="margin-top:8px; font-size:0.8em;">
+      <strong>Fernando May Fuentes</strong> &nbsp;|&nbsp; IPN UPIITA · BUAA · Nexus Research Institute &nbsp;|&nbsp; ESCOM Summer School 2026
+    </p>
+  </header>
+
+  <div class="card" style="grid-column:1; grid-row:2;">
+    <h2>🧠 The Vision</h2>
+    <p>Virtual environments that <strong style="color:var(--primary);">adapt in real-time</strong> to the user's cognitive state using fractal geometry, relativistic metrics, and multi-agent coalition networks.</p>
+    <div style="margin:15px 0;">
+      <div class="layer-strip">
+        <div class="layer l1">L1: Cognitive</div>
+        <div class="layer l2">L2: NDAN</div>
+        <div class="layer l3">L3: Geometry</div>
+        <div class="layer l4">L4: Infrastructure</div>
+      </div>
+    </div>
+    <p style="font-size:0.75em; margin-bottom:5px;"><strong>Feedback Loop:</strong></p>
+    <div class="code" style="font-size:0.6em;">
+Cognition → BCI → NDAN → Fractal Engine → Metric Geometry → XR Rendering → Feedback
+    </div>
+
+    <h2 style="margin-top:15px;">🔬 Key Metrics</h2>
+    <div class="grid-2">
+      <div class="metric"><div class="metric-val">60+</div><div class="metric-lbl">FPS (1080p)</div></div>
+      <div class="metric"><div class="metric-val">&lt;45ms</div><div class="metric-lbl">BCI Latency</div></div>
+      <div class="metric"><div class="metric-val">&lt;2.3s</div><div class="metric-lbl">Coalition Convergence</div></div>
+      <div class="metric"><div class="metric-val">85%+</div><div class="metric-lbl">Code Coverage</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column:2;">
+    <h2>⚙️ Architecture</h2>
+    <p><strong style="color:var(--accent);">Layer 1 - Cognitive</strong><br>Human users, XR devices, AI agents generating intent and interaction.</p>
+    <p><strong style="color:var(--accent);">Layer 2 - NDAN</strong><br>BCI signal processing (EEG/fNIRS), cognitive feature extraction, feedback control.</p>
+    <p><strong style="color:var(--accent);">Layer 3 - Geometry</strong><br>GPU-accelerated Mandelbrot generation, metric tensor computation, geodesics.</p>
+    <p><strong style="color:var(--accent);">Layer 4 - Infrastructure</strong><br>D2D coalition formation (merge-and-split), resource allocation, distributed compute.</p>
+
+    <h2 style="margin-top:12px;">🧮 Mathematical Core</h2>
+    <div class="code" style="font-size:0.6em;">
+Mandelbrot:  z_{n+1} = z_n^2 + c<br>
+Metric:      ds^2 = g_{ij} dx^i dx^j<br>
+Geodesic:    d^2x/dλ^2 + Γ dx/dλ dx/dλ = 0<br>
+Coalition:   v(S) = Σ resources + synergy
+    </div>
+  </div>
+
+  <div class="card" style="grid-column:3;">
+    <h2>📊 Performance</h2>
+    <table style="width:100%; font-size:0.75em; border-collapse:collapse;">
+      <tr><th style="text-align:left; border-bottom:1px solid var(--border); padding:5px;">Metric</th><th style="text-align:center; border-bottom:1px solid var(--border); padding:5px;">Target</th><th style="text-align:center; border-bottom:1px solid var(--border); padding:5px;">Achieved</th></tr>
+      <tr><td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05);">Fractal Render</td><td style="text-align:center; padding:5px;">60 FPS</td><td style="text-align:center; padding:5px; color:var(--primary);">66 FPS</td></tr>
+      <tr><td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05);">Metric Compute</td><td style="text-align:center; padding:5px;">&lt;100ms</td><td style="text-align:center; padding:5px; color:var(--primary);">85ms</td></tr>
+      <tr><td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05);">BCI Processing</td><td style="text-align:center; padding:5px;">&lt;100ms</td><td style="text-align:center; padding:5px; color:var(--primary);">45ms</td></tr>
+      <tr><td style="padding:5px; border-bottom:1px solid rgba(255,255,255,0.05);">Coalition Form</td><td style="text-align:center; padding:5px;">&lt;5s</td><td style="text-align:center; padding:5px; color:var(--primary);">2.3s</td></tr>
+      <tr><td style="padding:5px;">Tests Passing</td><td style="text-align:center; padding:5px;">22</td><td style="text-align:center; padding:5px; color:var(--primary);">22 ✅</td></tr>
+    </table>
+
+    <h2 style="margin-top:12px;">🛠️ Technology</h2>
+    <p>
+      <span class="tag">Python 3.13</span>
+      <span class="tag">NumPy/SciPy</span>
+      <span class="tag">CuPy (GPU)</span>
+      <span class="tag tag-a">MNE (BCI)</span>
+      <span class="tag tag-w">FastAPI</span>
+      <span class="tag">WebSockets</span>
+      <span class="tag tag-a">SymPy</span>
+      <span class="tag">Pytest</span>
+      <span class="tag">GitHub CI</span>
+    </p>
+
+    <h2 style="margin-top:12px;">📄 Citation</h2>
+    <div class="code" style="font-size:0.55em;">
+@article{may2026fcstn,<br>
+&nbsp;&nbsp;title={Fractal Cognitive Space-Time Networks...},<br>
+&nbsp;&nbsp;author={May Fuentes, Fernando},<br>
+&nbsp;&nbsp;journal={Nexus Research Institute TR},<br>
+&nbsp;&nbsp;year={2026}<br>
+}
+    </div>
+  </div>
+
+  <footer>
+    📧 fmayf1500@alumno.ipn.mx &nbsp;·&nbsp; 🔗 github.com/fmayf/fcstn &nbsp;·&nbsp; 🏛 IPN UPIITA · BUAA · Nexus Research Institute &nbsp;·&nbsp; 🚀 "From cognition to cosmos — one fractal at a time."
+  </footer>
+</div>
+</body>
+</html>

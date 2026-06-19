@@ -13,29 +13,63 @@ FCSTN is a comprehensive framework for AI-generated cognitive virtual environmen
 ```
 fcstn/
 ├── README.md                          # This file
+├── launch.py                          # Unified CLI launcher
+├── run.bat                            # Windows launcher menu
+├── fcstn_platform.py                  # Main platform integration
+├── neurogaming_demo.py                # Neurogaming demo
 ├── docs/                              # Documentation
 │   ├── architecture.md                # System architecture details
-│   ├── mathematical_foundations.md    # Mathematical background
-│   ├── api_reference.md               # API documentation
+│   ├── presentation.html              # Reveal.js slides (16 slides)
+│   ├── poster.html                    # Scientific poster (A0)
 │   └── experimental_roadmap.md        # Validation pathway
 ├── src/                               # Source code
 │   ├── core/                          # Core framework
-│   │   ├── fractal_engine/            # Fractal generation
+│   │   ├── fractal_engine/            # Fractal generation (Mandelbrot)
 │   │   ├── geometry_engine/           # Metric tensor computation
 │   │   ├── ndan_interface/            # NeuroDigital interface
 │   │   └── coalition_network/         # Coalition formation
-│   ├── applications/                  # Application modules
-│   │   ├── xr_worlds/                 # XR immersive environments
-│   │   ├── neurogaming/               # Neurogaming applications
-│   │   ├── digital_twins/             # Cognitive digital twins
-│   │   └── scientific_sim/            # Scientific simulation
-│   └── utils/                         # Utilities
-├── examples/                          # Example implementations
-├── tests/                             # Test suite
-├── config/                            # Configuration files
+│   └── api/                           # Web dashboard
+│       ├── server.py                  # FastAPI server
+│       └── static/                    # Dashboard UI (HTML/JS/CSS)
 ├── scripts/                           # Build and deployment scripts
+│   ├── deploy.sh                      # Automated deployment
+│   ├── start_dashboard.sh             # Dashboard launcher
+│   └── demo_runner.py                 # Visual output generator
+├── outputs/                           # Generated visuals for presentation
+├── test_fcstn.py                      # Test suite (22 tests)
+├── conftest.py                        # Pytest configuration
+├── platform_config.yaml               # Configuration file
 └── requirements.txt                   # Python dependencies
 ```
+
+## ESCOM Summer School 2026
+
+This project is presented at the **ESCOM Summer School** on **July 3, 2026**.
+
+### 🚀 Quick Start (for the presentation)
+
+```bash
+# Unified launcher
+python launch.py all     # Run tests + demo + open presentation
+
+# Or individually:
+python launch.py demo     # Terminal platform demo
+python launch.py neurogame  # Neurogaming with visualizations
+python launch.py dashboard  # Web dashboard at localhost:8000
+python launch.py present    # Open slides
+```
+
+### 📁 Presentation Materials
+
+| File | Description |
+|------|-------------|
+| `docs/presentation.html` | Reveal.js slides (16 slides) |
+| `docs/poster.html` | Scientific poster (A0 landscape) |
+| `launch.py` | Unified CLI launcher |
+| `run.bat` | Windows launcher menu |
+| `outputs/*.png` | Pre-generated visuals |
+
+---
 
 ## Quick Start
 

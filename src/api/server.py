@@ -82,11 +82,14 @@ class SimulationState:
         game = CoalitionFormationGame(self.agents)
         final_coalitions = game.run_merge_and_split(max_iterations=5)
         nodes, edges = [], []
+        agent_lookup = {a.id: a for a in self.agents}
         for c_id, coalition in final_coalitions.items():
             nodes.append({"id": c_id, "label": f"{coalition.coalition_type.value} ({len(coalition.members)})", "group": "coalition"})
-            for member in coalition.members:
-                nodes.append({"id": member.id, "label": member.name, "group": member.agent_type.value})
-                edges.append({"source": c_id, "target": member.id})
+            for member_id in coalition.members:
+                agent = agent_lookup.get(member_id)
+                if agent:
+                    nodes.append({"id": agent.id, "label": agent.id, "group": agent.agent_type.value})
+                    edges.append({"source": c_id, "target": agent.id})
         self.coalition_graph = {"nodes": nodes, "edges": edges}
 
 state = SimulationState()
