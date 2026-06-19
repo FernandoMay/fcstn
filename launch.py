@@ -21,22 +21,21 @@ ROOT = Path(__file__).parent
 
 def cmd_demo():
     os.chdir(ROOT)
-    sys.path.insert(0, str(ROOT / 'src'))
-    from fcstn_platform import run_demo
-    run_demo()
+    result = subprocess.run([sys.executable, str(ROOT / 'fcstn_platform.py')], capture_output=False)
+    sys.exit(result.returncode)
 
 def cmd_neurogame():
     os.chdir(ROOT)
-    sys.path.insert(0, str(ROOT / 'src'))
     os.makedirs(ROOT / 'outputs', exist_ok=True)
-    exec(open(ROOT / 'neurogaming_demo.py').read())
+    result = subprocess.run([sys.executable, str(ROOT / 'neurogaming_demo.py')], capture_output=False)
+    sys.exit(result.returncode)
 
 def cmd_dashboard():
     os.chdir(ROOT)
     print("Starting FCSTN Dashboard at http://localhost:8000/dashboard")
     webbrowser.open('http://localhost:8000/dashboard')
-    import uvicorn
-    uvicorn.run("src.api.server:app", host="0.0.0.0", port=8000, reload=True)
+    result = subprocess.run([sys.executable, '-m', 'uvicorn', 'src.api.server:app', '--host', '0.0.0.0', '--port', '8000', '--reload'], capture_output=False)
+    sys.exit(result.returncode)
 
 def cmd_test():
     os.chdir(ROOT)
