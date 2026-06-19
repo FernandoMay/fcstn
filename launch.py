@@ -8,6 +8,10 @@ Commands:
   dashboard  Start web dashboard (http://localhost:8000/dashboard)
   test       Run test suite
   present    Open presentation slides
+  live       Start LIVE 3D demo ecosystem (server + viz + controller)
+  live-srv   Start LIVE demo server only
+  live-viz   Start LIVE 3D visualizer only (needs server)
+  live-ctrl  Start LIVE controller only (needs server)
   all        Run everything sequentially
 """
 
@@ -50,6 +54,22 @@ def cmd_present():
     else:
         print("Presentation not found at docs/presentation.html")
 
+def cmd_live():
+    result = subprocess.run([sys.executable, str(ROOT / 'server' / 'run_demo_live.py')] + sys.argv[2:], capture_output=False)
+    sys.exit(result.returncode)
+
+def cmd_live_srv():
+    result = subprocess.run([sys.executable, str(ROOT / 'server' / 'fcstn_server.py')], capture_output=False)
+    sys.exit(result.returncode)
+
+def cmd_live_viz():
+    result = subprocess.run([sys.executable, str(ROOT / 'server' / 'visualizer_3d.py')], capture_output=False)
+    sys.exit(result.returncode)
+
+def cmd_live_ctrl():
+    result = subprocess.run([sys.executable, str(ROOT / 'server' / 'controller.py')], capture_output=False)
+    sys.exit(result.returncode)
+
 def cmd_all():
     print("=" * 60)
     print("FCSTN - FULL DEMO SEQUENCE")
@@ -69,6 +89,10 @@ if __name__ == '__main__':
         'dashboard': cmd_dashboard,
         'test': cmd_test,
         'present': cmd_present,
+        'live': cmd_live,
+        'live-srv': cmd_live_srv,
+        'live-viz': cmd_live_viz,
+        'live-ctrl': cmd_live_ctrl,
         'all': cmd_all,
     }
     if len(sys.argv) < 2 or sys.argv[1] not in commands:
