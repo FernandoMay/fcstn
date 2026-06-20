@@ -37,6 +37,8 @@ public struct CognitiveData
     public string image_prompt;
 }
 
+public enum VisualState { Base, Transitional, Critical }
+
 public class FCSTNClient : MonoBehaviour
 {
     [Header("Connection")]
@@ -48,6 +50,12 @@ public class FCSTNClient : MonoBehaviour
     public ParticleSystem fractalParticles;
     public ParticleSystem glitchParticles;
     public Camera mainCamera;
+
+    [Header("Line Renderer (Fractal Dim History)")]
+    public LineRenderer dimGraph;
+    public int graphPoints = 128;
+    public float graphHeight = 2.0f;
+    public float graphWidth = 3.0f;
 
     [Header("Visualization Settings")]
     public float scaleSpeed = 3f;
@@ -62,6 +70,11 @@ public class FCSTNClient : MonoBehaviour
     public Material glitchMaterial;
     public float glitchIntensity = 0f;
 
+    [Header("Audio Feedback")]
+    public AudioSource audioSource;
+    public float basePitch = 0.8f;
+    public float pitchRange = 1.2f;
+
     [Header("Live Metrics (Read Only)")]
     public float attention = 0.5f;
     public float engagement = 0.5f;
@@ -73,11 +86,15 @@ public class FCSTNClient : MonoBehaviour
     public Color currentColor = Color.magenta;
     public string lastNarrative = "";
     public string lastImagePrompt = "";
+    public VisualState visualState = VisualState.Base;
 
     private ClientWebSocket ws;
     private CancellationTokenSource cts;
     private readonly Queue<CognitiveData> pendingData = new Queue<CognitiveData>();
     private Color targetColor = Color.magenta;
+    private Color baseColor = new Color(0.1f, 0.4f, 1.0f);    // blue
+    private Color transitionalColor = new Color(0.6f, 0.1f, 0.9f); // purple
+    private Color criticalColor = new Color(1.0f, 0.1f, 0.1f);    // red
     private Vector3 targetScale = Vector3.one;
     private float targetRotationSpeed = 10f;
     private Vector3 cameraOriginPosition;
@@ -86,6 +103,18 @@ public class FCSTNClient : MonoBehaviour
     private float glitchTarget = 0f;
     private float elapsedTime = 0f;
     private Material overlayMaterial;
+
+    // Fractal dimension history for line graph
+    private float[] dimHistory;
+    private int dimIndex = 0;
+
+    // Terminal overlay
+    private Texture2D terminalTex;
+    private Color[] terminalPixels;
+    private int termWidth = 128;
+    private int termHeight = 72;
+    private float[] termChars;
+    private float[] termBrightness;
 
     async void Start()
     {
@@ -120,8 +149,65 @@ public class FCSTNClient : MonoBehaviour
         if (fractalParticles != null) Debug.Log("[FCSTN] Fractal particles: " + fractalParticles.name);
         if (glitchParticles != null) Debug.Log("[FCSTN] Glitch particles: " + glitchParticles.name);
 
+        dimHistory = new float[graphPoints];
+        for (int i = 0; i < graphPoints; i++) dimHistory[i] = 2.5f;
+
+        if (dimGraph != null)
+        {
+            dimGraph.positionCount = graphPoints;
+            dimGraph.startWidth = 0.04f;
+            dimGraph.endWidth = 0.01f;
+            dimGraph.material = new Material(Shader.Find("Sprites/Default"));
+            dimGraph.startColor = Color.cyan;
+            dimGraph.endColor = Color.magenta;
+        }
+
+        InitTerminalOverlay();
+
         cts = new CancellationTokenSource();
         _ = ConnectAndListen();
+    }
+
+    void InitTerminalOverlay()
+    {
+        terminalTex = new Texture2D(termWidth, termHeight, TextureFormat.RGBA32, false);
+        terminalPixels = new Color[termWidth * termHeight];
+        termChars = new float[termWidth * termHeight];
+        termBrightness = new float[termWidth * termHeight];
+        for (int i = 0; i < termChars.Length; i++)
+        {
+            termChars[i] = Random.value;
+            termBrightness[i] = Random.Range(0.1f, 0.8f);
+        }
+    }
+
+    void UpdateTerminalOverlay()
+    {
+        float chaos = Mathf.Lerp(0.01f, 0.15f, glitchTarget);
+        for (int y = 0; y < termHeight; y++)
+        {
+            for (int x = 0; x < termWidth; x++)
+            {
+                int idx = y * termWidth + x;
+                if (Random.value < chaos)
+                {
+                    termChars[idx] = Random.value;
+                    termBrightness[idx] = Random.Range(0.3f, 1.0f);
+                }
+                float b = termBrightness[idx] * (1f - Mathf.Abs(y - termHeight / 2f) / termHeight * 0.5f);
+                Color c = Color.Lerp(currentColor, Color.white, b * 0.3f) * b;
+                c.a = b * Mathf.Lerp(0.3f, 0.8f, glitchTarget);
+                terminalPixels[idx] = c;
+            }
+        }
+        terminalTex.SetPixels(terminalPixels);
+        terminalTex.Apply();
+
+        if (overlayMaterial != null)
+        {
+            overlayMaterial.SetTexture("_TerminalTex", terminalTex);
+            overlayMaterial.SetFloat("_TerminalOpacity", Mathf.Lerp(0f, 0.4f, glitchTarget));
+        }
     }
 
     int _reconnectCount = 0;
@@ -183,20 +269,26 @@ public class FCSTNClient : MonoBehaviour
                 return;
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[FCSTN] Payload parse skipped: " + ex.Message);
+        }
 
         try
         {
-            CognitiveData directData = JsonUtility.FromJson<CognitiveData>(json);
-            if (directData.attention > 0 || directData.fractal_dimension > 0)
+            var dict = JsonUtility.FromJson<CognitiveData>(json);
+            if (dict.attention > 0 || dict.fractal_dimension > 0)
             {
                 lock (pendingData)
                 {
-                    pendingData.Enqueue(directData);
+                    pendingData.Enqueue(dict);
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Debug.LogWarning("[FCSTN] Direct data parse skipped: " + ex.Message);
+        }
     }
 
     void Update()
@@ -242,27 +334,87 @@ public class FCSTNClient : MonoBehaviour
             }
 
             glitchTarget = workload * 0.5f + Mathf.Max(0, (attention - 0.8f)) * 0.5f;
+
+            dimHistory[dimIndex % graphPoints] = fractalDimension;
+            dimIndex++;
         }
 
-        if (fractalMesh != null)
-        {
-            fractalMesh.localScale = Vector3.Lerp(fractalMesh.localScale, targetScale, Time.deltaTime * scaleSpeed);
-            fractalMesh.Rotate(Vector3.up, targetRotationSpeed * Time.deltaTime);
-            fractalMesh.Rotate(Vector3.right, (targetRotationSpeed * 0.3f) * Time.deltaTime);
-            fractalMesh.Rotate(Vector3.forward, (targetRotationSpeed * 0.15f) * Time.deltaTime);
+        UpdateVisualState();
+        UpdateFractalMesh();
+        UpdateParticles();
+        UpdateCameraShake();
+        UpdateLighting();
+        UpdateDimGraph();
+        UpdateTerminalOverlay();
 
-            Renderer renderer = fractalMesh.GetComponent<Renderer>();
-            if (renderer != null)
+        glitchIntensity = Mathf.Lerp(glitchIntensity, glitchTarget, Time.deltaTime * 2f);
+
+        if (audioSource != null && audioSource.isActiveAndEnabled)
+        {
+            audioSource.pitch = Mathf.Lerp(basePitch, basePitch + pitchRange, workload);
+            audioSource.volume = Mathf.Lerp(0.1f, 0.6f, glitchTarget);
+        }
+    }
+
+    void UpdateVisualState()
+    {
+        VisualState prev = visualState;
+        if (workload > 0.7f || glitchTarget > 0.5f)
+            visualState = VisualState.Critical;
+        else if (workload > 0.4f || engagement > 0.7f)
+            visualState = VisualState.Transitional;
+        else
+            visualState = VisualState.Base;
+
+        if (prev != visualState)
+            Debug.Log("[FCSTN] Visual State: " + visualState);
+
+        Color stateColor;
+        switch (visualState)
+        {
+            case VisualState.Critical:
+                stateColor = Color.Lerp(targetColor, criticalColor, 0.5f);
+                break;
+            case VisualState.Transitional:
+                stateColor = Color.Lerp(targetColor, transitionalColor, 0.3f);
+                break;
+            default:
+                stateColor = Color.Lerp(targetColor, baseColor, 0.2f);
+                break;
+        }
+        targetColor = Color.Lerp(targetColor, stateColor, 0.3f);
+    }
+
+    void UpdateFractalMesh()
+    {
+        if (fractalMesh == null) return;
+        fractalMesh.localScale = Vector3.Lerp(fractalMesh.localScale, targetScale, Time.deltaTime * scaleSpeed);
+        fractalMesh.Rotate(Vector3.up, targetRotationSpeed * Time.deltaTime);
+        fractalMesh.Rotate(Vector3.right, (targetRotationSpeed * 0.3f) * Time.deltaTime);
+        fractalMesh.Rotate(Vector3.forward, (targetRotationSpeed * 0.15f) * Time.deltaTime);
+
+        Renderer renderer = fractalMesh.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            currentColor = Color.Lerp(currentColor, targetColor, Time.deltaTime * colorSpeed);
+            renderer.material.color = currentColor;
+            if (renderer.material.HasProperty("_EmissionColor"))
             {
-                currentColor = Color.Lerp(currentColor, targetColor, Time.deltaTime * colorSpeed);
-                renderer.material.color = currentColor;
-                if (renderer.material.HasProperty("_EmissionColor"))
-                {
-                    renderer.material.SetColor("_EmissionColor", currentColor * (0.3f + attention * 0.7f));
-                }
+                renderer.material.SetColor("_EmissionColor", currentColor * (0.3f + attention * 0.7f));
+            }
+            if (renderer.material.HasProperty("_Glossiness"))
+            {
+                renderer.material.SetFloat("_Glossiness", Mathf.Lerp(0.2f, 1.0f, coherence));
+            }
+            if (renderer.material.HasProperty("_Metallic"))
+            {
+                renderer.material.SetFloat("_Metallic", Mathf.Lerp(0f, 0.8f, workload));
             }
         }
+    }
 
+    void UpdateParticles()
+    {
         if (fractalParticles != null)
         {
             var mainModule = fractalParticles.main;
@@ -310,37 +462,58 @@ public class FCSTNClient : MonoBehaviour
             glitchMain.startColor = Color.Lerp(Color.red, Color.cyan, attention);
             glitchMain.simulationSpeed = Mathf.Lerp(0.5f, 4f, workload);
         }
+    }
 
-        if (mainCamera != null)
+    void UpdateCameraShake()
+    {
+        if (mainCamera == null) return;
+        if (currentShakeTime > 0)
         {
-            if (currentShakeTime > 0)
-            {
-                Vector3 randomOffset = Random.insideUnitSphere * currentShakeIntensity;
-                mainCamera.transform.localPosition = cameraOriginPosition + randomOffset;
-                mainCamera.transform.localRotation = Quaternion.Euler(
-                    Random.Range(-currentShakeIntensity * 5f, currentShakeIntensity * 5f),
-                    Random.Range(-currentShakeIntensity * 3f, currentShakeIntensity * 3f),
-                    0
-                );
-                currentShakeTime -= Time.deltaTime;
-                currentShakeIntensity = Mathf.Lerp(currentShakeIntensity, 0f, Time.deltaTime * shakeDecay);
-            }
-            else
-            {
-                mainCamera.transform.localPosition = Vector3.Lerp(
-                    mainCamera.transform.localPosition, cameraOriginPosition, Time.deltaTime * 5f);
-                mainCamera.transform.localRotation = Quaternion.Lerp(
-                    mainCamera.transform.localRotation, Quaternion.identity, Time.deltaTime * 3f);
-            }
+            Vector3 randomOffset = Random.insideUnitSphere * currentShakeIntensity;
+            mainCamera.transform.localPosition = cameraOriginPosition + randomOffset;
+            mainCamera.transform.localRotation = Quaternion.Euler(
+                Random.Range(-currentShakeIntensity * 5f, currentShakeIntensity * 5f),
+                Random.Range(-currentShakeIntensity * 3f, currentShakeIntensity * 3f),
+                0
+            );
+            currentShakeTime -= Time.deltaTime;
+            currentShakeIntensity = Mathf.Lerp(currentShakeIntensity, 0f, Time.deltaTime * shakeDecay);
+        }
+        else
+        {
+            mainCamera.transform.localPosition = Vector3.Lerp(
+                mainCamera.transform.localPosition, cameraOriginPosition, Time.deltaTime * 5f);
+            mainCamera.transform.localRotation = Quaternion.Lerp(
+                mainCamera.transform.localRotation, Quaternion.identity, Time.deltaTime * 3f);
+        }
+    }
+
+    void UpdateLighting()
+    {
+        if (sceneLight == null) return;
+        sceneLight.color = Color.Lerp(sceneLight.color, targetColor, Time.deltaTime * colorSpeed * 0.5f);
+        sceneLight.intensity = Mathf.Lerp(0.8f, 3.0f, attention);
+    }
+
+    void UpdateDimGraph()
+    {
+        if (dimGraph == null) return;
+        int count = Mathf.Min(graphPoints, dimIndex);
+        for (int i = 0; i < count; i++)
+        {
+            int idx = (dimIndex - count + i) % graphPoints;
+            float x = (float)i / count * graphWidth - graphWidth / 2f;
+            float y = (dimHistory[idx] - 2f) / 2f * graphHeight;
+            dimGraph.SetPosition(i, new Vector3(x, y, 2f));
+        }
+        for (int i = count; i < graphPoints; i++)
+        {
+            dimGraph.SetPosition(i, Vector3.zero);
         }
 
-        if (sceneLight != null)
-        {
-            sceneLight.color = Color.Lerp(sceneLight.color, targetColor, Time.deltaTime * colorSpeed * 0.5f);
-            sceneLight.intensity = Mathf.Lerp(0.8f, 3.0f, attention);
-        }
-
-        glitchIntensity = Mathf.Lerp(glitchIntensity, glitchTarget, Time.deltaTime * 2f);
+        float graphOpacity = Mathf.Lerp(0.05f, 0.6f, glitchTarget + attention * 0.3f);
+        dimGraph.startColor = new Color(currentColor.r, currentColor.g, currentColor.b, graphOpacity);
+        dimGraph.endColor = new Color(currentColor.r * 0.5f, 0f, currentColor.b, graphOpacity * 0.3f);
     }
 
     void OnRenderImage(RenderTexture source, RenderTexture destination)

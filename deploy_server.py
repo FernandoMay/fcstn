@@ -1,7 +1,7 @@
 """FCSTN Live Server - Combined deployment for Render/Heroku.
 Serves Flutter web app + WebSocket + REST API + BCI integration + Fractal Renderer.
 """
-import os, sys, json, time, asyncio, logging, io, math, threading
+import os, sys, json, time, asyncio, logging, io, math, threading, concurrent.futures
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -160,6 +160,13 @@ async def get_logs(n: int = 100, level: str = ""):
 _fractal_cache = {}
 _fractal_cache_lock = threading.Lock()
 _FRACTAL_CACHE_TTL = 2.0  # seconds
+_fractal_executor = None
+
+def _get_fractal_executor():
+    global _fractal_executor
+    if _fractal_executor is None:
+        _fractal_executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+    return _fractal_executor
 
 def _get_cached_fractal(key, render_func, *args, **kwargs):
     now = time.time()
@@ -174,6 +181,10 @@ def _get_cached_fractal(key, render_func, *args, **kwargs):
     with _fractal_cache_lock:
         _fractal_cache[key] = {'image': buf.getvalue(), 'time': now}
     return _fractal_cache[key]['image']
+
+async def _render_fractal_async(key, render_func, *args, **kwargs):
+    loop = asyncio.get_event_loop()
+    return await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_func, *args, **kwargs)
 
 @app.get("/api/palettes")
 async def list_palettes():
@@ -197,14 +208,15 @@ async def fractal(
     log.info("Fractal requested", {"mode": mode, "palette": palette, "zoom": zoom})
     key = f"{mode}:{palette}:{width}:{height}:{zoom}:{cx}:{cy}:{rotation}:{max_iter}:{julia_cx}:{julia_cy}:{palette_offset}"
     try:
+        loop = asyncio.get_event_loop()
         if mode == "terrain":
-            img_data = _get_cached_fractal(key, render_terrain, width, height, palette, cx, cy, zoom, 60, 0.5)
+            img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_terrain, width, height, palette, cx, cy, zoom, 60, 0.5)
         elif mode == "julia":
-            img_data = _get_cached_fractal(key, render_julia, width, height, palette, max_iter, julia_cx, julia_cy, zoom, palette_offset)
+            img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_julia, width, height, palette, max_iter, julia_cx, julia_cy, zoom, palette_offset)
         elif mode == "multifractal":
-            img_data = _get_cached_fractal(key, render_multi_fractal, width, height, palette, "layers", cx, cy, zoom)
+            img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_multi_fractal, width, height, palette, "layers", cx, cy, zoom)
         else:
-            img_data = _get_cached_fractal(key, render_mandelbrot, width, height, palette, max_iter, cx, cy, zoom, rotation, palette_offset)
+            img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_mandelbrot, width, height, palette, max_iter, cx, cy, zoom, rotation, palette_offset)
         return Response(content=img_data, media_type="image/png")
     except Exception as e:
         log.error("Fractal render failed", {"error": str(e), "mode": mode})
@@ -216,7 +228,8 @@ async def fractal_by_state(width: int = 960, height: int = 540):
     log.info("Fractal by state requested", {"state": engine.state.state_name})
     key = f"state:{engine.state.state_name}:{engine.state.attention:.2f}:{engine.state.engagement:.2f}:{time.time()//2}"
     state_dict = engine.state.to_dict()
-    img_data = _get_cached_fractal(key, render_fractal_by_state, state_dict, width, height)
+    loop = asyncio.get_event_loop()
+    img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_fractal_by_state, state_dict, width, height)
     return Response(content=img_data, media_type="image/png")
 
 @app.get("/api/fractal/map")
@@ -230,7 +243,8 @@ async def fractal_map_tile(
     log.info("Map tile requested", {"zoom": zoom_level, "x": tile_x, "y": tile_y})
     from server.fractal_renderer import render_map_tile
     try:
-        img = render_map_tile(zoom_level, tile_x, tile_y, palette)
+        loop = asyncio.get_event_loop()
+        img = await loop.run_in_executor(_get_fractal_executor(), render_map_tile, zoom_level, tile_x, tile_y, palette)
         buf = io.BytesIO()
         img.save(buf, format='PNG')
         buf.seek(0)

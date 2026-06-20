@@ -6,6 +6,8 @@ Shader "Hidden/FCSTNGlitch"
         _GlitchIntensity ("Glitch Intensity", Range(0, 1)) = 0
         _TimeOffset ("Time Offset", Float) = 0
         _GlitchColor ("Glitch Color", Color) = (1, 0, 0, 1)
+        _TerminalTex ("Terminal Overlay", 2D) = "black" {}
+        _TerminalOpacity ("Terminal Opacity", Range(0, 1)) = 0
     }
     SubShader
     {
@@ -38,18 +40,34 @@ Shader "Hidden/FCSTNGlitch"
             }
 
             sampler2D _MainTex;
+            sampler2D _TerminalTex;
             float _GlitchIntensity;
             float _TimeOffset;
             float4 _GlitchColor;
+            float _TerminalOpacity;
 
             fixed4 frag (v2f i) : SV_Target
             {
-                fixed4 col = tex2D(_MainTex, i.uv);
-
                 float t = _TimeOffset * 13.37;
                 float glitchLine = sin(i.uv.y * 240 + t) * 0.5 + 0.5;
                 float glitchAmount = glitchLine * _GlitchIntensity;
 
+                // --- RGB Channel Offset (Chromatic Aberration on glitch) ---
+                float splitAmount = _GlitchIntensity * 0.02;
+                float r_offset = sin(i.uv.y * 480 + t * 0.7) * splitAmount;
+                float b_offset = cos(i.uv.y * 480 + t * 0.5) * splitAmount;
+
+                fixed4 col_r = tex2D(_MainTex, i.uv + float2(r_offset, 0));
+                fixed4 col_g = tex2D(_MainTex, i.uv);
+                fixed4 col_b = tex2D(_MainTex, i.uv + float2(b_offset, 0));
+
+                fixed4 col;
+                col.r = col_r.r;
+                col.g = col_g.g;
+                col.b = col_b.b;
+                col.a = 1.0;
+
+                // --- Block glitch displacement ---
                 if (glitchAmount > 0.95)
                 {
                     float2 offset = float2(
@@ -60,11 +78,31 @@ Shader "Hidden/FCSTNGlitch"
                     col.rgb = lerp(col.rgb, _GlitchColor.rgb, _GlitchIntensity * 0.3);
                 }
 
+                // --- Scanlines ---
                 float scanline = sin(i.uv.y * 480) * 0.02 + 0.98;
                 col.rgb *= scanline;
 
-                float vignette = 1.0 - length(i.uv - 0.5) * 0.8;
+                // --- Vignette ---
+                float2 center = i.uv - 0.5;
+                float vignette = 1.0 - dot(center, center) * 1.2;
                 col.rgb *= vignette;
+
+                // --- Screen shake blocks at high glitch ---
+                if (_GlitchIntensity > 0.3)
+                {
+                    float blockLine = sin(i.uv.y * 24 + t * 3.0) * 0.5 + 0.5;
+                    float blockAmount = step(0.95 - _GlitchIntensity * 0.4, blockLine);
+                    float2 blockOffset = float2(
+                        (sin(i.uv.y * 40 + t * 2.0) * 0.5 + 0.5) * _GlitchIntensity * 0.03,
+                        0
+                    );
+                    fixed4 blockCol = tex2D(_MainTex, i.uv + blockOffset);
+                    col = lerp(col, blockCol, blockAmount * _GlitchIntensity);
+                }
+
+                // --- Terminal overlay ---
+                fixed4 terminal = tex2D(_TerminalTex, i.uv);
+                col.rgb = lerp(col.rgb, terminal.rgb, terminal.a * _TerminalOpacity);
 
                 return col;
             }
