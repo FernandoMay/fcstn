@@ -186,7 +186,7 @@ class BCIBrainServer:
             state['narrative'] = self._narrative
             state['cognitive']['narrative'] = self._narrative
 
-        if self._music_gen:
+        if self.music_gen:
             state['music'] = {'bpm': self.music_gen._bpm} if hasattr(self.music_gen, '_bpm') else {}
 
         if self._game_map:
@@ -328,27 +328,17 @@ def run_server(ws_port=8766, source_type='recorded', source_kwargs=None):
     _server_instance = server
     server.start()
 
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    async def main_loop():
+        async with websockets.serve(_ws_handler, 'localhost', ws_port):
+            log.info(f"BCI WebSocket server on ws://localhost:{ws_port}")
+            await _broadcast_to_ws(server)
+
     try:
-        loop.run_until_complete(
-            websockets.serve(_ws_handler, 'localhost', ws_port)
-        )
-        log.info(f"BCI WebSocket server on ws://localhost:{ws_port}")
-
-        # Run broadcast + server in same loop
-        async def main_loop():
-            await asyncio.gather(
-                websockets.serve(_ws_handler, 'localhost', ws_port),
-                _broadcast_to_ws(server),
-            )
-
-        loop.run_until_complete(main_loop())
+        asyncio.run(main_loop())
     except KeyboardInterrupt:
         pass
     finally:
         server.stop()
-        loop.close()
 
 
 def run_standalone():
