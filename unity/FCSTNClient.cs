@@ -92,30 +92,50 @@ public class FCSTNClient : MonoBehaviour
         if (mainCamera != null)
         {
             cameraOriginPosition = mainCamera.transform.localPosition;
+            Debug.Log("[FCSTN] Camera found: " + mainCamera.name);
         }
         else if (Camera.main != null)
         {
             mainCamera = Camera.main;
             cameraOriginPosition = mainCamera.transform.localPosition;
+            Debug.Log("[FCSTN] Using Main Camera");
+        }
+        else
+        {
+            Debug.LogWarning("[FCSTN] No camera assigned!");
         }
 
         if (glitchMaterial != null)
         {
             overlayMaterial = new Material(glitchMaterial);
+            Debug.Log("[FCSTN] Glitch material created");
         }
+        else
+        {
+            Debug.LogWarning("[FCSTN] No glitch material assigned");
+        }
+
+        if (fractalMesh != null) Debug.Log("[FCSTN] Fractal mesh: " + fractalMesh.name);
+        if (sceneLight != null) Debug.Log("[FCSTN] Light: " + sceneLight.name);
+        if (fractalParticles != null) Debug.Log("[FCSTN] Fractal particles: " + fractalParticles.name);
+        if (glitchParticles != null) Debug.Log("[FCSTN] Glitch particles: " + glitchParticles.name);
 
         cts = new CancellationTokenSource();
         _ = ConnectAndListen();
     }
+
+    int _reconnectCount = 0;
+    int _msgCount = 0;
 
     async Task ConnectAndListen()
     {
         ws = new ClientWebSocket();
         try
         {
-            Debug.Log("[FCSTN] Connecting to " + serverUrl + "...");
+            Debug.Log("[FCSTN] Connecting to " + serverUrl + "... (attempt " + (_reconnectCount + 1) + ")");
             await ws.ConnectAsync(new Uri(serverUrl), cts.Token);
             Debug.Log("[FCSTN] Connected!");
+            _reconnectCount = 0;
 
             byte[] buffer = new byte[16384];
 
@@ -124,10 +144,12 @@ public class FCSTNClient : MonoBehaviour
                 var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
+                    Debug.LogWarning("[FCSTN] Server closed connection");
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
                     break;
                 }
                 string json = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                _msgCount++;
                 ProcessMessage(json);
             }
         }
@@ -140,7 +162,8 @@ public class FCSTNClient : MonoBehaviour
             ws?.Dispose();
         }
 
-        Debug.Log("[FCSTN] Reconnecting in 3s...");
+        _reconnectCount++;
+        Debug.Log("[FCSTN] Reconnecting in 3s... (attempts=" + _reconnectCount + ", msgs=" + _msgCount + ")");
         await Task.Delay(3000);
         if (!cts.Token.IsCancellationRequested)
             _ = ConnectAndListen();
@@ -193,6 +216,8 @@ public class FCSTNClient : MonoBehaviour
 
         if (hasNewData)
         {
+            if (data.state_name != stateName)
+                Debug.Log("[FCSTN] State: " + data.state_name + " | attn=" + data.attention.ToString("F2") + " eng=" + data.engagement.ToString("F2") + " load=" + data.workload.ToString("F2"));
             attention = data.attention;
             engagement = data.engagement;
             workload = Mathf.Max(data.load, data.workload);

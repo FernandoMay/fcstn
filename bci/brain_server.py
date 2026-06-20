@@ -1,4 +1,4 @@
-"""FCSTN BCI WebSocket Server - Real brain signals → everything.
+"""FCSTN BCI WebSocket Server - Real brain signals everything.
 
 Broadcasts cognitive state, Mandelbrot path, music params, game maps,
 dream visuals, and image prompts over WebSocket to all clients.
@@ -19,19 +19,19 @@ from .generators import (
     ImagePromptGenerator, MusicGenerator,
     TextGenerator, GameMapGenerator, DreamGenerator
 )
+from shared.logger import get_logger
 
-log = logging.getLogger('BCI.Server')
+log = get_logger("BCI")
 
 
 class BCIBrainServer:
-    """Integrates real EEG acquisition → processing → multi-modal generation → WebSocket broadcast."""
+    """Integrates real EEG acquisition processing multi-modal generation WebSocket broadcast."""
 
     def __init__(self, ws_port=8766, source_type='recorded', source_kwargs=None):
         self.ws_port = ws_port
         self.source_type = source_type
         self.source_kwargs = source_kwargs or {}
 
-        # Processing chain
         self.source = None
         self.processor = None
         self.mapper = FractalMapper()
@@ -44,7 +44,6 @@ class BCIBrainServer:
         self.running = False
         self.clients = set()
 
-        # State
         self._brain_state = None
         self._fractal_path = None
         self._image_prompt = ""
@@ -54,58 +53,55 @@ class BCIBrainServer:
         self._dream_params = {}
         self._last_broadcast_time = 0
         self._eeg_quality = 0
+        self._total_samples = 0
+        self._dropped_broadcasts = 0
+
+        log.info("BCIBrainServer initialized", {"port": ws_port, "source": source_type})
 
     def start(self):
         """Start the full BCI pipeline."""
         self.running = True
 
-        # Create EEG source
-        log.info(f"Starting BCI with source: {self.source_type}")
+        log.info("Starting BCI pipeline", {"source": self.source_type})
         try:
             if self.source_type == 'muse':
                 self.source = MuseSource(**self.source_kwargs)
+                log.info("Muse BLE source selected", {"kwargs": self.source_kwargs})
             else:
                 self.source = RecordedSource(**self.source_kwargs)
+                log.info("Recorded EEG source selected", {"kwargs": self.source_kwargs})
             self.source.start()
+            log.info("EEG source started")
         except Exception as e:
-            log.error(f"Failed to start EEG source: {e}")
+            log.error("Failed to start EEG source", {"error": str(e)})
             return
 
-        # Wait for data
         timeout = 5
         start = time.time()
         while len(self.source.buffer) < self.source.sampling_rate:
             time.sleep(0.1)
             if time.time() - start > timeout:
-                log.warning("Timeout waiting for EEG data. Using generated data.")
+                log.warn("Timeout waiting for EEG data", {"timeout_s": timeout, "buffer_size": len(self.source.buffer)})
                 break
 
-        # Initialize processor with source properties
         self.processor = SignalProcessor(
             sampling_rate=self.source.sampling_rate,
             n_channels=self.source.n_channels,
             window_seconds=2,
         )
+        log.info("SignalProcessor initialized", {"sr": self.source.sampling_rate, "ch": self.source.n_channels})
 
-        # Start music generator if audio output available
         self.music_gen.start()
+        log.info("Music generator started")
 
-        # Set up data callback for real-time processing
         self.source.on_data = self._on_eeg_data
+        log.info("Data callback registered")
 
-        # Start broadcast loop
         self._broadcast_thread = threading.Thread(target=self._broadcast_loop, daemon=True)
         self._broadcast_thread.start()
+        log.info("Broadcast thread started")
 
-        log.info(f"BCI Brain Server running. WebSocket on port {self.ws_port}")
-        log.info("Connected clients will receive:")
-        log.info("  - Cognitive state (attention, engagement, load, valence, coherence)")
-        log.info("  - Mandelbrot/fractal navigation path")
-        log.info("  - Image generation prompts (Stable Diffusion)")
-        log.info("  - Real-time brainwave music")
-        log.info("  - Procedural game map terrain")
-        log.info("  - Dream visualization parameters")
-        log.info("  - Narrative text (thoughts decoded)")
+        log.info("BCI Brain Server running", {"port": self.ws_port})
 
     def stop(self):
         """Stop the BCI pipeline."""
@@ -113,12 +109,13 @@ class BCIBrainServer:
         if self.source:
             self.source.stop()
         self.music_gen.stop()
-        log.info("BCI Brain Server stopped.")
+        log.info("BCI Brain Server stopped", {"total_samples": self._total_samples, "dropped": self._dropped_broadcasts})
 
     def _on_eeg_data(self, samples):
         """Callback for new EEG data samples."""
         if self.processor:
             self.processor.feed(samples)
+            self._total_samples += len(samples) if hasattr(samples, '__len__') else 1
 
     def _update_state(self):
         """Update all derived state from current brain state."""
@@ -128,11 +125,13 @@ class BCIBrainServer:
         brain = self.processor.get_state()
         self._brain_state = brain
 
-        # Quality check: if all band powers are zero, EEG signal is poor
         bp = brain.band_powers
+        prev_quality = self._eeg_quality
         self._eeg_quality = 1.0 if sum(bp.values()) > 0.01 else 0.0
 
-        # Update all generators
+        if self._eeg_quality != prev_quality:
+            log.info("EEG quality changed", {"quality": self._eeg_quality, "bands": {k: round(v, 6) for k, v in bp.items()}})
+
         self._fractal_path = self.mapper.path
         self.mapper.update(brain)
 
@@ -140,10 +139,10 @@ class BCIBrainServer:
         self.music_gen.update(brain)
         self._narrative = self.text_gen.generate(brain)
 
-        # Game map (every 5 seconds to save computation)
         if not hasattr(self, '_last_map_time') or time.time() - self._last_map_time > 5:
             self._game_map = self.game_map_gen.generate(brain)
             self._last_map_time = time.time()
+            log.debug("Game map regenerated", {"biome": self._game_map.get('biome', 'unknown') if self._game_map else 'none'})
 
         self._dream_params = self.dream_gen.update(brain)
 
@@ -156,16 +155,15 @@ class BCIBrainServer:
             'source': self.source_type,
             'eeg_quality': self._eeg_quality,
             'timestamp': time.time(),
+            'total_samples': self._total_samples,
         }
 
         if brain:
             state['cognitive'] = brain.to_dict()
 
-            # Band powers as array
             bp = brain.band_powers
             state['bands'] = {k: round(v, 6) for k, v in bp.items()}
 
-            # Raw ratios
             state['ratios'] = {
                 'alpha_theta': round(brain.alpha_theta_ratio, 4),
                 'beta_alpha': round(brain.beta_alpha_ratio, 4),
@@ -174,11 +172,9 @@ class BCIBrainServer:
                 'asymmetry': round(brain.asymmetry, 4),
             }
 
-        # Fractal path
         if self._fractal_path:
             state['fractal'] = self._fractal_path.to_dict()
 
-        # Generators
         if self._image_prompt:
             state['image_prompt'] = self._image_prompt
 
@@ -194,7 +190,6 @@ class BCIBrainServer:
                 k: v for k, v in self._game_map.items()
                 if k != 'heightmap'
             }
-            # Include downsampled heightmap for preview
             if 'heightmap' in self._game_map:
                 hm = np.array(self._game_map['heightmap'])
                 import math
@@ -213,6 +208,7 @@ class BCIBrainServer:
 
     def _broadcast_loop(self):
         """Periodically update and broadcast state."""
+        cycle = 0
         while self.running:
             try:
                 self._update_state()
@@ -222,43 +218,54 @@ class BCIBrainServer:
                 closed = set()
                 for client in self.clients:
                     try:
-                        # Use asyncio run_coroutine_threadsafe for thread safety
-                        pass
+                        asyncio.run_coroutine_threadsafe(client.send(msg), self._ws_loop).result(timeout=0.5)
                     except Exception:
                         closed.add(client)
-                self.clients -= closed
+                if closed:
+                    self.clients -= closed
+                    log.debug("Removed stale clients", {"count": len(closed)})
+
+                if cycle % 200 == 0:
+                    log.debug("BCI broadcast cycle", {
+                        "clients": len(self.clients),
+                        "quality": self._eeg_quality,
+                        "state": state.get('cognitive', {}).get('state_name', 'unknown') if state.get('cognitive') else 'no_cog'
+                    })
+                cycle += 1
             except Exception as e:
-                log.warning(f"Broadcast error: {e}")
-            time.sleep(0.05)  # 20 fps
+                log.warn("Broadcast error", {"error": str(e)})
+                self._dropped_broadcasts += 1
+            time.sleep(0.05)
 
     async def ws_handler(self, websocket):
         """Handle WebSocket client connection."""
+        cid = f"bci-{id(websocket):x}"
         self.clients.add(websocket)
-        log.info(f"BCI client connected. Total: {len(self.clients)}")
-
+        log.info("BCI client connected", {"client": cid, "total": len(self.clients)})
+        start = time.time()
         try:
-            # Send initial state
             await websocket.send(json.dumps(self.get_full_state()))
-
             async for message in websocket:
                 try:
                     data = json.loads(message)
                     msg_type = data.get('type', '')
-
                     if msg_type == 'get_state':
                         await websocket.send(json.dumps(self.get_full_state()))
                     elif msg_type == 'set_mode':
                         mode = data.get('mode', 'free')
+                        log.info("Mapper mode change", {"client": cid, "mode": mode})
                         self.mapper.set_mode(mode)
                     elif msg_type == 'ping':
                         await websocket.send(json.dumps({'type': 'pong'}))
+                    else:
+                        log.debug("Unknown BCI message", {"client": cid, "type": msg_type})
                 except json.JSONDecodeError:
-                    pass
+                    log.warn("Invalid BCI message", {"client": cid})
         except websockets.exceptions.ConnectionClosed:
-            pass
+            log.info("BCI client disconnected", {"client": cid, "duration_s": round(time.time() - start, 1)})
         finally:
             self.clients.discard(websocket)
-            log.info(f"BCI client disconnected. Total: {len(self.clients)}")
+            log.info("BCI client cleaned up", {"client": cid, "remaining": len(self.clients)})
 
 
 _ws_clients_bci = set()
@@ -272,6 +279,7 @@ def get_server():
 
 async def _broadcast_to_ws(server):
     """Async broadcast loop for WebSocket clients."""
+    cycle = 0
     while server.running:
         if _ws_clients_bci:
             state = server.get_full_state()
@@ -283,13 +291,18 @@ async def _broadcast_to_ws(server):
                 except Exception:
                     closed.add(client)
             _ws_clients_bci -= closed
+            if cycle % 200 == 0:
+                log.debug("BCI WS broadcast", {"clients": len(_ws_clients_bci)})
+            cycle += 1
         await asyncio.sleep(0.05)
 
 
 async def _ws_handler(websocket):
     """Async WebSocket handler."""
+    cid = f"bci-{id(websocket):x}"
     _ws_clients_bci.add(websocket)
-    log.info(f"BCI WS client. Total: {len(_ws_clients_bci)}")
+    log.info("BCI WS client", {"client": cid, "total": len(_ws_clients_bci)})
+    start = time.time()
     try:
         server = get_server()
         if server:
@@ -304,16 +317,18 @@ async def _ws_handler(websocket):
                 if msg_type == 'get_state':
                     await websocket.send(json.dumps(server.get_full_state()))
                 elif msg_type == 'set_mode':
-                    server.mapper.set_mode(data.get('mode', 'free'))
+                    mode = data.get('mode', 'free')
+                    log.info("BCI mode change", {"client": cid, "mode": mode})
+                    server.mapper.set_mode(mode)
                 elif msg_type == 'ping':
                     await websocket.send(json.dumps({'type': 'pong'}))
             except json.JSONDecodeError:
                 pass
     except websockets.exceptions.ConnectionClosed:
-        pass
+        log.info("BCI WS disconnected", {"client": cid, "duration_s": round(time.time() - start, 1)})
     finally:
         _ws_clients_bci.discard(websocket)
-        log.info(f"BCI WS disconnected. Total: {len(_ws_clients_bci)}")
+        log.info("BCI WS cleaned up", {"client": cid, "remaining": len(_ws_clients_bci)})
 
 
 def run_server(ws_port=8766, source_type='recorded', source_kwargs=None):
@@ -330,7 +345,7 @@ def run_server(ws_port=8766, source_type='recorded', source_kwargs=None):
 
     async def main_loop():
         async with websockets.serve(_ws_handler, 'localhost', ws_port):
-            log.info(f"BCI WebSocket server on ws://localhost:{ws_port}")
+            log.info("BCI WebSocket server listening", {"url": f"ws://localhost:{ws_port}"})
             await _broadcast_to_ws(server)
 
     try:
