@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Rendering;
+using Random = UnityEngine.Random;
 
 [System.Serializable]
 public struct CognitivePayload
@@ -19,15 +21,20 @@ public struct CognitiveData
 {
     public float attention;
     public float engagement;
+    public float load;
     public float workload;
+    public float valence;
+    public float coherence;
+    public float fractal_dimension;
     public float fractal_dim;
     public string state_name;
+    public string phase;
     public string color;
     public float complexity;
     public float instability;
     public double timestamp;
-    public string narrative;      // Dynamic AI narrative text
-    public string image_prompt;   // Generative world-seed prompt
+    public string narrative;
+    public string image_prompt;
 }
 
 public class FCSTNClient : MonoBehaviour
@@ -38,40 +45,47 @@ public class FCSTNClient : MonoBehaviour
     [Header("Target Objects")]
     public Transform fractalMesh;
     public Light sceneLight;
-    public ParticleSystem fractalParticles; // System of particles representing neurons/chaos
-    public Camera mainCamera;               // Main camera to apply dynamic shake effects
+    public ParticleSystem fractalParticles;
+    public ParticleSystem glitchParticles;
+    public Camera mainCamera;
 
     [Header("Visualization Settings")]
     public float scaleSpeed = 3f;
     public float colorSpeed = 3f;
     public float rotationSpeed = 10f;
 
-    [Header("Camera Shake Settings")]
+    [Header("Camera Shake")]
     public float shakeIntensityMultiplier = 0.5f;
     public float shakeDecay = 1.5f;
 
-    // Runtime cognitive state
+    [Header("Glitch Overlay")]
+    public Material glitchMaterial;
+    public float glitchIntensity = 0f;
+
     [Header("Live Metrics (Read Only)")]
     public float attention = 0.5f;
     public float engagement = 0.5f;
     public float workload = 0.3f;
     public float fractalDimension = 2.5f;
-    public string stateName = "neutral";
+    public float valence = 0.5f;
+    public float coherence = 0.5f;
+    public string stateName = "resting";
     public Color currentColor = Color.magenta;
     public string lastNarrative = "";
     public string lastImagePrompt = "";
 
     private ClientWebSocket ws;
     private CancellationTokenSource cts;
-    private Queue<CognitiveData> pendingData = new Queue<CognitiveData>();
+    private readonly Queue<CognitiveData> pendingData = new Queue<CognitiveData>();
     private Color targetColor = Color.magenta;
     private Vector3 targetScale = Vector3.one;
     private float targetRotationSpeed = 10f;
-
-    // Camera shake fields
     private Vector3 cameraOriginPosition;
     private float currentShakeTime = 0f;
     private float currentShakeIntensity = 0f;
+    private float glitchTarget = 0f;
+    private float elapsedTime = 0f;
+    private Material overlayMaterial;
 
     async void Start()
     {
@@ -85,6 +99,11 @@ public class FCSTNClient : MonoBehaviour
             cameraOriginPosition = mainCamera.transform.localPosition;
         }
 
+        if (glitchMaterial != null)
+        {
+            overlayMaterial = new Material(glitchMaterial);
+        }
+
         cts = new CancellationTokenSource();
         _ = ConnectAndListen();
     }
@@ -96,20 +115,18 @@ public class FCSTNClient : MonoBehaviour
         {
             Debug.Log("[FCSTN] Connecting to " + serverUrl + "...");
             await ws.ConnectAsync(new Uri(serverUrl), cts.Token);
-            Debug.Log("[FCSTN] Connected to FCSTN Server!");
+            Debug.Log("[FCSTN] Connected!");
 
-            byte[] buffer = new byte[16384]; // Increased buffer size for rich AI payloads
+            byte[] buffer = new byte[16384];
 
             while (ws.State == WebSocketState.Open && !cts.Token.IsCancellationRequested)
             {
                 var result = await ws.ReceiveAsync(new ArraySegment<byte>(buffer), cts.Token);
-
                 if (result.MessageType == WebSocketMessageType.Close)
                 {
                     await ws.CloseAsync(WebSocketCloseStatus.NormalClosure, "", CancellationToken.None);
                     break;
                 }
-
                 string json = Encoding.UTF8.GetString(buffer, 0, result.Count);
                 ProcessMessage(json);
             }
@@ -120,11 +137,9 @@ public class FCSTNClient : MonoBehaviour
         }
         finally
         {
-            if (ws != null)
-                ws.Dispose();
+            ws?.Dispose();
         }
 
-        // Reconnect after 3s
         Debug.Log("[FCSTN] Reconnecting in 3s...");
         await Task.Delay(3000);
         if (!cts.Token.IsCancellationRequested)
@@ -136,37 +151,36 @@ public class FCSTNClient : MonoBehaviour
         try
         {
             CognitivePayload payload = JsonUtility.FromJson<CognitivePayload>(json);
-            // Support both standard envelope or direct data
             if (payload.type == "state" || payload.type == "cognitive_state")
             {
                 lock (pendingData)
                 {
                     pendingData.Enqueue(payload.data);
                 }
+                return;
             }
-            else
+        }
+        catch { }
+
+        try
+        {
+            CognitiveData directData = JsonUtility.FromJson<CognitiveData>(json);
+            if (directData.attention > 0 || directData.fractal_dimension > 0)
             {
-                // Fallback attempt to parse data directly if sent without type envelope
-                CognitiveData directData = JsonUtility.FromJson<CognitiveData>(json);
-                if (directData.attention > 0 || directData.fractal_dim > 0)
+                lock (pendingData)
                 {
-                    lock (pendingData)
-                    {
-                        pendingData.Enqueue(directData);
-                    }
+                    pendingData.Enqueue(directData);
                 }
             }
         }
-        catch (Exception e)
-        {
-            Debug.LogWarning("[FCSTN] Parse error: " + e.Message);
-        }
+        catch { }
     }
 
     void Update()
     {
-        // Process pending data on main thread
-        CognitiveData data;
+        elapsedTime += Time.deltaTime;
+
+        CognitiveData data = default;
         bool hasNewData = false;
         lock (pendingData)
         {
@@ -175,103 +189,147 @@ public class FCSTNClient : MonoBehaviour
                 data = pendingData.Dequeue();
                 hasNewData = true;
             }
-            else
-            {
-                data = new CognitiveData();
-            }
         }
 
         if (hasNewData)
         {
-            // Update runtime metrics
             attention = data.attention;
             engagement = data.engagement;
-            workload = data.workload;
-            fractalDimension = data.fractal_dim;
+            workload = Mathf.Max(data.load, data.workload);
+            fractalDimension = Mathf.Max(data.fractal_dimension, data.fractal_dim);
+            valence = data.valence;
+            coherence = data.coherence;
             stateName = data.state_name;
             lastNarrative = data.narrative;
             lastImagePrompt = data.image_prompt;
 
-            // Parse color
             if (ColorUtility.TryParseHtmlString(data.color, out Color parsedColor))
                 targetColor = parsedColor;
 
-            // Calculate target scale based on fractal dimension and engagement
             float scale = 1f + (fractalDimension - 2f) * 2.5f + engagement * 2.0f;
             targetScale = new Vector3(scale, scale, scale);
-
-            // Rotation speed based on instability
             targetRotationSpeed = 10f + data.instability * 80f;
 
-            // Trigger Camera Shake if workload is high
             if (workload > 0.75f)
             {
-                currentShakeIntensity = (workload - 0.7f) * shakeIntensityMultiplier;
-                currentShakeTime = 0.5f; // Shake for half a second
+                currentShakeIntensity = (workload - 0.7f) * shakeIntensityMultiplier * 2f;
+                currentShakeTime = 0.6f;
             }
+
+            glitchTarget = workload * 0.5f + Mathf.Max(0, (attention - 0.8f)) * 0.5f;
         }
 
-        // Apply smooth transformations to the core fractal mesh
         if (fractalMesh != null)
         {
             fractalMesh.localScale = Vector3.Lerp(fractalMesh.localScale, targetScale, Time.deltaTime * scaleSpeed);
             fractalMesh.Rotate(Vector3.up, targetRotationSpeed * Time.deltaTime);
             fractalMesh.Rotate(Vector3.right, (targetRotationSpeed * 0.3f) * Time.deltaTime);
+            fractalMesh.Rotate(Vector3.forward, (targetRotationSpeed * 0.15f) * Time.deltaTime);
 
             Renderer renderer = fractalMesh.GetComponent<Renderer>();
             if (renderer != null)
             {
                 currentColor = Color.Lerp(currentColor, targetColor, Time.deltaTime * colorSpeed);
                 renderer.material.color = currentColor;
-                renderer.material.SetColor("_EmissionColor", currentColor * (0.3f + attention * 0.7f));
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.SetColor("_EmissionColor", currentColor * (0.3f + attention * 0.7f));
+                }
             }
         }
 
-        // Update Particle System parameters dynamically (Wow factor)
         if (fractalParticles != null)
         {
             var mainModule = fractalParticles.main;
             var emissionModule = fractalParticles.emission;
             var noiseModule = fractalParticles.noise;
+            var colorOverLifetime = fractalParticles.colorOverLifetime;
+            var sizeOverLifetime = fractalParticles.sizeOverLifetime;
 
-            // Speed of particles reflects the cognitive engagement
-            mainModule.simulationSpeed = Mathf.Lerp(0.5f, 5.0f, engagement);
-            
-            // Start color matches the network's color
+            mainModule.simulationSpeed = Mathf.Lerp(0.5f, 6.0f, engagement);
             mainModule.startColor = currentColor;
+            emissionModule.rateOverTime = Mathf.Lerp(20f, 500f, attention);
 
-            // Number of active particles matches the audience attention
-            emissionModule.rateOverTime = Mathf.Lerp(15f, 350f, attention);
-
-            // Chaos in particles matches the mental workload (system instability)
-            if (noiseModule.enabled || workload > 0.3f)
+            if (noiseModule.enabled || workload > 0.2f)
             {
                 noiseModule.enabled = true;
-                noiseModule.strength = Mathf.Lerp(0.05f, 3.5f, workload);
+                noiseModule.strength = Mathf.Lerp(0.05f, 4.0f, workload);
+                noiseModule.frequency = Mathf.Lerp(0.3f, 2.0f, workload);
+                noiseModule.scrollSpeed = Mathf.Lerp(0.1f, 3.0f, engagement);
+            }
+
+            if (coherence > 0.6f)
+            {
+                var grad = new Gradient();
+                grad.SetKeys(
+                    new GradientColorKey[] {
+                        new GradientColorKey(currentColor, 0f),
+                        new GradientColorKey(Color.Lerp(currentColor, Color.white, 0.3f), 0.5f),
+                        new GradientColorKey(currentColor, 1f)
+                    },
+                    new GradientAlphaKey[] {
+                        new GradientAlphaKey(1f, 0f),
+                        new GradientAlphaKey(0.5f, 0.5f),
+                        new GradientAlphaKey(0f, 1f)
+                    }
+                );
+                colorOverLifetime.color = new ParticleSystem.MinMaxGradient(grad);
             }
         }
 
-        // Handle Camera Shake
+        if (glitchParticles != null)
+        {
+            var glitchEmission = glitchParticles.emission;
+            glitchEmission.rateOverTime = Mathf.Lerp(0f, 100f, glitchTarget);
+            var glitchMain = glitchParticles.main;
+            glitchMain.startColor = Color.Lerp(Color.red, Color.cyan, attention);
+            glitchMain.simulationSpeed = Mathf.Lerp(0.5f, 4f, workload);
+        }
+
         if (mainCamera != null)
         {
             if (currentShakeTime > 0)
             {
-                Vector3 randomOffset = UnityEngine.Random.insideUnitSphere * currentShakeIntensity;
+                Vector3 randomOffset = Random.insideUnitSphere * currentShakeIntensity;
                 mainCamera.transform.localPosition = cameraOriginPosition + randomOffset;
+                mainCamera.transform.localRotation = Quaternion.Euler(
+                    Random.Range(-currentShakeIntensity * 5f, currentShakeIntensity * 5f),
+                    Random.Range(-currentShakeIntensity * 3f, currentShakeIntensity * 3f),
+                    0
+                );
                 currentShakeTime -= Time.deltaTime;
                 currentShakeIntensity = Mathf.Lerp(currentShakeIntensity, 0f, Time.deltaTime * shakeDecay);
             }
             else
             {
-                mainCamera.transform.localPosition = Vector3.Lerp(mainCamera.transform.localPosition, cameraOriginPosition, Time.deltaTime * 5f);
+                mainCamera.transform.localPosition = Vector3.Lerp(
+                    mainCamera.transform.localPosition, cameraOriginPosition, Time.deltaTime * 5f);
+                mainCamera.transform.localRotation = Quaternion.Lerp(
+                    mainCamera.transform.localRotation, Quaternion.identity, Time.deltaTime * 3f);
             }
         }
 
-        // Update light color
         if (sceneLight != null)
         {
             sceneLight.color = Color.Lerp(sceneLight.color, targetColor, Time.deltaTime * colorSpeed * 0.5f);
-            sceneLight.intensity = 0.8f + attention * 2.0f;
+            sceneLight.intensity = Mathf.Lerp(0.8f, 3.0f, attention);
+        }
+
+        glitchIntensity = Mathf.Lerp(glitchIntensity, glitchTarget, Time.deltaTime * 2f);
+    }
+
+    void OnRenderImage(RenderTexture source, RenderTexture destination)
+    {
+        if (overlayMaterial != null && glitchIntensity > 0.01f)
+        {
+            overlayMaterial.SetFloat("_GlitchIntensity", glitchIntensity);
+            overlayMaterial.SetFloat("_TimeOffset", elapsedTime);
+            overlayMaterial.SetColor("_GlitchColor", currentColor);
+            Graphics.Blit(source, destination, overlayMaterial);
+        }
+        else
+        {
+            Graphics.Blit(source, destination);
         }
     }
 
@@ -279,5 +337,7 @@ public class FCSTNClient : MonoBehaviour
     {
         cts?.Cancel();
         ws?.Dispose();
+        if (overlayMaterial != null)
+            Destroy(overlayMaterial);
     }
 }

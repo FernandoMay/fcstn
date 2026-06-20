@@ -1,7 +1,4 @@
-"""
-FCSTN Live Demo Server - Cognitive Engine with WebSocket broadcast
-Connects 3D visualizer, Unity, and controller clients in real-time.
-"""
+"""FCSTN Live Demo Server - Cognitive Engine with WebSocket broadcast ++ voice + Flutter support."""
 
 import asyncio
 import json
@@ -10,14 +7,8 @@ import logging
 import random
 import time
 import threading
+import math
 from dataclasses import dataclass, field, asdict
-
-# Try to import speech recognition
-try:
-    import speech_recognition as sr
-    SPEECH_AVAILABLE = True
-except ImportError:
-    SPEECH_AVAILABLE = False
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [FCSTN] %(message)s')
 log = logging.getLogger('FCSTN')
@@ -28,9 +19,14 @@ class CognitiveState:
     attention: float = 0.5
     engagement: float = 0.5
     workload: float = 0.3
+    load: float = 0.3
+    valence: float = 0.5
+    coherence: float = 0.5
+    fractal_dimension: float = 2.5
     fractal_dim: float = 2.5
-    state_name: str = "neutral"
-    color: str = "#9933FF"
+    state_name: str = "resting"
+    phase: str = "resting"
+    color: str = "#00F0FF"
     complexity: float = 0.5
     instability: float = 0.3
     timestamp: float = field(default_factory=time.time)
@@ -38,112 +34,111 @@ class CognitiveState:
     image_prompt: str = "fractal neuro-digital nexus, symmetrical geometry, network lattice"
 
     def to_dict(self):
-        return asdict(self)
+        return {
+            "attention": self.attention,
+            "engagement": self.engagement,
+            "load": self.workload,
+            "workload": self.workload,
+            "valence": self.valence,
+            "coherence": self.coherence,
+            "fractal_dimension": self.fractal_dimension,
+            "fractal_dim": self.fractal_dimension,
+            "state_name": self.state_name,
+            "phase": self.phase,
+            "color": self.color,
+            "complexity": self.complexity,
+            "instability": self.instability,
+            "timestamp": self.timestamp,
+            "narrative": self.narrative,
+            "image_prompt": self.image_prompt,
+        }
 
 
-# Scientific keywords mapping to drive cognitive changes
 KEYWORDS_MAP = {
-    "caos": {"attention": 0.90, "engagement": 0.85, "workload": 0.90, "narrative": "Modulación caótica de espacio-tiempo. Inyectando entropía fractal."},
-    "colapso": {"attention": 0.95, "engagement": 0.70, "workload": 0.95, "narrative": "Colapso inminente detectado. Espacio-tiempo comprimiéndose de golpe."},
-    "estrés": {"attention": 0.85, "engagement": 0.60, "workload": 0.90, "narrative": "Alerta de estrés cognitivo. Elevando andamiaje geométrico protector."},
-    "calma": {"attention": 0.25, "engagement": 0.30, "workload": 0.10, "narrative": "Sintonizando ondas delta/alfa. Geometría fractal estable y relajada."},
-    "relajar": {"attention": 0.20, "engagement": 0.25, "workload": 0.08, "narrative": "Descompresión cognitiva activa. Ralentizando evolución temporal."},
-    "paz": {"attention": 0.30, "engagement": 0.20, "workload": 0.15, "narrative": "Estabilización simétrica. Resonancia cerebral en modo pacífico."},
-    "viaje": {"attention": 0.75, "engagement": 0.85, "workload": 0.40, "narrative": "Iniciando viaje espacio-temporal. Dimensiones fractales en expansión."},
-    "aprender": {"attention": 0.85, "engagement": 0.80, "workload": 0.50, "narrative": "Modo aprendizaje profundo. Mapeando sinapsis de conocimiento en tiempo real."},
-    "curioso": {"attention": 0.70, "engagement": 0.90, "workload": 0.35, "narrative": "Curiosidad intelectual activa. Explorando anomalías geométricas."},
-    "mente": {"attention": 0.60, "engagement": 0.85, "workload": 0.30, "narrative": "Mapeando redes neuronales humanas. Simbiosis bio-digital establecida."},
-    "conexión": {"attention": 0.65, "engagement": 0.90, "workload": 0.25, "narrative": "Conectividad total establecida. Transfiriendo señales cognitivas."},
-    "agresivo": {"attention": 0.95, "engagement": 0.90, "workload": 0.85, "narrative": "Respuesta agresiva de la IA. Sobrecargando de luz y energía el render."}
+    "caos": {"load": 0.95, "attention": 0.90, "engagement": 0.85, "narrative": "Modulación caótica de espacio-tiempo. Inyectando entropía fractal."},
+    "colapso": {"load": 0.95, "attention": 0.95, "engagement": 0.70, "narrative": "Colapso inminente detectado. Espacio-tiempo comprimiéndose de golpe."},
+    "estrés": {"load": 0.90, "attention": 0.85, "engagement": 0.60, "narrative": "Alerta de estrés cognitivo. Elevando andamiaje geométrico protector."},
+    "calma": {"load": 0.10, "attention": 0.25, "engagement": 0.30, "narrative": "Sintonizando ondas delta/alfa. Geometría fractal estable y relajada."},
+    "relajar": {"load": 0.08, "attention": 0.20, "engagement": 0.25, "narrative": "Descompresión cognitiva activa. Ralentizando evolución temporal."},
+    "paz": {"load": 0.15, "attention": 0.30, "engagement": 0.20, "narrative": "Estabilización simétrica. Resonancia cerebral en modo pacífico."},
+    "viaje": {"load": 0.40, "attention": 0.75, "engagement": 0.85, "narrative": "Iniciando viaje espacio-temporal. Dimensiones fractales en expansión."},
+    "aprender": {"load": 0.50, "attention": 0.85, "engagement": 0.80, "narrative": "Modo aprendizaje profundo. Mapeando sinapsis de conocimiento en tiempo real."},
+    "curioso": {"load": 0.35, "attention": 0.70, "engagement": 0.90, "narrative": "Curiosidad intelectual activa. Explorando anomalías geométricas."},
+    "mente": {"load": 0.30, "attention": 0.60, "engagement": 0.85, "narrative": "Mapeando redes neuronales humanas. Simbiosis bio-digital establecida."},
+    "conexión": {"load": 0.25, "attention": 0.65, "engagement": 0.90, "narrative": "Conectividad total establecida. Transfiriendo señales cognitivas."},
+    "foco": {"load": 0.30, "attention": 0.95, "engagement": 0.80, "narrative": "Atención quirúrgica activa. Precisión fractal milimétrica."},
+    "explosion": {"load": 0.95, "attention": 0.95, "engagement": 0.95, "valence": 0.90, "narrative": "✦ EXPLOSIÓN COGNITIVA ✦ Todas las métricas al máximo. Teatro cuántico activado."},
+    "todas maximas": {"load": 0.95, "attention": 0.95, "engagement": 0.95, "valence": 0.90, "coherence": 0.90, "narrative": "✦ EXPLOSIÓN COGNITIVA ✦ Todas las métricas al máximo. Teatro cuántico activado."},
+    "todas minimas": {"load": 0.05, "attention": 0.05, "engagement": 0.05, "valence": 0.10, "coherence": 0.10, "narrative": "✦ Reposo total cognitivo. Sistema en standby."},
+    "reposo": {"load": 0.05, "attention": 0.05, "engagement": 0.05, "valence": 0.10, "coherence": 0.10, "narrative": "✦ Reposo total cognitivo. Sistema en standby."},
+    "creativo": {"load": 0.30, "attention": 0.60, "engagement": 0.80, "valence": 0.95, "narrative": "✦ Creatividad desatada. Valencia máxima. Nuevas geometrías emergiendo."},
+    "equilibrio": {"load": 0.30, "attention": 0.50, "engagement": 0.50, "valence": 0.50, "coherence": 0.85, "narrative": "✦ Coherencia neural establecida. Armonía fractal equilibrada."},
+    "atencion": {"load": 0.30, "attention": 0.90, "engagement": 0.70, "narrative": "✦ Alta atención detectada. Precisión y enfoque máximo."},
+    "alta atencion": {"load": 0.30, "attention": 0.90, "engagement": 0.70, "narrative": "✦ Alta atención detectada. Precisión y enfoque máximo."},
+    "carga maxima": {"load": 0.90, "attention": 0.80, "engagement": 0.75, "narrative": "✦ Carga máxima activada. Sobrecarga controlada del sistema."},
+    "carga baja": {"load": 0.05, "attention": 0.30, "engagement": 0.35, "narrative": "✦ Carga baja. Sistema en modo descanso profundo."},
+    "alta valencia": {"load": 0.25, "attention": 0.55, "engagement": 0.70, "valence": 0.90, "narrative": "✦ Valencia emocional elevada. Experiencia positiva amplificada."},
+    "coherencia alta": {"load": 0.25, "attention": 0.50, "engagement": 0.50, "coherence": 0.85, "narrative": "✦ Coherencia neural óptima. Sincronización hemisférica total."},
+    "agresivo": {"load": 0.85, "attention": 0.95, "engagement": 0.90, "narrative": "Respuesta agresiva de la IA. Sobrecargando de luz y energía el render."},
 }
 
 
 class FCSTNEngine:
     def __init__(self):
         self.state = CognitiveState()
+        self._idle_counter = 0
         self.time_step = 0
         self.history = []
         self.clients = set()
 
     def process_input(self, text: str, time_taken: float) -> CognitiveState:
         self.time_step += 1
+        self._idle_counter = 0
         text_lower = text.lower() if text else ""
-        
-        # Check for explicit keywords first
+
         matched_keyword = None
         for kw, override in KEYWORDS_MAP.items():
             if kw in text_lower:
                 matched_keyword = kw
-                self.state.attention = override["attention"]
-                self.state.engagement = override["engagement"]
-                self.state.workload = override["workload"]
-                self.state.narrative = override["narrative"]
+                if "load" in override:
+                    self.state.workload = override["load"]
+                if "attention" in override:
+                    self.state.attention = override["attention"]
+                if "engagement" in override:
+                    self.state.engagement = override["engagement"]
+                if "valence" in override:
+                    self.state.valence = override["valence"]
+                if "coherence" in override:
+                    self.state.coherence = override["coherence"]
+                if "narrative" in override:
+                    self.state.narrative = override["narrative"]
                 break
 
         if not matched_keyword:
-            # Map response speed and text length to cognitive load
             speed_factor = max(0, min(1, 1.0 - (time_taken / 10.0)))
             text_complexity = min(1.0, len(text) / 100.0) if text else 0.3
-
-            # Update cognitive metrics with smoothing
             self.state.attention = self.state.attention * 0.6 + (speed_factor * 0.6 + text_complexity * 0.4) * 0.4
             self.state.engagement = self.state.engagement * 0.6 + (0.5 + (speed_factor - 0.5) * 0.4 + text_complexity * 0.4) * 0.4
             self.state.workload = self.state.workload * 0.6 + (speed_factor * 0.5 + text_complexity * 0.5) * 0.4
 
-            # Clamp
             self.state.attention = max(0.05, min(0.95, self.state.attention))
             self.state.engagement = max(0.05, min(0.95, self.state.engagement))
             self.state.workload = max(0.05, min(0.95, self.state.workload))
 
-        # Derive fractal dimension from cognitive metrics
-        self.state.fractal_dim = 2.0 + (self.state.attention * 0.6 + self.state.engagement * 0.4)
-        self.state.complexity = (self.state.attention + self.state.engagement) / 2.0
-        self.state.instability = self.state.workload
+        self._derive_state()
 
-        # Classify cognitive state
-        if self.state.attention > 0.7 and self.state.engagement > 0.6:
-            self.state.state_name = "focused"
-            self.state.color = "#FF0055"
-        elif self.state.workload > 0.7:
-            self.state.state_name = "stressed"
-            self.state.color = "#FF4400"
-        elif self.state.attention < 0.3 and self.state.engagement < 0.3:
-            self.state.state_name = "fatigued"
-            self.state.color = "#4488FF"
-        elif self.state.engagement > 0.5:
-            self.state.state_name = "engaged"
-            self.state.color = "#00F0FF"
-        elif self.state.attention > 0.5:
-            self.state.state_name = "curious"
-            self.state.color = "#00FF88"
-        else:
-            self.state.state_name = "neutral"
-            self.state.color = "#9933FF"
-
-        # Generate narrative if not set by keyword
         if not matched_keyword:
-            narrative_templates = {
-                "focused": f"Enfoque profundo sintonizado. Elevando recursión a {self.state.fractal_dim:.2f}.",
-                "stressed": f"Carga de trabajo elevada. Modulando geometría en {self.state.fractal_dim:.2f} para andamiaje de alivio.",
-                "fatigued": f"Fatiga cerebral detectada. Reduciendo complejidad matemática para descanso cognitivo.",
-                "engaged": f"Ecosistema en sintonía. Retroalimentación espacio-temporal estabilizada.",
-                "curious": f"Sonda de curiosidad activa. Expandiendo fronteras del render fractal.",
-                "neutral": f"Monitoreo normal del espacio cognitivo. Atención y flujo constantes."
-            }
-            self.state.narrative = narrative_templates.get(self.state.state_name, "Ecosistema estable.")
+            self.state.narrative = self._generate_narrative()
 
-        # Update Stable Diffusion/Generative seed prompt
         prompt_styles = {
             "focused": "highly detailed hyper-complex mandelbrot 3d fractal, glowing laser grids, cybernetic neural synapse network, crimson and cyan glow",
             "stressed": "chaotic unstable fractal geometry, red and orange energy sparks, exploding neural patterns, high friction glitch art",
             "fatigued": "soft minimalist geometry, smooth calm fluid gradients, soft blue ambient light, zen mandela shapes",
             "engaged": "interconnected neural network matrix, glowing purple and teal nodes, beautiful digital harmony, sleek tech line art",
             "curious": "exploratory deep space fractal zoom, biological neon plant fractal, green emerald bio-luminescence",
-            "neutral": "symmetrical clean mathematical 3d rendering, violet neon lattice lines, balanced composition"
+            "resting": "symmetrical clean mathematical 3d rendering, violet neon lattice lines, balanced composition",
         }
-        self.state.image_prompt = prompt_styles.get(self.state.state_name, prompt_styles["neutral"])
-
-        # Add text context to prompt if available
+        self.state.image_prompt = prompt_styles.get(self.state.state_name, prompt_styles["resting"])
         if text:
             self.state.image_prompt += f", inspired by '{text[:50]}'"
 
@@ -155,107 +150,97 @@ class FCSTNEngine:
         log.info(f"State: {self.state.state_name.upper()} | "
                  f"Attn: {self.state.attention:.2f} | "
                  f"Eng: {self.state.engagement:.2f} | "
-                 f"Wrk: {self.state.workload:.2f} | "
-                 f"Dim: {self.state.fractal_dim:.2f} | "
+                 f"Load: {self.state.workload:.2f} | "
+                 f"Dim: {self.state.fractal_dimension:.2f} | "
                  f"Text: '{text}'")
 
         return self.state
 
-    def set_manual(self, attention=None, engagement=None, workload=None):
-        if attention is not None:
-            self.state.attention = max(0.05, min(0.95, attention))
-        if engagement is not None:
-            self.state.engagement = max(0.05, min(0.95, engagement))
-        if workload is not None:
-            self.state.workload = max(0.05, min(0.95, workload))
-
-        self.state.fractal_dim = 2.0 + (self.state.attention * 0.6 + self.state.engagement * 0.4)
+    def _derive_state(self):
+        self.state.fractal_dimension = 2.0 + (self.state.attention * 0.6 + self.state.engagement * 0.4)
+        self.state.fractal_dim = self.state.fractal_dimension
         self.state.complexity = (self.state.attention + self.state.engagement) / 2.0
         self.state.instability = self.state.workload
 
         if self.state.attention > 0.7 and self.state.engagement > 0.6:
             self.state.state_name = "focused"
+            self.state.phase = "focused"
             self.state.color = "#FF0055"
         elif self.state.workload > 0.7:
             self.state.state_name = "stressed"
+            self.state.phase = "stressed"
             self.state.color = "#FF4400"
         elif self.state.attention < 0.3 and self.state.engagement < 0.3:
             self.state.state_name = "fatigued"
+            self.state.phase = "fatigued"
             self.state.color = "#4488FF"
         elif self.state.engagement > 0.5:
             self.state.state_name = "engaged"
+            self.state.phase = "engaged"
             self.state.color = "#00F0FF"
         elif self.state.attention > 0.5:
             self.state.state_name = "curious"
+            self.state.phase = "curious"
             self.state.color = "#00FF88"
         else:
-            self.state.state_name = "neutral"
+            self.state.state_name = "resting"
+            self.state.phase = "resting"
             self.state.color = "#9933FF"
 
-        # Auto narratives for manual overrides
+    def _generate_narrative(self):
+        templates = {
+            "focused": f"Enfoque profundo sintonizado. Elevando recursión a {self.state.fractal_dimension:.2f}.",
+            "stressed": f"Carga de trabajo elevada. Modulando geometría en {self.state.fractal_dimension:.2f} para andamiaje de alivio.",
+            "fatigued": f"Fatiga cerebral detectada. Reduciendo complejidad matemática para descanso cognitivo.",
+            "engaged": f"Ecosistema en sintonía. Retroalimentación espacio-temporal estabilizada.",
+            "curious": f"Sonda de curiosidad activa. Expandiendo fronteras del render fractal.",
+            "resting": f"Monitoreo normal del espacio cognitivo. Atención y flujo constantes.",
+        }
+        return templates.get(self.state.state_name, "Ecosistema estable.")
+
+    def set_manual(self, attention=None, engagement=None, load=None, valence=None, coherence=None, phase=None):
+        if attention is not None:
+            self.state.attention = max(0.05, min(0.95, attention))
+        if engagement is not None:
+            self.state.engagement = max(0.05, min(0.95, engagement))
+        if load is not None:
+            self.state.workload = max(0.05, min(0.95, load))
+        if valence is not None:
+            self.state.valence = max(0.05, min(0.95, valence))
+        if coherence is not None:
+            self.state.coherence = max(0.05, min(0.95, coherence))
+        if phase is not None:
+            self.state.phase = phase
+
+        self._derive_state()
         manual_narratives = {
             "focused": "Modo ENFOQUE manual activado. Estabilizando vector cognitivo de precisión.",
             "stressed": "Modo sobrecarga estrés forzado. Activando simulación caótica.",
             "fatigued": "Fatiga simulada activa. Bajando ritmos de procesamiento.",
             "engaged": "Ajuste manual: Interacción y sintonía en nivel óptimo.",
             "curious": "Estímulo cognitivo: Modo exploración activa.",
-            "neutral": "Restableciendo red a estado de equilibrio basal."
+            "resting": "Restableciendo red a estado de equilibrio basal.",
         }
         self.state.narrative = manual_narratives.get(self.state.state_name, "Control manual activo.")
-        
         self.state.timestamp = time.time()
         return self.state
+
+    def idle_drift(self):
+        self._idle_counter += 1
+        if self._idle_counter > 100:
+            t = math.sin(self._idle_counter * 0.01) * 0.02
+            self.state.attention = max(0.05, min(0.95, self.state.attention + t * 0.1))
+            self.state.engagement = max(0.05, min(0.95, self.state.engagement + t * 0.05))
+            self.state.workload = max(0.05, min(0.95, self.state.workload + t * 0.08))
+            self._derive_state()
 
 
 engine = FCSTNEngine()
 
 
-# Background Speech Recognition Thread
-def speech_listener_thread(engine_instance):
-    if not SPEECH_AVAILABLE:
-        log.info("SpeechRecognition library not detected on system. Headless voice server features disabled.")
-        return
-
-    log.info("Voice Input Thread: Initializing microphone...")
-    try:
-        recognizer = sr.Recognizer()
-        mic = sr.Microphone()
-        
-        log.info("Voice Input Thread: Calibrating for ambient noise...")
-        with mic as source:
-            recognizer.adjust_for_ambient_noise(source, duration=1.0)
-        log.info("Voice Input Thread: Microphone online. Listening in background for commands...")
-
-        while True:
-            try:
-                with mic as source:
-                    # listen with timeout of 3s to keep loop responsive
-                    audio = recognizer.listen(source, timeout=3.0, phrase_time_limit=8.0)
-                
-                log.info("Voice Input Thread: Audio captured, performing speech-to-text...")
-                start_time = time.time()
-                text = recognizer.recognize_google(audio, language="es-MX")
-                duration = time.time() - start_time
-                
-                log.info(f"Voice Input Thread: Heard -> '{text}' (processing in {duration:.2f}s)")
-                # Send to engine
-                engine_instance.process_input(text, duration)
-                
-            except sr.WaitTimeoutError:
-                pass
-            except sr.UnknownValueError:
-                # Audio heard but not understood
-                pass
-            except Exception as e:
-                log.warning(f"Voice Input Thread error: {e}")
-                time.sleep(1)
-    except Exception as e:
-        log.error(f"Failed to bind speech listener microphone: {e}. Ensure a microphone is connected.")
-
-
 async def broadcast_state():
-    """Periodically broadcast current state to all connected clients."""
     while True:
+        engine.idle_drift()
         if engine.clients:
             msg = json.dumps({"type": "state", "data": engine.state.to_dict()})
             closed = set()
@@ -264,34 +249,31 @@ async def broadcast_state():
                     await client.send(msg)
                 except websockets.exceptions.ConnectionClosed:
                     closed.add(client)
-                except Exception:
-                    closed.add(client)
             engine.clients -= closed
-        await asyncio.sleep(0.05)  # 20fps updates
+        await asyncio.sleep(0.05)
 
 
 async def handler(websocket):
     engine.clients.add(websocket)
     log.info(f"Client connected. Total: {len(engine.clients)}")
-
     try:
-        # Send initial state
         await websocket.send(json.dumps({"type": "state", "data": engine.state.to_dict()}))
-
         async for message in websocket:
             try:
                 data = json.loads(message)
                 msg_type = data.get("type", "")
-
                 if msg_type == "input":
-                    text = data.get("text", "")
-                    time_taken = float(data.get("time_taken", 3.0))
-                    engine.process_input(text, time_taken)
-                elif msg_type == "control":
+                    engine.process_input(data.get("text", ""), float(data.get("time_taken", 3.0)))
+                elif msg_type == "voice":
+                    engine.process_input(data.get("text", ""), 1.0)
+                elif msg_type in ("control", "set"):
                     engine.set_manual(
                         attention=data.get("attention"),
                         engagement=data.get("engagement"),
-                        workload=data.get("workload"),
+                        load=data.get("load"),
+                        valence=data.get("valence"),
+                        coherence=data.get("coherence"),
+                        phase=data.get("phase"),
                     )
                 elif msg_type == "ping":
                     await websocket.send(json.dumps({"type": "pong"}))
@@ -310,21 +292,13 @@ async def handler(websocket):
 
 async def main():
     log.info("=" * 50)
-    log.info("FCSTN Live Demo Server")
+    log.info("FCSTN Live Demo Server v2.0")
     log.info("WebSocket: ws://localhost:8765")
-    if SPEECH_AVAILABLE:
-        log.info("Voice Control: ACTIVE (SpeechRecognition enabled)")
-        # Start voice listener in background thread
-        t = threading.Thread(target=speech_listener_thread, args=(engine,), daemon=True)
-        t.start()
-    else:
-        log.info("Voice Control: INACTIVE (Run 'pip install SpeechRecognition PyAudio' to enable)")
+    log.info("Flutter App + Unity + Web Dashboard ready")
     log.info("=" * 50)
-
     async with websockets.serve(handler, "localhost", 8765):
         await broadcast_state()
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-

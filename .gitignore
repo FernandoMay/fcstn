@@ -157,6 +157,13 @@ outputs/
 *.bmp
 *.tiff
 
+# Flutter / Dart
+flutter_app/.dart_tool/
+flutter_app/.packages
+flutter_app/.pub/
+flutter_app/.flutter-plugins
+flutter_app/.flutter-plugins.dependencies
+
 # Temporary files
 *.tmp
 *.temp
