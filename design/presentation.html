@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FCSTN COMMAND | Slide Presentation</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary-glow: rgba(0, 219, 231, 0.3);
+            --secondary-glow: rgba(78, 222, 163, 0.2);
+        }
+        body {
+            background-color: #10141a;
+            color: #dfe2eb;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(16, 20, 26, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(58, 73, 75, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card:hover {
+            border-color: #00dbe7;
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .fractal-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+            pointer-events: none;
+        }
+        .slide-transition {
+            animation: slideIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .pulse-status {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#d8d7ff",
+                      "inverse-surface": "#dfe2eb",
+                      "on-surface": "#dfe2eb",
+                      "secondary-fixed-dim": "#4edea3",
+                      "surface-variant": "#31353c",
+                      "background": "#10141a",
+                      "surface-container-high": "#262a31",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-primary": "#00363a",
+                      "tertiary-fixed": "#e1e0ff",
+                      "primary-fixed": "#74f5ff",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-dim": "#10141a",
+                      "primary-container": "#00f2ff",
+                      "inverse-on-surface": "#2d3137",
+                      "surface-container": "#1c2026",
+                      "outline-variant": "#3a494b",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "on-surface-variant": "#b9cacb",
+                      "surface-tint": "#00dbe7",
+                      "inverse-primary": "#00696f",
+                      "on-primary-fixed": "#002022",
+                      "error-container": "#93000a",
+                      "secondary-container": "#00a572",
+                      "on-primary-container": "#006a71",
+                      "surface-bright": "#353940",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "on-secondary-container": "#00311f",
+                      "surface-container-highest": "#31353c",
+                      "surface-container-low": "#181c22",
+                      "on-tertiary-container": "#4a4cd7",
+                      "surface": "#10141a",
+                      "on-secondary-fixed": "#002113",
+                      "tertiary": "#f9f5ff",
+                      "on-secondary": "#003824",
+                      "surface-container-lowest": "#0a0e14",
+                      "outline": "#849495",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#004f54",
+                      "on-tertiary-fixed": "#07006c",
+                      "primary": "#e1fdff",
+                      "secondary": "#4edea3",
+                      "on-tertiary": "#1000a9",
+                      "on-error-container": "#ffdad6",
+                      "on-background": "#dfe2eb",
+                      "error": "#ffb4ab",
+                      "primary-fixed-dim": "#00dbe7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "gutter": "24px",
+                      "margin-mobile": "16px",
+                      "container-max": "1440px",
+                      "margin-desktop": "48px",
+                      "base": "4px"
+              },
+              "fontFamily": {
+                      "mono-label": ["JetBrains Mono"],
+                      "headline-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "mono-data": ["JetBrains Mono"],
+                      "headline-lg": ["Inter"]
+              },
+              "fontSize": {
+                      "mono-label": ["13px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                      "mono-data": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                      "headline-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+              }
+            },
+          },
+        }
+    </script>
+</head>
+<body class="flex flex-col h-screen w-screen overflow-hidden">
+<!-- Subtle Fractal Background -->
+<div class="fractal-bg">
+
+</div>
+<!-- Top App Bar (Shell Navigation) -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_0_15px_rgba(0,219,231,0.2)]">
+<div class="flex items-center gap-6">
+<span class="font-mono-label text-mono-label font-bold uppercase tracking-widest text-primary-fixed">FCSTN COMMAND</span>
+<div class="hidden md:flex gap-4">
+<span class="text-on-surface-variant font-mono-label">NEURAL_CORE</span>
+<span class="text-primary-fixed font-bold border-b border-primary-fixed">SYSTEM_SLIDES</span>
+<span class="text-on-surface-variant font-mono-label">ARCHIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right mr-4 hidden md:block">
+<p class="font-mono-label text-mono-label text-primary-fixed">FERNANDO MAY FUENTES</p>
+<p class="font-mono-data text-mono-data text-on-surface-variant">LEAD ARCHITECT</p>
+</div>
+<span class="material-symbols-outlined text-primary-fixed cursor-pointer hover:scale-110 transition-transform">account_tree</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:scale-110 transition-transform">terminal</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:scale-110 transition-transform">settings</span>
+</div>
+</header>
+<!-- Side Navigation Shell (Hidden on Mobile) -->
+<nav class="fixed left-0 top-16 bottom-0 z-40 flex flex-col bg-surface-container-lowest/60 backdrop-blur-md border-r border-outline-variant/20 w-16 md:w-64 transition-all duration-300">
+<div class="p-6 flex-1">
+<div class="space-y-2">
+<div class="text-on-surface-variant hover:text-secondary p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:scale-110">psychology</span>
+<span class="font-mono-label text-mono-label hidden md:block">NEURAL_CORE</span>
+</div>
+<div class="bg-secondary-container/20 text-secondary border-r-2 border-secondary p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:scale-110">hub</span>
+<span class="font-mono-label text-mono-label hidden md:block">FRACTAL_VIZ</span>
+</div>
+<div class="text-on-surface-variant hover:text-secondary p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined group-hover:scale-110">videogame_asset</span>
+<span class="font-mono-label text-mono-label hidden md:block">SIM_ENGINE</span>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-outline-variant/10">
+<button class="w-full bg-secondary-container text-on-secondary-container font-mono-label py-3 rounded-sm flex items-center justify-center gap-2 hover:bg-secondary transition-colors text-[11px]">
+<span class="material-symbols-outlined text-[16px]">sensors</span>
+<span class="hidden md:block">INITIATE NEURAL LINK</span>
+</button>
+</div>
+</nav>
+<!-- Main Canvas Area -->
+<main class="flex-1 ml-16 md:ml-64 pt-16 pb-12 px-6 md:px-margin-desktop overflow-hidden relative">
+<!-- Corner Logos -->
+<div class="absolute top-20 left-8 flex items-center gap-3 opacity-60">
+<div class="w-8 h-8 flex items-center justify-center border border-primary-fixed/40 rounded-full">
+<span class="material-symbols-outlined text-primary-fixed text-sm" style="font-variation-settings: 'FILL' 1;">deployed_code</span>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant">IPN_PROTOCOLS</span>
+</div>
+<div class="absolute top-20 right-8 flex items-center gap-3 opacity-60">
+<span class="font-mono-label text-mono-label text-on-surface-variant text-right">NEXUS_RESEARCH_DIV</span>
+<div class="w-8 h-8 flex items-center justify-center border border-secondary/40 rounded-full">
+<span class="material-symbols-outlined text-secondary text-sm" style="font-variation-settings: 'FILL' 1;">biotech</span>
+</div>
+</div>
+<!-- Slide Content Container -->
+<div class="max-w-container-max mx-auto h-full flex flex-col justify-center slide-transition">
+<!-- Slide Header -->
+<div class="mb-12 border-l-4 border-primary-fixed pl-6">
+<h2 class="font-headline-lg text-headline-lg text-primary uppercase tracking-tight">Key Architectural Pillars</h2>
+<div class="flex items-center gap-4 mt-2">
+<span class="font-mono-data text-mono-data text-on-surface-variant tracking-[0.2em]">CLASSIFICATION: HIGH_LEVEL_OVERVIEW</span>
+<div class="h-px flex-1 bg-outline-variant/20"></div>
+</div>
+</div>
+<!-- Content Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+<!-- Block 1: Fractal Generation -->
+<div class="glass-card p-6 flex flex-col group">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed text-3xl">auto_videocam</span>
+<span class="font-mono-data text-mono-data text-outline-variant">COORD: 01.A</span>
+</div>
+<h3 class="font-mono-label text-mono-label text-primary-fixed mb-3 group-hover:translate-x-1 transition-transform">FRACTAL GENERATION</h3>
+<div class="relative w-full h-32 mb-4 overflow-hidden rounded-sm border border-outline-variant/20">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/10 to-transparent"></div>
+<img class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" data-alt="A highly complex, mathematical fractal visualization reminiscent of the Mandelbrot set, rendered with deep navy and cyan glowing lines. The style is clinical, technical, and scientific, appearing as if processed on a high-end GPU workstation with visible coordinate overlays and grid lines." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvHxuFHPjiUG_z4Mjep_hJjvH9WBIl8OxTT0iv6ImXbHiZWTybT8nlMEAh3y6-Yu_KtgVcL4vwIogAbKBlMDuRiqHHn8x8y8fDn69NdrlTTC8VqiklXgKQgS88x6of4jf4it2f7f1voiFgdcYxuvfzL79C6Nt_W1zkwetMqWPjrItigNiS_4iS__Z35_iw3hWLWZ8iX1ZDrCy0Vb-A7-nc-QOHYFM2wL1OHRWMzUUbUnX-CD0Voj10QtZeTcAWv2YcVL0T_Aqtw-3T"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Real-time GPU rendering using Mandelbrot iterative sets for structural stability in variable environments.</p>
+</div>
+<!-- Block 2: Metric Geometry -->
+<div class="glass-card p-6 flex flex-col group">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary text-3xl">architecture</span>
+<span class="font-mono-data text-mono-data text-outline-variant">COORD: 02.B</span>
+</div>
+<h3 class="font-mono-label text-mono-label text-secondary mb-3 group-hover:translate-x-1 transition-transform">METRIC GEOMETRY</h3>
+<div class="relative w-full h-32 mb-4 overflow-hidden rounded-sm border border-outline-variant/20">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent"></div>
+<img class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" data-alt="Abstract geometric representation of relativistic curvature in spacetime. The image shows a mesh grid being warped by invisible forces, colored in slate and emerald green. The aesthetic is clean, sci-fi minimalism, resembling a laboratory diagnostic screen for topological research." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRXWVtbHu3PDKyGHutHwYm9XIqlGjN6PuAsy6AhTs-SGNysnFKrb6AXxwRUTkJtcuYEb1JFEIhUKWjZeVrjtR2iuTkqe4j1-Gp7UUisuo6tIVrWEhYHcvzUWEpBM9o-kebjhGXtKItKPGrvIWDA2FffF4QTVlBs0m8qTSB0zilIOdOdWj3a64-C6txolKli3d6s2qSK5g68G8_sBSPRMYBUP3U96jVlopxY9hKTIrqj7GLSdejtTDAaBX6s9ozl9z_rkkEkVXQBuEe"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Applying relativistic curvature models to optimize data flow paths across non-Euclidean network nodes.</p>
+</div>
+<!-- Block 3: NeuroDigital -->
+<div class="glass-card p-6 flex flex-col group">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed text-3xl">psychology_alt</span>
+<span class="font-mono-data text-mono-data text-outline-variant">COORD: 03.C</span>
+</div>
+<h3 class="font-mono-label text-mono-label text-primary-fixed mb-3 group-hover:translate-x-1 transition-transform">NEURODIGITAL</h3>
+<div class="relative w-full h-32 mb-4 overflow-hidden rounded-sm border border-outline-variant/20">
+<div class="absolute inset-0 bg-gradient-to-br from-primary-container/10 to-transparent"></div>
+<img class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" data-alt="Microscopic view of a neural interface chip merging with biological brain tissue. Glowing cyan synapses connect to crystalline digital paths. High contrast dark background with sharp medical-grade detail. The mood is cutting-edge BCI integration, clean and clinical." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCX1vNZkItQY9ouXEcPpn9mjRGJVKoJpLY9ftwWG6ScyXAhEZGEei2fGLQMgKjZfobWFY7Rj6_LmFV3oIqts05cdSNFECHAXMXnLOtu4hYiW_thI4z4YRPSvCpQaWsFgASiBumRt83Dn9z5alGyZ_teqsDSiArrDz18dQ0X6W-DsUcFciPZDjmMkGYIOdofYN4yEHuRgaq6bU1sK2obXEV7G3alTZmOLBjsZL39103uETmgs_yIjUgjZhMMqAV1FC75saVhLlq3VOgn"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Bi-directional Brain-Computer Interface integration utilizing sub-second latency for cognitive expansion.</p>
+</div>
+<!-- Block 4: Coalition Networking -->
+<div class="glass-card p-6 flex flex-col group">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary text-3xl">share_reviews</span>
+<span class="font-mono-data text-mono-data text-outline-variant">COORD: 04.D</span>
+</div>
+<h3 class="font-mono-label text-mono-label text-secondary mb-3 group-hover:translate-x-1 transition-transform">COALITION NETWORKING</h3>
+<div class="relative w-full h-32 mb-4 overflow-hidden rounded-sm border border-outline-variant/20">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/10 to-transparent"></div>
+<img class="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500" data-alt="A sprawling network map showing thousands of glowing green nodes connected by pulsing lines. The visualization represents D2D coordination in a decentralized digital ecosystem. The perspective is aerial and vast, with a dark, deep-space background and high-tech UI elements." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmqizQw2OEEvr8DLlpHvOukuTwhz3UgeJwFevHljMz-87jSNjbNXfw4XzvGrgm4l1Br8jcBwZyMYDBZBlF5ZjcXvPbovCkIABRBMOijpRrZfXHW7Rm_d6_EHMEiW1FIy6XMhcctYHM_uYxuhjrO5z84bccYy9NzGJjlf8R7CaEXGXOlsXb33y0xu0X8HGpNRmdt_erG3PwlQE8sUMFohTg5daqAIvvOPy2mgriT-RvGf612H9koSvI38yL5Hilj951D92yLhmYx7s7"/>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Massive-scale D2D coordination protocols enabling collective intelligence synchronization across global arrays.</p>
+</div>
+</div>
+<!-- Slide Progress & Navigation -->
+<div class="mt-16 flex items-center justify-between">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2">
+<span class="font-mono-label text-mono-label text-primary-fixed">03</span>
+<div class="w-16 h-1 bg-outline-variant/20 relative overflow-hidden">
+<div class="absolute inset-0 bg-primary-fixed w-[18.75%]"></div>
+</div>
+<span class="font-mono-label text-mono-label text-on-surface-variant">16</span>
+</div>
+<div class="flex items-center gap-4 border-l border-outline-variant/20 pl-8">
+<span class="font-mono-data text-mono-data text-on-surface-variant">STATUS: <span class="text-secondary pulse-status">ENCRYPTED_LINK_ACTIVE</span></span>
+</div>
+</div>
+<div class="flex gap-4">
+<button class="w-12 h-12 flex items-center justify-center glass-card hover:bg-surface-variant/20 active:scale-95 transition-all text-on-surface-variant hover:text-primary-fixed">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-12 h-12 flex items-center justify-center glass-card hover:bg-surface-variant/20 active:scale-95 transition-all text-on-surface-variant hover:text-primary-fixed border-l-2 border-primary-fixed">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Overlay -->
+<footer class="fixed bottom-0 w-full flex justify-between items-center px-gutter py-2 z-50 bg-background/80 border-t border-outline-variant/10">
+<div class="flex items-center gap-4">
+<span class="font-mono-data text-mono-data text-on-surface-variant">© 2024 FCSTN ARCHITECTURE | COGNITIVE_PROTOCOL_v4.2</span>
+</div>
+<div class="flex items-center gap-6">
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all underline" href="#">SYSTEM_STATUS</a>
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all underline" href="#">SECURITY_ENCLAVE</a>
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all underline" href="#">API_DOCS</a>
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+<span class="font-mono-data text-mono-data">LATENCY: 4ms</span>
+</div>
+</div>
+</footer>
+<!-- Interactive Layer -->
+<script>
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                // Mock slide transition
+                console.log('Next slide');
+            }
+            if (e.key === 'ArrowLeft') {
+                // Mock slide transition
+                console.log('Previous slide');
+            }
+        });
+
+        // Hover effect for side nav
+        const sideNav = document.querySelector('nav');
+        sideNav.addEventListener('mouseenter', () => {
+            sideNav.classList.remove('w-16');
+            sideNav.classList.add('w-64');
+        });
+        sideNav.addEventListener('mouseleave', () => {
+            sideNav.classList.remove('w-64');
+            sideNav.classList.add('w-16');
+        });
+    </script>
+</body></html>

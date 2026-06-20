@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FCSTN Scientific Poster | Fractal Cognitive Space-Time Networks</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --grid-opacity: 0.05;
+        }
+        body {
+            background-color: #10141a;
+            background-image: 
+                linear-gradient(to right, rgba(132, 148, 149, var(--grid-opacity)) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(132, 148, 149, var(--grid-opacity)) 1px, transparent 1px);
+            background-size: 40px 40px;
+            cursor: crosshair;
+        }
+        .glass-panel {
+            background: rgba(16, 20, 26, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(185, 202, 203, 0.1);
+        }
+        .glow-accent {
+            box-shadow: 0 0 15px rgba(0, 219, 231, 0.2);
+        }
+        .fractal-line {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #00dbe7, transparent);
+        }
+        @media (min-width: 1536px) {
+            .poster-container {
+                aspect-ratio: 1.414 / 1; /* A0 Landscape Ratio */
+                height: 95vh;
+                margin: 2.5vh auto;
+            }
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#d8d7ff",
+                      "inverse-surface": "#dfe2eb",
+                      "on-surface": "#dfe2eb",
+                      "secondary-fixed-dim": "#4edea3",
+                      "surface-variant": "#31353c",
+                      "background": "#10141a",
+                      "surface-container-high": "#262a31",
+                      "secondary-fixed": "#6ffbbe",
+                      "on-primary": "#00363a",
+                      "tertiary-fixed": "#e1e0ff",
+                      "primary-fixed": "#74f5ff",
+                      "on-secondary-fixed-variant": "#005236",
+                      "surface-dim": "#10141a",
+                      "primary-container": "#00f2ff",
+                      "inverse-on-surface": "#2d3137",
+                      "surface-container": "#1c2026",
+                      "outline-variant": "#3a494b",
+                      "on-tertiary-fixed-variant": "#2f2ebe",
+                      "on-surface-variant": "#b9cacb",
+                      "surface-tint": "#00dbe7",
+                      "inverse-primary": "#00696f",
+                      "on-primary-fixed": "#002022",
+                      "error-container": "#93000a",
+                      "secondary-container": "#00a572",
+                      "on-primary-container": "#006a71",
+                      "surface-bright": "#353940",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "on-secondary-container": "#00311f",
+                      "surface-container-highest": "#31353c",
+                      "surface-container-low": "#181c22",
+                      "on-tertiary-container": "#4a4cd7",
+                      "surface": "#10141a",
+                      "on-secondary-fixed": "#002113",
+                      "tertiary": "#f9f5ff",
+                      "on-secondary": "#003824",
+                      "surface-container-lowest": "#0a0e14",
+                      "outline": "#849495",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#004f54",
+                      "on-tertiary-fixed": "#07006c",
+                      "primary": "#e1fdff",
+                      "secondary": "#4edea3",
+                      "on-tertiary": "#1000a9",
+                      "on-error-container": "#ffdad6",
+                      "on-background": "#dfe2eb",
+                      "error": "#ffb4ab",
+                      "primary-fixed-dim": "#00dbe7"
+              },
+              "fontFamily": {
+                      "mono-label": ["JetBrains Mono"],
+                      "headline-md": ["Inter"],
+                      "body-md": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "mono-data": ["JetBrains Mono"]
+              },
+              "fontSize": {
+                      "mono-label": ["13px", {"lineHeight": "1.0", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                      "headline-md": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "headline-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "mono-data": ["12px", {"lineHeight": "1.4", "fontWeight": "400"}]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="text-on-surface p-6 xl:p-12 selection:bg-primary-fixed selection:text-on-primary-fixed overflow-x-hidden">
+<!-- Top Navigation Anchor (Shared Component Mapping) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_0_15px_rgba(0,219,231,0.2)]">
+<div class="font-mono-label text-mono-label font-bold uppercase tracking-widest text-primary-fixed">
+            FCSTN COMMAND
+        </div>
+<div class="hidden md:flex gap-8">
+<span class="text-primary-fixed font-bold border-b border-primary-fixed cursor-default">POSTER_VIEW</span>
+<span class="text-on-surface-variant font-mono-label hover:text-primary-fixed transition-colors duration-200 cursor-pointer">NEURAL_CORE</span>
+<span class="text-on-surface-variant font-mono-label hover:text-primary-fixed transition-colors duration-200 cursor-pointer">FRACTAL_VIZ</span>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors" data-icon="settings">settings</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:text-primary-fixed cursor-pointer transition-colors" data-icon="terminal">terminal</span>
+<div class="w-8 h-8 rounded-full border border-primary-fixed/30 flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of Fernando May Fuentes, a lead architect of neuro-digital networking systems. He is depicted in a high-tech lab environment with soft teal and deep navy lighting. The portrait captures a sense of intellectual intensity and futuristic academic authority, perfectly aligned with the Deep Space Technical aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlZo6O5cUwxjqs3dIXwDSaGUSesN7Pz9Q8rdnJ7upDj6IW8SywMIAPnfshCKKA60OnLSDEAy6h8KMvq1EbswVu4sbNmdkonZ-nSShpnODvw-3cdspaNaR0u36o5rDTOVAzklbDv0iuH6rFp3rF2nPfypCoqFmIqk5R8qW7dVnNMGN7ydSnv-mbwh4JDUMLaQSyRbfHzjrxvOfRizAr0BMDd9EKqRIXWyQEvd7WhjTebJVclJcvnrI32gcw8MQ5fTjWJY7rNMp0aE77"/>
+</div>
+</div>
+</header>
+<main class="mt-20 poster-container max-w-container-max mx-auto flex flex-col gap-8">
+<!-- HEADER SECTION -->
+<section class="glass-panel p-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-2">
+<span class="text-primary-fixed-dim font-mono-label px-2 py-1 border border-primary-fixed-dim/20 rounded">PROTOCOL_V4.2</span>
+<div class="h-px flex-1 bg-outline-variant/30"></div>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight">Fractal Cognitive Space-Time Networks</h1>
+<p class="font-headline-md text-headline-md text-on-surface-variant mt-2">Exploratory Architectures for Neuro-Digital Synchronization</p>
+</div>
+<div class="text-right flex flex-col items-end">
+<div class="font-mono-label text-headline-md text-secondary mb-1">FERNANDO MAY FUENTES</div>
+<div class="font-mono-data text-mono-data text-on-surface-variant tracking-widest">
+                    IPN | BUAA | NEXUS RESEARCH INSTITUTE
+                </div>
+<div class="mt-4 flex gap-4">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span>
+<span class="font-mono-data">NODE: ARCH_01</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="sensors">sensors</span>
+<span class="font-mono-data">LINK: ACTIVE</span>
+</div>
+</div>
+</div>
+</section>
+<!-- BENTO CONTENT GRID -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-8 flex-1">
+<!-- COLUMN 1: ABSTRACT & METHODOLOGY -->
+<div class="md:col-span-4 flex flex-col gap-8">
+<!-- Abstract -->
+<div class="glass-panel p-6 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">01_ABS</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="description">description</span>
+                        Abstract
+                    </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                        This research introduces the <span class="text-primary">Fractal Cognitive Space-Time Network (FCSTN)</span>, a novel framework for synthesizing immersive neuro-digital environments. By leveraging recursive geometry and asynchronous neural data stream synchronization (NDSS), we achieve near-zero perceptual latency in hyper-complex virtual constructs. Our methodology integrates fractal-based level-of-detail management with geodesic cognitive mapping to optimize cognitive load during high-fidelity digital interaction.
+                    </p>
+</div>
+<!-- Methodology -->
+<div class="glass-panel p-6 flex-1 relative">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">02_METH</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="schema">schema</span>
+                        Methodology: Fractal Engine
+                    </h3>
+<div class="relative w-full aspect-square border border-outline-variant/30 p-4 bg-surface-container-lowest/50">
+
+<div class="relative z-10 h-full flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div class="bg-surface/80 p-2 border border-secondary/30 rounded">
+<div class="font-mono-data text-[10px] text-secondary">RECURSION_DEPTH</div>
+<div class="font-mono-label text-lg">12.4x</div>
+</div>
+<div class="bg-surface/80 p-2 border border-primary/30 rounded">
+<div class="font-mono-data text-[10px] text-primary">SYNC_PRECISION</div>
+<div class="font-mono-label text-lg">99.98%</div>
+</div>
+</div>
+<div class="p-3 bg-surface/90 border-t border-outline-variant/50">
+<div class="text-mono-data text-[11px] mb-2 text-on-surface-variant">NDAN INTERFACE TOPOLOGY</div>
+<div class="grid grid-cols-4 gap-1">
+<div class="h-1 bg-secondary glow-accent"></div>
+<div class="h-1 bg-secondary/40"></div>
+<div class="h-1 bg-secondary glow-accent"></div>
+<div class="h-1 bg-secondary"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-6 space-y-4">
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 border border-secondary/30">
+<span class="font-mono-label text-secondary">01</span>
+</div>
+<div>
+<div class="font-mono-label text-sm text-on-surface">COGNITIVE FRACTAL GENERATION</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Procedural generation of navigable data-scapes using Mandelbrot-set derivations.</p>
+</div>
+</div>
+<div class="flex gap-4 items-start">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 border border-primary/30">
+<span class="font-mono-label text-primary">02</span>
+</div>
+<div>
+<div class="font-mono-label text-sm text-on-surface">GEODESIC PATH OPTIMIZATION</div>
+<p class="text-body-sm text-on-surface-variant mt-1">Shortest-path algorithms calculated in non-Euclidean digital manifolds.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- COLUMN 2: PERFORMANCE & ROADMAP -->
+<div class="md:col-span-5 flex flex-col gap-8">
+<!-- Results/Visualization -->
+<div class="glass-panel p-6 flex-1 relative overflow-hidden group">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">03_VIS</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="videogame_asset">videogame_asset</span>
+                        Visual Outputs: Fractal World Rendering
+                    </h3>
+<div class="grid grid-cols-2 gap-4 h-[400px]">
+<div class="relative rounded border border-outline-variant/30 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" data-alt="A cinematic, high-resolution visualization of a fractal-based digital world. The landscape is composed of infinite geometric patterns resembling crystal structures and neural pathways, glowing with soft cyan and emerald light. Deep navy shadows provide extreme contrast. Minimalist UI elements like coordinate markers and neural load graphs are subtly overlaid, creating a high-science digital visor aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3RkN8KRie6naATbxg0FhYkvlrYncvklwG6cRxy3Ic4lDWh8P7YCUgyZFDevCa6YwwPlEpBg6h9tCI_WebOAmLeNF1CplL3SvYwMpc3YRNMi1l0sTm53Ew6TTibU44iSqBwZ1eWrpVXkTQ2928Q-iM8tJhAVBnNAqyV9GcBDmCeGZS8YMTut0JNR87MTg7QFNTSNmyQhC5ASBCWTwJDqCDpvxUGembFTTqHm5fVsxME2U9T7MjtWlq1jbXFyUriVmO759DwtlWMz72"/>
+<div class="absolute bottom-0 left-0 w-full p-2 bg-background/80 backdrop-blur font-mono-data text-[10px]">LOC: 42.11 / -8.92 // FRACTAL_SCAFFOLD</div>
+</div>
+<div class="grid grid-rows-2 gap-4">
+<div class="relative rounded border border-outline-variant/30 overflow-hidden">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="Close-up of a digital geodesic path visualization. Glowing lines of data weave through a dark, abyssal space, forming a structured lattice of information. The lighting is focused on the intersections of the lines, creating bright pulses of light that suggest active data transmission. The aesthetic is clinical and technical, using a palette of slate and bright cyan." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXuBzq9wds3-MOXJFHf8qj1x-X35xDHPPbIDGclR47epNd--ICFq0DHW9HdCo39c_FkQgMaQneOmq2O31ExOOzKi2B_3lbBMv8sIP5a_ZDXa7tBXcjD3pkmg-uBOOAgZUm1Hr-Fzg4f7zwAJS2XfUsmLmoHIRScWbY2AQ1I3taHyHepCGTjM1sAB9uqk2ktyi8iL0f7Kswo6MeZ0ClIUIo5W-Tp7Usyu2ar9suSpKKFCr8hNArguX3n458XQnM5jisZmL_ZMoGdQKt"/>
+<div class="absolute top-0 right-0 m-2 px-1 bg-secondary text-on-secondary font-mono-data text-[8px]">ACTIVE_PATH</div>
+</div>
+<div class="relative rounded border border-outline-variant/30 overflow-hidden">
+
+<div class="absolute bottom-0 right-0 m-2 font-mono-data text-[10px] text-primary bg-background/60 p-1">RECURSION_REALTIME</div>
+</div>
+</div>
+</div>
+<div class="mt-4 p-4 border border-outline-variant/20 bg-surface-container-low/30 rounded">
+<div class="flex items-center justify-between mb-2">
+<span class="font-mono-data text-on-surface-variant">COGNITIVE LOAD DISTRIBUTION</span>
+<span class="font-mono-data text-primary">64.2% STABLE</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden flex">
+<div class="h-full bg-primary glow-accent" style="width: 64.2%"></div>
+<div class="h-full bg-secondary/40" style="width: 20%"></div>
+</div>
+</div>
+</div>
+<!-- Performance Table -->
+<div class="glass-panel p-6 relative">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">04_DATA</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="analytics">analytics</span>
+                        Performance Targets
+                    </h3>
+<table class="w-full font-mono-data text-sm border-collapse">
+<thead>
+<tr class="text-on-surface-variant border-b border-outline-variant/50">
+<th class="text-left py-3 font-medium">METRIC_ID</th>
+<th class="text-center py-3 font-medium">PHASE_II (BASE)</th>
+<th class="text-center py-3 font-medium text-secondary">PHASE_IV (TARGET)</th>
+<th class="text-right py-3 font-medium">DELTA</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/10">
+<tr>
+<td class="py-4 text-on-surface">FRAME_RATE (FPS)</td>
+<td class="text-center py-4">90.0</td>
+<td class="text-center py-4 text-secondary">240.0+</td>
+<td class="text-right py-4 text-secondary">+166%</td>
+</tr>
+<tr>
+<td class="py-4 text-on-surface">SYNAPTIC_LATENCY</td>
+<td class="text-center py-4">12.4ms</td>
+<td class="text-center py-4 text-secondary">1.2ms</td>
+<td class="text-right py-4 text-secondary">-90%</td>
+</tr>
+<tr>
+<td class="py-4 text-on-surface">IMMERSION_SCORE</td>
+<td class="text-center py-4">0.74</td>
+<td class="text-center py-4 text-secondary">0.99</td>
+<td class="text-right py-4 text-secondary">+34%</td>
+</tr>
+<tr>
+<td class="py-4 text-on-surface">CONCURRENCY_NODES</td>
+<td class="text-center py-4">1,024</td>
+<td class="text-center py-4 text-secondary">65,536</td>
+<td class="text-right py-4 text-secondary">+6400%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- COLUMN 3: ROADMAP & CITATIONS -->
+<div class="md:col-span-3 flex flex-col gap-8">
+<!-- Roadmap -->
+<div class="glass-panel p-6 flex-1 relative">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">05_TIME</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="timeline">timeline</span>
+                        Development Roadmap
+                    </h3>
+<div class="space-y-8 relative before:content-[''] before:absolute before:left-[11px] before:top-0 before:bottom-0 before:w-px before:bg-outline-variant/30">
+<div class="relative pl-8">
+<div class="absolute left-0 top-1.5 w-6 h-6 bg-surface border-2 border-secondary rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-[12px] text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="font-mono-label text-xs text-secondary">PHASE_I: FOUNDATION</div>
+<div class="text-sm text-on-surface mt-1">Fractal kernel optimization and math verification.</div>
+<div class="text-[10px] text-outline mt-1 italic">COMPLETED Q3 2023</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1.5 w-6 h-6 bg-secondary border-2 border-secondary rounded-full flex items-center justify-center glow-accent">
+<span class="material-symbols-outlined text-[12px] text-on-secondary" style="font-variation-settings: 'FILL' 1;">sync</span>
+</div>
+<div class="font-mono-label text-xs text-primary">PHASE_II: INTEGRATION</div>
+<div class="text-sm text-on-surface mt-1">Neural interface link established. Multi-node sync.</div>
+<div class="text-[10px] text-primary mt-1 italic uppercase animate-pulse">ACTIVE_SPRINT</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1.5 w-6 h-6 bg-surface border-2 border-outline-variant rounded-full flex items-center justify-center"></div>
+<div class="font-mono-label text-xs text-on-surface-variant">PHASE_III: EXPANSION</div>
+<div class="text-sm text-on-surface-variant mt-1">High-density data visualization and AI agents.</div>
+</div>
+<div class="relative pl-8">
+<div class="absolute left-0 top-1.5 w-6 h-6 bg-surface border-2 border-outline-variant rounded-full flex items-center justify-center"></div>
+<div class="font-mono-label text-xs text-on-surface-variant">PHASE_IV: SINGULARITY</div>
+<div class="text-sm text-on-surface-variant mt-1">Full perceptual immersion protocol.</div>
+</div>
+</div>
+</div>
+<!-- Citations -->
+<div class="glass-panel p-6 relative">
+<div class="absolute top-0 right-0 p-2 font-mono-data text-outline opacity-50">06_REF</div>
+<h3 class="font-mono-label text-primary-fixed uppercase mb-4 text-xs">Selected References</h3>
+<div class="space-y-4 font-mono-data text-[11px] text-on-surface-variant">
+<p>[1] Fuentes, F. M. (2023). "Recursive Geometries in Virtual Manifolds." <i>Journal of Neuro-Digital Architecture</i>, 14(2), 112-145.</p>
+<p>[2] Chen, L. et al. (2022). "Asynchronous Neural Sync Protocols for High-Fidelity VR." <i>IEEE Transactions on Systems</i>, 8(4).</p>
+<p>[3] Nexus Institute. (2024). "FCSTN Core Protocol Technical Specification v4.2."</p>
+</div>
+<div class="mt-6 flex justify-center">
+<div class="p-2 border border-outline-variant/30 bg-white inline-block">
+<img class="w-16 h-16" data-alt="A clean, high-contrast QR code generated in a minimalist technical style. It is rendered in sharp black on a crisp white background with a thin slate border, designed to link to the digital version of the research paper. The surrounding UI maintains the Deep Space Technical theme with small monospace coordinate labels." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCG09Da-fKlJjQBoNVi2lZmhg-8AcDfy4HCUFxyyFMFxn2ka0tFRpP44tWbHEU4u43_IUn2TzsBn1WS0hlP4dBlm78j5_qeJlBEjb5RHujfZAv6DIPYN2V5QMAVbyzpFilOcXkm7dXSS7nW2ax9GNgbqqBBVCrhlDYM9n2OfFRmtjmkNYFWootAgUX7u30c8_Ms8iwZOh8QutHGeBnAfBmiYqsOUe2JHslaB7R1pIM2EM0u2pZBq7ZHae9MkASXB7UzxJpUhKp44UW-"/>
+</div>
+</div>
+<div class="text-center font-mono-data text-[10px] mt-2 text-outline">SCAN FOR FULL PAPER</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FOOTER (Shared Component Mapping) -->
+<footer class="fixed bottom-0 left-0 w-full flex justify-between items-center px-gutter py-2 z-50 bg-background/80 border-t border-outline-variant/10">
+<div class="font-mono-label text-mono-label text-on-surface-variant">
+            © 2024 FCSTN ARCHITECTURE | COGNITIVE_PROTOCOL_v4.2
+        </div>
+<div class="flex gap-6">
+<a class="text-on-surface-variant font-mono-data text-mono-data hover:text-primary transition-all underline" href="#">SYSTEM_STATUS</a>
+<a class="text-on-surface-variant font-mono-data text-mono-data hover:text-primary transition-all underline" href="#">SECURITY_ENCLAVE</a>
+<a class="text-on-surface-variant font-mono-data text-mono-data hover:text-primary transition-all underline" href="#">API_DOCS</a>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="sensors">sensors</span>
+<span class="font-mono-data text-mono-data text-secondary">NETWORK_UP</span>
+<span class="mx-2 text-outline opacity-30">|</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" data-icon="speed">speed</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">LATENCY: 4ms</span>
+</div>
+</footer>
+<script>
+        // Micro-interaction for holographic interaction feel
+        document.querySelectorAll('.glass-panel').forEach(panel => {
+            panel.addEventListener('mousemove', e => {
+                const rect = panel.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                panel.style.setProperty('--mouse-x', `${x}px`);
+                panel.style.setProperty('--mouse-y', `${y}px`);
+            });
+        });
+    </script>
+</body></html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FCSTN COMMAND CENTER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+        @keyframes pulse-cyan {
+            0%, 100% { opacity: 0.8; box-shadow: 0 0 5px rgba(0, 219, 231, 0.4); }
+            50% { opacity: 1; box-shadow: 0 0 15px rgba(0, 219, 231, 0.8); }
+        }
+        @keyframes glitch-slide {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        .glass-panel {
+            background: rgba(16, 20, 26, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(58, 73, 75, 0.3);
+        }
+        .data-grid-bg {
+            background-image: radial-gradient(circle, rgba(0, 219, 231, 0.1) 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #3a494b; border-radius: 10px; }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "tertiary-container": "#d8d7ff",
+                        "inverse-surface": "#dfe2eb",
+                        "on-surface": "#dfe2eb",
+                        "secondary-fixed-dim": "#4edea3",
+                        "surface-variant": "#31353c",
+                        "background": "#10141a",
+                        "surface-container-high": "#262a31",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-primary": "#00363a",
+                        "tertiary-fixed": "#e1e0ff",
+                        "primary-fixed": "#74f5ff",
+                        "on-secondary-fixed-variant": "#005236",
+                        "surface-dim": "#10141a",
+                        "primary-container": "#00f2ff",
+                        "inverse-on-surface": "#2d3137",
+                        "surface-container": "#1c2026",
+                        "outline-variant": "#3a494b",
+                        "on-tertiary-fixed-variant": "#2f2ebe",
+                        "on-surface-variant": "#b9cacb",
+                        "surface-tint": "#00dbe7",
+                        "inverse-primary": "#00696f",
+                        "on-primary-fixed": "#002022",
+                        "error-container": "#93000a",
+                        "secondary-container": "#00a572",
+                        "on-primary-container": "#006a71",
+                        "surface-bright": "#353940",
+                        "tertiary-fixed-dim": "#c0c1ff",
+                        "on-secondary-container": "#00311f",
+                        "surface-container-highest": "#31353c",
+                        "surface-container-low": "#181c22",
+                        "on-tertiary-container": "#4a4cd7",
+                        "surface": "#10141a",
+                        "on-secondary-fixed": "#002113",
+                        "tertiary": "#f9f5ff",
+                        "on-secondary": "#003824",
+                        "surface-container-lowest": "#0a0e14",
+                        "outline": "#849495",
+                        "on-error": "#690005",
+                        "on-primary-fixed-variant": "#004f54",
+                        "on-tertiary-fixed": "#07006c",
+                        "primary": "#e1fdff",
+                        "secondary": "#4edea3",
+                        "on-tertiary": "#1000a9",
+                        "on-error-container": "#ffdad6",
+                        "on-background": "#dfe2eb",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#00dbe7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "fontFamily": {
+                        "mono-label": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "mono-data": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container/30 overflow-hidden">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-gutter h-16 bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_0_15px_rgba(0,219,231,0.2)]">
+<div class="flex items-center gap-6">
+<div class="font-mono-label text-mono-label font-bold uppercase tracking-widest text-primary-fixed">FCSTN COMMAND</div>
+<nav class="hidden md:flex gap-4">
+<a class="text-primary-fixed font-bold border-b border-primary-fixed font-mono-label text-mono-label px-2" href="#">DASHBOARD</a>
+<a class="text-on-surface-variant font-mono-label text-mono-label hover:text-primary-fixed transition-colors duration-200 px-2" href="#">ANALYTICS</a>
+<a class="text-on-surface-variant font-mono-label text-mono-label hover:text-primary-fixed transition-colors duration-200 px-2" href="#">NETWORK</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative group">
+<div class="absolute inset-0 bg-primary-fixed-dim/20 blur-md rounded-full opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<span class="material-symbols-outlined text-primary p-2 cursor-pointer relative">settings</span>
+</div>
+<span class="material-symbols-outlined text-primary p-2 cursor-pointer">terminal</span>
+<div class="flex items-center gap-3 border-l border-outline-variant/30 pl-4">
+<div class="text-right">
+<div class="font-mono-label text-[10px] text-on-surface-variant leading-none">ARCHITECT</div>
+<div class="font-mono-label text-mono-label text-primary-fixed">F.M. FUENTES</div>
+</div>
+<div class="w-8 h-8 rounded-full border border-primary-fixed-dim/50 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="A professional high-contrast portrait of a male lead architect in a dark tech-wear aesthetic. The lighting is cold and clinical with cyan highlights on the face, set against a backdrop of glowing digital architecture nodes. Professional, authoritative, and academic mood for a neuro-digital networking interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpikRKvDomMrQS7tRMCFxRigWBeN0rxHIBF8rFHV2WBmXoWPr-Uf54pVZJcrdWj15Zr3u00LKppXxmy_JQ3ZfBcO_hRTevRtOgN1hZDsjGfjyZGpC2tlBngH9F91dvtTomrOfty8HuR_08zxMCN4t03CmvnZZNCZdYQz71aQsZanTB0hzh0V29jejZz1amprSYPzn1wvC__T9lZp3fZe9QIKot1z4X8ojqQALG6ElAjvwbK65ltxI359Y1b4YF96UWUzuVog02kZ6t"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Layout Container -->
+<main class="flex h-screen pt-16 pb-10">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-16 bottom-10 z-40 flex flex-col w-64 bg-surface-container-lowest/60 backdrop-blur-md border-r border-outline-variant/20">
+<div class="p-6 border-b border-outline-variant/10">
+<div class="flex items-center gap-3 mb-1">
+<span class="material-symbols-outlined text-secondary text-[20px]">psychology</span>
+<span class="font-mono-label text-mono-label text-primary tracking-tighter">NEURAL_CORE</span>
+</div>
+<div class="text-[10px] font-mono-data text-on-surface-variant/60 uppercase">System Integrity: Nominal</div>
+</div>
+<nav class="flex-1 py-4">
+<div class="bg-secondary-container/20 text-secondary border-r-2 border-secondary p-4 flex items-center gap-3 transition-transform duration-150 translate-x-1 cursor-pointer">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-mono-label text-mono-label">NEURAL_CORE</span>
+</div>
+<div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">hub</span>
+<span class="font-mono-label text-mono-label">FRACTAL_VIZ</span>
+</div>
+<div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">videogame_asset</span>
+<span class="font-mono-label text-mono-label">SIM_ENGINE</span>
+</div>
+<div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-mono-label text-mono-label">ARCHIVE</span>
+</div>
+<div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer group">
+<span class="material-symbols-outlined">terminal</span>
+<span class="font-mono-label text-mono-label">SYSTEM_LOG</span>
+</div>
+</nav>
+<div class="p-4 mt-auto">
+<button class="w-full py-3 bg-transparent border border-secondary text-secondary font-mono-label text-[11px] uppercase tracking-widest hover:bg-secondary/10 active:scale-95 transition-all">
+                    INITIATE NEURAL LINK
+                </button>
+<div class="mt-4 flex flex-col gap-2 opacity-60">
+<div class="flex items-center gap-2 font-mono-data text-mono-data">
+<span class="material-symbols-outlined text-[14px]">sensors</span>
+<span>NETWORK_UP</span>
+</div>
+<div class="flex items-center gap-2 font-mono-data text-mono-data">
+<span class="material-symbols-outlined text-[14px]">speed</span>
+<span>LATENCY: 4ms</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<div class="flex-1 ml-64 flex flex-col lg:flex-row p-6 gap-6 relative">
+<!-- Central Viewport -->
+<section class="flex-[2] relative rounded-lg overflow-hidden glass-panel group">
+<div class="absolute top-4 left-4 z-20 flex items-center gap-3">
+<div class="bg-primary-container text-on-primary-container px-3 py-1 font-mono-label text-[10px] rounded-full flex items-center gap-2">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-on-primary-container opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-on-primary-container"></span>
+</span>
+                        LIVE_VIZ: METRIC_TENSOR_CURVATURE
+                    </div>
+<div class="glass-panel border-none px-3 py-1 font-mono-data text-[10px] text-primary">COORD: 42.109 / -19.443 / 88.001</div>
+</div>
+<div class="absolute inset-0 z-0">
+
+</div>
+<div class="absolute bottom-4 left-4 z-20 flex flex-col gap-1">
+<div class="font-mono-label text-[12px] text-primary-fixed/80">RECURSION_DEPTH: 2048</div>
+<div class="w-48 h-1 bg-outline-variant/30 rounded-full overflow-hidden">
+<div class="h-full bg-primary shadow-[0_0_8px_#00dbe7] w-[75%] transition-all duration-1000"></div>
+</div>
+</div>
+<div class="absolute top-1/2 right-4 -translate-y-1/2 z-20 flex flex-col gap-4">
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-colors"><span class="material-symbols-outlined text-primary">add</span></button>
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-colors"><span class="material-symbols-outlined text-primary">remove</span></button>
+<button class="w-10 h-10 glass-panel flex items-center justify-center hover:bg-primary/20 transition-colors"><span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1">videocam</span></button>
+</div>
+</section>
+<!-- Right Sidebar Panel Cluster -->
+<section class="flex-1 flex flex-col gap-6 overflow-y-auto pr-2">
+<!-- Neural Core Panel -->
+<div class="glass-panel p-4 rounded-lg flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h3 class="font-mono-label text-mono-label text-primary uppercase">Neural Core Status</h3>
+<span class="text-[10px] font-mono-data text-on-surface-variant">Real-time fNIRS/EEG Telemetry</span>
+</div>
+<span class="text-[10px] font-mono-data text-secondary">T+144:22:04</span>
+</div>
+<div class="h-24 relative overflow-hidden bg-surface-container-low/50 rounded border border-outline-variant/20">
+<!-- Waveform Placeholder -->
+<div class="absolute inset-0 opacity-40">
+
+</div>
+<div class="absolute inset-0 pointer-events-none data-grid-bg opacity-30"></div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="p-2 border border-outline-variant/10 bg-surface-container/30">
+<div class="text-[10px] font-mono-data text-on-surface-variant">COGNITIVE_STATE</div>
+<div class="font-mono-label text-secondary flex items-center gap-2">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                                FOCUSED
+                            </div>
+</div>
+<div class="p-2 border border-outline-variant/10 bg-surface-container/30">
+<div class="text-[10px] font-mono-data text-on-surface-variant">LINK_LATENCY</div>
+<div class="font-mono-label text-primary-fixed">&lt;100ms</div>
+</div>
+</div>
+</div>
+<!-- Metric Geometry Panel -->
+<div class="glass-panel p-4 rounded-lg flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h3 class="font-mono-label text-mono-label text-primary uppercase">Metric Geometry</h3>
+<span class="text-[10px] font-mono-data text-on-surface-variant">Topology Evolution Metrics</span>
+</div>
+<span class="material-symbols-outlined text-primary text-[18px]">account_tree</span>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between items-center text-[11px] font-mono-data">
+<span class="text-on-surface-variant">CURVATURE_TENSOR</span>
+<span class="text-primary">Rμν = 0.884</span>
+</div>
+<div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-primary-fixed-dim w-[88%] shadow-[0_0_10px_rgba(0,219,231,0.5)]"></div>
+</div>
+<div class="flex justify-between items-center text-[11px] font-mono-data">
+<span class="text-on-surface-variant">GEODESIC_PATH</span>
+<span class="text-secondary">CONVERGING</span>
+</div>
+<div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[94%] shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+</div>
+</div>
+<div class="mt-2 h-32 glass-panel border-dashed border-outline-variant/30 flex items-center justify-center relative overflow-hidden">
+
+<span class="relative z-10 font-mono-data text-[10px] text-primary/40 uppercase tracking-widest">TOPOLOGY_STREAM</span>
+</div>
+</div>
+<!-- Coalition Network Panel -->
+<div class="glass-panel p-4 rounded-lg flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex flex-col">
+<h3 class="font-mono-label text-mono-label text-primary uppercase">Coalition Network</h3>
+<span class="text-[10px] font-mono-data text-on-surface-variant">D2D Node Coordination</span>
+</div>
+<div class="flex gap-1">
+<span class="w-1.5 h-1.5 bg-secondary rounded-full"></span>
+<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+</div>
+</div>
+<div class="relative w-full aspect-square glass-panel border-outline-variant/10 rounded overflow-hidden">
+<div class="absolute inset-0 bg-cover bg-center opacity-60" data-alt="A detailed digital radar-style map visualization showing a network of interconnected glowing nodes over a dark blue minimalist grid. Thin lines connect moving points, simulating agent merges and D2D coordination. Minimalist sci-fi aesthetic with cyan and emerald accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDZvTLltMVUnytAJjlmkjg0ev505ySzLtexUQGQv0GHNVl-qVPRlu69YOBNHzcl9WfyXZiP3aaKkB8LnrZOp1fEQhKAnW2zZPE7fTdLJD4kCsMdOaLahZpUp-eGCnZ19W6rFKZrWaI_kfKmwjsnFgJOVXjkYcj9j3p5VH8KZf7r7VEilK6Z_gFyn6TDDldT0uIoBM1wpUWQl5rhgkqdEZ2raaT24pMDwRVg-3MAgthpz6zYVNXA1KaiaxSpx2nh87izm1ZF79LdYC1j')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="absolute bottom-2 left-2 text-[9px] font-mono-data text-secondary flex flex-col">
+<span>NODES: 1,402</span>
+<span>MERGES: 12/min</span>
+</div>
+<!-- Radar Sweep Animation Overlay (Pure CSS) -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] bg-gradient-conic from-primary/10 to-transparent animate-[spin_4s_linear_infinite] pointer-events-none"></div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer / Global Metrics -->
+<footer class="fixed bottom-0 w-full flex justify-between items-center px-gutter py-2 z-50 bg-background/80 border-t border-outline-variant/10 backdrop-blur-md">
+<div class="flex items-center gap-6 overflow-hidden">
+<div class="flex items-center gap-3 border-r border-outline-variant/20 pr-6 shrink-0">
+<span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">Pytest: <span class="text-secondary">22/22 passed</span></span>
+</div>
+<div class="flex items-center gap-3 border-r border-outline-variant/20 pr-6 shrink-0">
+<span class="material-symbols-outlined text-[16px] text-primary">analytics</span>
+<span class="font-mono-data text-mono-data text-on-surface-variant">Metric Tensor: <span class="text-primary">Convergence reached</span></span>
+</div>
+<div class="flex items-center gap-3 shrink-0">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+</span>
+<span class="font-mono-data text-mono-data text-secondary">ESCOM Summer School 2026: ACTIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all" href="#">SYSTEM_STATUS</a>
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all" href="#">SECURITY_ENCLAVE</a>
+<a class="font-mono-data text-mono-data text-on-surface-variant hover:text-primary transition-all" href="#">API_DOCS</a>
+</div>
+<div class="font-mono-label text-[10px] text-on-surface-variant/40 tracking-tighter">
+                © 2024 FCSTN ARCHITECTURE | COGNITIVE_PROTOCOL_v4.2
+            </div>
+</div>
+</footer>
+<!-- HUD Overlay for Glitch Effects & Atmosphere -->
+<div class="fixed inset-0 pointer-events-none z-[100] border-[20px] border-transparent opacity-10">
+<div class="absolute inset-0 overflow-hidden">
+<div class="w-full h-1 bg-primary/20 animate-[scanline_8s_linear_infinite]"></div>
+</div>
+</div>
+<script>
+        // Micro-interaction for HUD scaling
+        document.querySelectorAll('button, .glass-panel').forEach(el => {
+            el.addEventListener('mousedown', () => {
+                el.style.transform = 'scale(0.98)';
+                el.style.transition = 'transform 0.1s ease';
+            });
+            el.addEventListener('mouseup', () => {
+                el.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simulating data updates
+        setInterval(() => {
+            const lat = Math.floor(Math.random() * 20) + 80;
+            const latElement = document.querySelector('.text-primary-fixed');
+            if (latElement && latElement.innerText.includes('ms')) {
+                latElement.innerText = `<${lat}ms`;
+            }
+        }, 3000);
+    </script>
+</body></html>
