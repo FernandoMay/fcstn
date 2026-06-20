@@ -150,3 +150,101 @@ input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
 }
 .log-entry { margin-bottom: 5px; }
 .log-time { color: var(--primary); margin-right: 8px; }
+
+/* VOICE & NARRATIVE CARDS */
+.voice-controls-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.btn-mic-pulse {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--primary);
+    background: rgba(0, 240, 255, 0.1);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+    position: relative;
+    outline: none;
+}
+
+.btn-mic-pulse:hover {
+    background: rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.btn-mic-pulse.listening {
+    border-color: var(--accent);
+    background: rgba(255, 0, 85, 0.2);
+    box-shadow: 0 0 30px rgba(255, 0, 85, 0.8);
+    animation: mic-glow-pulse 1.5s infinite;
+}
+
+.mic-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+}
+
+.voice-status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+.voice-status.active {
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(255, 0, 85, 0.4);
+}
+
+.narrative-output {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--text-main);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-left: 3px solid var(--primary);
+    border-radius: 4px;
+    margin-bottom: 15px;
+    min-height: 60px;
+    font-style: italic;
+}
+
+.prompt-output-box {
+    background: rgba(0, 0, 0, 0.5);
+    padding: 12px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    border: 1px solid var(--border);
+}
+
+.prompt-output-box strong {
+    color: var(--warn);
+    display: block;
+    margin-bottom: 5px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+#prompt-output {
+    color: var(--text-dim);
+    line-height: 1.4;
+    word-break: break-all;
+}
+
+@keyframes mic-glow-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0.8); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 0, 85, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 0, 85, 0); }
+}

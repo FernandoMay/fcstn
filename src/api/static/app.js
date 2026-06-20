@@ -29,7 +29,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Coalition
         netContainer: document.getElementById('network-container'),
         btnAdd: document.getElementById('btn-add-agent'),
-        btnRem: document.getElementById('btn-rem-agent')
+        btnRem: document.getElementById('btn-rem-agent'),
+        // Voice & Narrative
+        btnMic: document.getElementById('btn-mic'),
+        lblVoice: document.getElementById('voice-status'),
+        lblNarrative: document.getElementById('narrative-output'),
+        lblPrompt: document.getElementById('prompt-output')
     };
 
     let ws = null;
@@ -98,6 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Overlay Stats
         els.lblIter.innerText = data.iterations;
+
+        // Dynamic Narrative & Image Prompts
+        if (data.narrative) {
+            els.lblNarrative.innerText = data.narrative;
+        }
+        if (data.image_prompt) {
+            els.lblPrompt.innerText = data.image_prompt;
+        }
 
         // If not in manual override, keep sliders synced to simulate feedback
         if (!els.chkOverride.checked) {
@@ -201,6 +214,84 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     els.btnRem.addEventListener('click', () => {
         ws.send(JSON.stringify({ action: "remove_agent" }));
+    });
+
+    // --- BROWSER VOICE RECOGNITION ---
+    let recognition = null;
+    let isListening = false;
+    let speechStartTime = 0;
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = 'es-MX'; // Native Spanish support for ESCOM
+
+        recognition.onstart = () => {
+            isListening = true;
+            speechStartTime = Date.now();
+            els.btnMic.classList.add('listening');
+            els.lblVoice.innerText = "Listening to voice waves... Speak now!";
+            els.lblVoice.classList.add('active');
+            addLog("Speech recognition session started");
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            const elapsedSeconds = (Date.now() - speechStartTime) / 1000.0;
+            els.lblVoice.innerText = `Heard: "${transcript}"`;
+            addLog(`Speech captured: "${transcript}" in ${elapsedSeconds.toFixed(1)}s`);
+            
+            // Send voice input command to backend
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({
+                    action: "voice_input",
+                    text: transcript,
+                    time_taken: elapsedSeconds
+                }));
+                // Auto toggle manual override to show feedback
+                if (!els.chkOverride.checked) {
+                    els.chkOverride.checked = true;
+                    // Trigger visual change for manual override box
+                    els.slidersBox.style.opacity = 1;
+                    els.slidersBox.style.pointerEvents = 'auto';
+                }
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error(event.error);
+            els.lblVoice.innerText = `Voice Error: ${event.error}`;
+            addLog(`Speech recognition error: ${event.error}`);
+            resetMicState();
+        };
+
+        recognition.onend = () => {
+            resetMicState();
+        };
+    } else {
+        els.lblVoice.innerText = "Web Speech API is not supported in this browser.";
+        els.btnMic.disabled = true;
+        els.btnMic.style.opacity = 0.5;
+    }
+
+    function resetMicState() {
+        isListening = false;
+        els.btnMic.classList.remove('listening');
+        els.lblVoice.classList.remove('active');
+        if (els.lblVoice.innerText.startsWith("Listening")) {
+            els.lblVoice.innerText = "Click mic to start voice tracking...";
+        }
+    }
+
+    els.btnMic.addEventListener('click', () => {
+        if (!recognition) return;
+        if (isListening) {
+            recognition.stop();
+        } else {
+            recognition.start();
+        }
     });
 
     // Loop
