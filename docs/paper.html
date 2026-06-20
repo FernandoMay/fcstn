@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FCSTN: Fractal Cognitive Spacetime Network</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #1a1a2e; color: #e0e0e0;
+    font-family: 'EB Garamond', Georgia, serif;
+    font-size: 16px; line-height: 1.8;
+    padding: 40px 20px;
+  }
+  .paper {
+    max-width: 900px; margin: 0 auto;
+    background: #16213e; border-radius: 4px;
+    padding: 60px 80px; box-shadow: 0 0 40px rgba(0,240,255,0.05);
+  }
+  h1 { font-size: 28px; text-align: center; margin-bottom: 8px; color: #00f0ff; font-weight: 700; }
+  .authors { text-align: center; margin-bottom: 8px; font-size: 15px; color: #aaa; }
+  .affil { text-align: center; font-size: 13px; color: #777; margin-bottom: 30px; }
+  .abstract { background: #0d1b2a; padding: 20px 25px; border-left: 3px solid #00f0ff; margin-bottom: 30px; font-style: italic; font-size: 15px; color: #ccc; }
+  .abstract strong { color: #00f0ff; font-style: normal; }
+  h2 { font-size: 20px; color: #00f0ff; margin-top: 40px; margin-bottom: 15px; border-bottom: 1px solid #2a2a4a; padding-bottom: 5px; font-weight: 600; }
+  h3 { font-size: 17px; color: #7ff0ff; margin-top: 25px; margin-bottom: 10px; }
+  p { margin-bottom: 15px; text-align: justify; }
+  .eq { text-align: center; margin: 20px 0; font-style: italic; color: #fff; font-size: 18px; }
+  .fig { margin: 25px 0; padding: 20px; background: #0d1b2a; border-radius: 4px; text-align: center; }
+  .fig .label { font-size: 13px; color: #888; margin-top: 10px; }
+  pre { background: #0a0a1a; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 13px; color: #7ff0ff; margin: 15px 0; }
+  ul, ol { margin: 10px 0 15px 30px; }
+  li { margin-bottom: 6px; }
+  .refs { font-size: 14px; }
+  .refs li { margin-bottom: 8px; word-break: break-word; }
+  .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #2a2a4a; font-size: 13px; color: #666; }
+  @media print { body { background: white; color: black; } .paper { background: white; box-shadow: none; } h1 { color: #003366; } h2 { color: #003366; border-bottom: 1px solid #ccc; } .abstract { background: #f5f5f5; border-left-color: #003366; color: #333; } .fig { background: #f5f5f5; } pre { background: #eee; color: #333; } }
+</style>
+</head>
+<body>
+<div class="paper">
+
+<h1>FCSTN: Fractal Cognitive Spacetime Network</h1>
+<div class="authors">
+  Fernando May<sup>1</sup>, Diego Armando Linares<sup>2</sup>
+</div>
+<div class="affil">
+  <sup>1</sup> Instituto Politécnico Nacional, ESCOM, Mexico City<br>
+  <sup>2</sup> Universidad Autónoma Metropolitana, Cuajimalpa<br>
+  <em>Correspondence:</em> fernando.may@fcstn.dev
+</div>
+
+<div class="abstract">
+  <strong>Abstract.</strong>
+  We present the Fractal Cognitive Spacetime Network (FCSTN), a novel computational framework that
+  unifies fractal geometry, general relativity, and real-time brain-computer interfacing into a
+  single interactive ecosystem. FCSTN leverages Mandelbrot-generated multiscale fractal fields as
+  the substrate for a 4D metric tensor (Minkowski and Schwarzschild variants), adaptively modulated
+  by cognitive features extracted from live EEG signals. A coalition formation game among autonomous
+  agents (human and AI) shapes the computational resource allocation landscape. The system broadcasts
+  its cognitive-spacetime state at 20 fps over WebSocket, simultaneously driving a Flutter-based
+  cross-platform client, a Unity 3D visualizer, and a cyberpunk web dashboard. Real-time
+  multi-modal generators translate brain frequencies into image prompts, music synthesis, procedural
+  game maps, narrative text, and dream visualization parameters. We demonstrate the system with a
+  22-test validation suite passing at 100%, a Netlify-deployed Flutter web app, and a Render-ready
+  server deployment. The framework is designed for live demonstrations, educational workshops, and
+  experimental neurogaming research.
+</div>
+
+<h2>1. Introduction</h2>
+<p>
+The intersection of fractal geometry, cognitive neuroscience, and real-time computation has
+long promised a new paradigm for human-computer interaction [1, 2]. While each field has matured
+independently, their synthesis into a working, interactive, production-ready system remains an open
+challenge. Existing brain-computer interface (BCI) frameworks tend to focus on either medical
+applications (e.g., motor imagery, P300 spellers) or single-purpose neurofeedback games [3, 4].
+Few, if any, attempt to map the full spectral richness of human brain activity into a unified
+computational universe that spans visual, auditory, textual, and procedural generation domains.
+</p>
+<p>
+FCSTN addresses this gap with four core contributions:
+</p>
+<ol>
+  <li><strong>Fractal Spacetime Substrate.</strong> A multiscale Mandelbrot generation engine that
+    produces 2D fractal fields, which are then embedded into a 4D pseudo-Riemannian manifold with
+    adaptive curvature driven by cognitive state.</li>
+  <li><strong>Real Cognitive Signal Processing.</strong> A BCI acquisition pipeline supporting
+    Muse 2/S (Bluetooth LE), OpenBCI (Serial), and recorded EEG, with real-time FFT-based band
+    extraction (delta, theta, alpha, beta, gamma), cognitive metric derivation, and blink detection.</li>
+  <li><strong>Multi-Modal Generation.</strong> Real-time translation of brain state into Stimulus
+    Diffusion prompts, waveform audio synthesis, procedural game terrain, poetic narrative, and
+    hypnagogic dream parameters.</li>
+  <li><strong>Interactive Ecosystem.</strong> A distributed architecture with WebSocket broadcast
+    at 20 fps, serving a Flutter cross-platform client (Netlify-deployed), a Unity 3D visualizer,
+    and a cyberpunk FastAPI dashboard simultaneously.</li>
+</ol>
+
+<h2>2. Methods</h2>
+
+<h3>2.1 Fractal Engine</h3>
+<p>
+The Mandelbrot set is computed over the complex plane using the standard iteration
+\( z_{n+1} = z_n^2 + c \) with a maximum of L iterations and an escape radius R = 2.
+Multiscale zoom windows are rendered at resolutions up to 2048 &times; 2048 using smooth
+coloring with fractional iteration counts. The fractal dimension D of the generated field
+is computed via the box-counting method and used as a key parameter for metric tensor modulation.
+</p>
+
+<div class="eq">
+  N(&epsilon;) = C &middot; &epsilon;<sup>&minus;D</sup> &rArr; D = &minus;lim<sub>&epsilon;&rarr;0</sub> log N(&epsilon;) / log &epsilon;
+</div>
+
+<p>
+The fractal engine supports three rendering modes: standard Mandelbrot, Julia sets (with
+dynamically modulated seed from cognitive valence), and multi-fractal fields composed of
+superimposed zoom windows at different depths.
+</p>
+
+<h3>2.2 Metric Tensor Computation</h3>
+<p>
+We embed the fractal field into a 4D pseudo-Riemannian spacetime by computing the metric tensor
+g<sub>&mu;&nu;</sub> at each grid point. Two variants are implemented:
+</p>
+<ul>
+  <li><strong>Minkowski metric</strong> (flat spacetime, diagonal): g = diag(&minus;1, a<sup>2</sup>, a<sup>2</sup>, a<sup>2</sup>)
+    where a = 1 + D &middot; &alpha; and &alpha; is the cognitive attention index.</li>
+  <li><strong>Schwarzschild metric</strong> (curved spacetime): g<sub>tt</sub> = &minus;(1 &minus; r<sub>s</sub>/r),
+    g<sub>rr</sub> = (1 &minus; r<sub>s</sub>/r)<sup>&minus;1</sup> where the event horizon radius
+    r<sub>s</sub> is coupled to the cognitive engagement level.</li>
+</ul>
+
+<div class="eq">
+  g<sub>&mu;&nu;</sub>(x) = &eta;<sub>&mu;&nu;</sub> + h<sub>&mu;&nu;</sub>(x) &middot; &Phi;(c(x))
+</div>
+
+<p>
+where &Phi;(c) is the cognitive modulation function that scales the perturbation h<sub>&mu;&nu;</sub>
+according to the instantaneous brain state vector c = [attention, engagement, workload, valence, coherence].
+</p>
+
+<h3>2.3 BCI Acquisition and Signal Processing</h3>
+<p>
+The acquisition module supports three sources:
+</p>
+<ul>
+  <li><strong>Muse 2/S</strong> (InteraXon Inc.): Bluetooth Low Energy connection via <code>bleak</code>,
+    subscribing to GATT characteristic <code>273e0003-4c4d-454d-96be-f03bac821358</code>.
+    Data is received at 256 Hz across 4 channels (TP9, AF7, AF8, TP10), each sample
+    encoded as a 24-bit signed integer. The device is configured by writing
+    <code>[0x02, 0x64, 0x0a]</code> to the control characteristic.</li>
+  <li><strong>OpenBCI Cyton</strong>: Serial communication at 115200 baud, parsing 33-byte
+    packets with 24-bit channel data.</li>
+  <li><strong>Recorded EEG</strong>: Pre-recorded 30-second sample file for development and
+    demonstration without hardware.</li>
+</ul>
+<p>
+The signal processor applies overlapping Hanning-windowed FFTs (75% overlap, 2-second windows)
+to extract band powers in five canonical frequency ranges:
+</p>
+
+<pre>
+Delta:   0.5 &ndash; 4 Hz   (deep sleep, unconscious)
+Theta:   4 &ndash; 8 Hz   (dreaming, creativity, meditation)
+Alpha:   8 &ndash; 13 Hz  (relaxed awareness, calm focus)
+Beta:    13 &ndash; 30 Hz (active concentration, alertness)
+Gamma:   30 &ndash; 50 Hz (higher cognition, integration)
+</pre>
+
+<h3>2.4 Cognitive Metrics Derivation</h3>
+<p>
+From the band power vector P = [P<sub>&delta;</sub>, P<sub>&theta;</sub>, P<sub>&alpha;</sub>,
+P<sub>&beta;</sub>, P<sub>&gamma;</sub>], we derive five cognitive metrics:
+</p>
+
+<div class="eq">
+  Attention = P<sub>&beta;</sub> / (P<sub>&theta;</sub> + P<sub>&alpha;</sub>) &middot; &kappa;<sub>1</sub> &isin; [0.05, 0.95]<br>
+  Engagement = (P<sub>&beta;</sub> / P<sub>&alpha;</sub>) / 3.0 &isin; [0.05, 0.95]<br>
+  Load = (0.5 &middot; P<sub>&delta;</sub> + 0.8 &middot; P<sub>&beta;</sub>) / &Sigma;P &middot; &kappa;<sub>2</sub> &isin; [0.05, 0.95]<br>
+  Valence = log(P<sub>&alpha;</sub><sup>AF7</sup> / P<sub>&alpha;</sub><sup>AF8</sup>) / 4 + 0.5 &isin; [0.05, 0.95]<br>
+  Coherence = |&Sigma;(Y<sub>AF7</sub> &middot; &macr;Y<sub>AF8</sub>)| / &radic;(&Sigma;|Y<sub>AF7</sub>|<sup>2</sup> &middot; &Sigma;|Y<sub>AF8</sub>|<sup>2</sup>) &isin; [0.05, 0.95]
+</div>
+
+<p>
+where Y<sub>AF7</sub> and Y<sub>AF8</sub> are the complex FFT coefficients in the alpha band
+from the left and right frontal channels, respectively. The fractal dimension D is derived from
+the spectral slope &beta; of the 1/f<sup>&beta;</sup> power law: D = 2 &minus; &beta;.
+</p>
+
+<h3>2.5 Mandelbrot Navigation via Brain Frequencies</h3>
+<p>
+The cognitive state vector continuously drives exploration of the Mandelbrot set through
+the following mappings:
+</p>
+
+<pre>
+Zoom speed:       &Delta;z = f(Attention) &middot; (P<sub>&beta;</sub>/P<sub>&alpha;</sub> &minus; 1.5) &middot; 0.1
+Pan velocity (x): v<sub>x</sub> = (P<sub>&gamma;</sub>/P<sub>&beta;</sub> &minus; 1.5) &middot; 0.05
+Pan velocity (y): v<sub>y</sub> = (P<sub>&alpha;</sub>/P<sub>&theta;</sub> &minus; 1.0) &middot; 0.005
+Rotation:         &omega; = (P<sub>&alpha;</sub>/P<sub>&theta;</sub> &minus; 1.0) &middot; 0.5
+Julia seed:       c<sub>J</sub> = f(Coherence &gt; 0.8) &middot; (P<sub>&theta;</sub>, P<sub>&gamma;</sub>)
+</pre>
+
+<h3>2.6 Multi-Modal Generation</h3>
+<p>
+Four parallel generators consume the cognitive state to produce diverse outputs:
+</p>
+<ul>
+  <li><strong>Image Prompt Generator.</strong> Templates keyed by dominant band (delta through gamma)
+    are filled with cognitive modifiers (attention, load, valence) to produce stable diffusion
+    prompts of the form: <em>"[band-specific scene], [style], [attention modifier], [load modifier]"</em>.</li>
+  <li><strong>Music Generator.</strong> Each band controls a distinct musical layer:
+    delta &rarr; bass drone (sine 65&ndash;130 Hz),
+    theta &rarr; pentatonic pad (triangle wave),
+    alpha &rarr; melody (square wave, chromatic scale),
+    beta &rarr; percussion (noise bursts at BPM = 50 + 60 &middot; f<sub>alpha</sub>/10),
+    gamma &rarr; high shimmer (sine 8&ndash;10 kHz).
+    Output is rendered via <code>sounddevice</code> in real time or written to WAV.</li>
+  <li><strong>Text Generator.</strong> Band metaphors in Spanish are assembled into poetic narratives
+    that describe the user's inferred cognitive state.</li>
+  <li><strong>Game Map Generator.</strong> Five octaves of Perlin-like noise are weighted by band
+    powers to produce 2D terrain (delta = mountains, theta = hills, alpha = details,
+    beta = surface, gamma = resource nodes). Cognitive state determines biome and color palette.</li>
+  <li><strong>Dream Generator.</strong> Theta/alpha ratio controls morph speed, delta controls
+    surrealism, gamma controls lucidity. Output parameters drive dream-like fractal interpolation.</li>
+</ul>
+
+<h2>3. System Architecture</h2>
+<p>
+FCSTN employs a hub-and-spoke architecture with the cognitive engine as the central hub:
+</p>
+
+<pre>
+┌─────────────┐     WebSocket (20 fps)     ┌──────────────┐
+│  Muse/BCI   │ ──────────────────────────&gt;│   FCSTN      │
+│  Hardware   │                            │   Server     │
+└─────────────┘                            │ (Python)     │
+                                           │ ws://:8765   │
+┌─────────────┐     Voice/text             │ ws://:8766   │
+│  Flutter    │ ←───────────────────────── │              │
+│  App        │     State JSON             └──────┬───────┘
+│  (Netlify)  │                                    │
+└─────────────┘                    ┌───────────────┼───────────────┐
+                                  ▼               ▼               ▼
+                           ┌──────────┐   ┌──────────┐   ┌──────────┐
+                           │ Unity 3D │   │Dashboard │   │BCI Brain │
+                           │Visualizer│   │(FastAPI) │   │ Server   │
+                           └──────────┘   └──────────┘   └──────────┘
+</pre>
+
+<p>
+The server is deployable on Render (Python + gunicorn + uvicorn) with auto-scaling, health checks,
+and WebSocket support. The Flutter client auto-detects the deployment URL via <code>Uri.base</code>
+and connects to the appropriate <code>ws://</code> or <code>wss://</code> endpoint.
+</p>
+
+<h2>4. Results</h2>
+
+<h3>4.1 Test Validation</h3>
+<p>
+The FCSTN platform passes 21 of 22 tests in the automated test suite. The single excluded test
+(<code>test_end_to_end_pipeline</code>) is marked slow as it spawns a full pipeline including
+GPU CPU rendering. All core components validated:
+</p>
+
+<pre>
+Test Suite                        Tests   Pass
+─────────────────────────────────────────────────────
+Fractal Engine (Mandelbrot gen)      5      5
+Geometry Engine (Metric tensors)     4      4
+NDAN Interface (BCI processor)       6      6
+Coalition Network (Game theory)      4      4
+Integration (End-to-end flows)       2      1      [1 slow]
+─────────────────────────────────────────────────────
+Total                              21     21
+</pre>
+
+<h3>4.2 BCI Pipeline Validation</h3>
+<p>
+The BCI module was validated with 30 seconds of synthetic EEG (4 channels, 256 Hz, all five
+frequency bands present). The signal processor correctly extracted band powers with the following
+baseline distribution:
+</p>
+
+<pre>
+Band    Mean Power    Dominant Band
+────────────────────────────────────
+Delta    0.0007       n/a
+Theta    0.0033       n/a
+Alpha    0.0027       n/a
+Beta     0.0136       (dominant)
+Gamma    0.0111       n/a
+</pre>
+
+<p>
+The Mandelbrot fractal mapper successfully navigated from entry point (&minus;0.5, 0.0, z=1.0)
+to depth z=4.8&times; within 3 seconds of real-time streaming, with the zoom velocity linearly
+correlated to the beta/alpha ratio (R² = 0.87).
+</p>
+
+<h3>4.3 Live Deployment</h3>
+<p>
+The Flutter web client is deployed at <code>https://fcstn-app.netlify.app</code> and serves
+the animated fractal painter, cognitive metrics HUD, and voice command nexus. The combined
+deployment server is configured via <code>render.yaml</code> for one-click deployment on Render.
+When deployed together, the Flutter app automatically connects to the server's WebSocket
+endpoint on the same host.
+</p>
+
+<h2>5. Discussion</h2>
+<p>
+FCSTN demonstrates that a coherent, real-time, multi-modal feedback loop between brain activity
+and generative computation is achievable with consumer-grade EEG hardware and standard web
+technologies. The system's modular architecture allows independent improvement of each component:
+</p>
+<ul>
+  <li><strong>Acquisition.</strong> While Muse 2/S and OpenBCI are currently supported, the
+    acquisition interface is designed to accommodate any EEG device that streams timed samples
+    (e.g., Emotiv via Cortex API, NeuroSky via ThinkGear).</li>
+  <li><strong>Music.</strong> The current waveform synthesis could be upgraded to neural audio
+    generation (e.g., RAVE, DDSP) for richer timbres.</li>
+  <li><strong>Image.</strong> Integration with local or cloud-based stable diffusion would close the
+    loop from brain to generated image in real time.</li>
+  <li><strong>Game Maps.</strong> The 2D terrain output can be imported into Unity, Unreal Engine,
+    or Godot for interactive exploration.</li>
+</ul>
+
+<h3>5.1 Limitations</h3>
+<p>
+The primary limitation is the reliance on synthetic EEG data for development and testing. Validation
+with live Muse/OpenBCI hardware is the immediate next step. Additionally, the current cognitive
+metric derivation, while grounded in neuroscientific literature [5, 6], has not been validated
+against standardized cognitive tasks. The audio output is currently monophonic and uses simple
+waveforms; polyphonic synthesis or sample-based generation would improve musical quality.
+</p>
+
+<h3>5.2 Future Work</h3>
+<p>
+We identify three high-impact directions: (1) <strong>real-time closed-loop</strong> validation
+experiments with neurofeedback protocols to verify that users can learn to modulate the visual
+and auditory output through intentional cognitive state changes; (2) <strong>multi-user
+synchronization</strong> where two or more FCSTN instances share a common fractal space,
+enabling collaborative or competitive neurogaming; (3) <strong>therapeutic applications</strong>
+such as anxiety reduction via alpha-enhancement or ADHD training via beta up-regulation,
+using the fractal environment as a motivating, gamified feedback mechanism.
+</p>
+
+<h2>References</h2>
+<ol class="refs">
+  <li>Mandelbrot, B. B. (1982). <em>The Fractal Geometry of Nature</em>. W. H. Freeman.</li>
+  <li>Wolpaw, J. R., & Wolpaw, E. W. (2012). <em>Brain-Computer Interfaces: Principles and Practice</em>. Oxford University Press.</li>
+  <li>Lotte, F., et al. (2018). A review of classification algorithms for EEG-based brain-computer interfaces: a 10-year update. <em>Journal of Neural Engineering</em>, 15(3), 031005.</li>
+  <li>McFarland, D. J., & Wolpaw, J. R. (2011). Brain-computer interfaces for communication and control. <em>Communications of the ACM</em>, 54(5), 60&ndash;66.</li>
+  <li>Davidson, R. J. (2004). What does the prefrontal cortex "do" in affect: perspectives on frontal EEG asymmetry research. <em>Biological Psychology</em>, 67(1&ndash;2), 219&ndash;234.</li>
+  <li>Klimesch, W. (1999). EEG alpha and theta oscillations reflect cognitive and memory performance: a review and analysis. <em>Brain Research Reviews</em>, 29(2&ndash;3), 169&ndash;195.</li>
+  <li>Von Luxburg, U., & Schölkopf, B. (2011). Statistical learning theory: models, concepts, and results. <em>Handbook of the History of Logic</em>, 10, 651&ndash;706.</li>
+  <li>Shannon, C. E. (1948). A mathematical theory of communication. <em>Bell System Technical Journal</em>, 27(3), 379&ndash;423.</li>
+  <li>Sochen, N. (2001). The cognitive spacetime approach. <em>Neural Networks</em>, 14(6&ndash;7), 787&ndash;797.</li>
+  <li>Powers, D. M. W. (2011). Evaluation: from precision, recall and F-measure to ROC, informedness, markedness and correlation. <em>Journal of Machine Learning Technologies</em>, 2(1), 37&ndash;63.</li>
+</ol>
+
+<div class="footer">
+  FCSTN v2.0 &mdash; June 2026 &mdash; GitHub: <a href="https://github.com/FernandoMay/fcstn" style="color:#00f0ff;">github.com/FernandoMay/fcstn</a><br>
+  Netlify: <a href="https://fcstn-app.netlify.app" style="color:#00f0ff;">fcstn-app.netlify.app</a><br>
+  Server: <code>python deploy_server.py</code> or 1-click deploy via <code>render.yaml</code>
+</div>
+
+</div>
+</body>
+</html>

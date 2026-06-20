@@ -8,425 +8,406 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/night.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
-    :root {
-      --primary: #00f0ff; --accent: #ff0055; --warn: #ffb800; --bg: #0f111a;
-    }
+    :root { --primary: #00f0ff; --accent: #ff0055; --warn: #ffb800; --bg: #0f111a; --green: #00ff88; --purple: #9933ff; }
     .reveal { font-family: 'Outfit', sans-serif; background: var(--bg); }
     .reveal h1 { font-weight: 900; font-size: 3em; background: linear-gradient(90deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .reveal h2 { color: var(--primary); font-weight: 700; }
+    .reveal h2 { color: var(--primary); font-weight: 700; font-size: 1.8em; }
     .reveal h3 { color: var(--warn); font-weight: 500; }
-    .reveal p, .reveal li { font-weight: 300; }
-    .reveal .code { font-family: 'JetBrains Mono', monospace; font-size: 0.7em; background: rgba(0,0,0,0.5); padding: 0.5em; border-radius: 8px; }
-    .reveal .highlight-primary { color: var(--primary); }
-    .reveal .highlight-accent { color: var(--accent); }
-    .reveal .highlight-warn { color: var(--warn); }
-    .reveal .fragment { opacity: 0; transition: opacity 0.5s; }
-    .reveal .fragment.visible { opacity: 1; }
-    .reveal .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-    .reveal .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
-    .reveal .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; }
-    .reveal .tag { display: inline-block; background: var(--primary); color: #000; padding: 2px 10px; border-radius: 20px; font-size: 0.6em; font-weight: 700; }
-    .reveal .tag-accent { background: var(--accent); color: #fff; }
-    .reveal section { padding: 20px; }
-    .layer-diagram { display: flex; flex-direction: column; gap: 5px; width: 80%; margin: 0 auto; }
-    .layer { padding: 12px 20px; border-radius: 8px; text-align: center; font-weight: 700; font-size: 0.9em; }
-    .layer-l1 { background: linear-gradient(90deg, rgba(0,240,255,0.3), rgba(0,240,255,0.1)); border: 1px solid var(--primary); }
-    .layer-l2 { background: linear-gradient(90deg, rgba(255,0,85,0.3), rgba(255,0,85,0.1)); border: 1px solid var(--accent); }
-    .layer-l3 { background: linear-gradient(90deg, rgba(255,184,0,0.3), rgba(255,184,0,0.1)); border: 1px solid var(--warn); }
-    .layer-l4 { background: linear-gradient(90deg, rgba(0,255,170,0.3), rgba(0,255,170,0.1)); border: 1px solid #00ffaa; }
-    .metric-box { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 15px; text-align: center; }
-    .metric-value { font-size: 2em; font-weight: 900; color: var(--primary); }
-    .metric-label { font-size: 0.7em; color: #8b9bb4; }
-    .reveal .slide-number { color: var(--primary); }
-    .diagram-arrow { color: var(--primary); font-size: 1.5em; text-align: center; }
-    .emoji-big { font-size: 3em; }
+    .reveal p, .reveal li { font-weight: 300; font-size: 0.85em; }
+    .reveal .code { font-family: 'JetBrains Mono', monospace; font-size: 0.6em; background: rgba(0,0,0,0.5); padding: 0.5em; border-radius: 8px; line-height: 1.4; }
+    .reveal .hl-p { color: var(--primary); } .reveal .hl-a { color: var(--accent); } .reveal .hl-g { color: var(--green); } .reveal .hl-w { color: var(--warn); }
+    .reveal .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .reveal .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+    .reveal .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+    .reveal .card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; backdrop-filter: blur(10px); }
+    .reveal .tag { display: inline-block; background: var(--primary); color: #000; padding: 2px 12px; border-radius: 20px; font-size: 0.55em; font-weight: 700; }
+    .reveal .tag-a { background: var(--accent); color: #fff; } .reveal .tag-g { background: var(--green); color: #000; }
+    .reveal .big { font-size: 2.5em; font-weight: 900; }
+    .reveal .metric { font-size: 1.2em; font-weight: 700; color: var(--primary); }
+    .reveal .bar { height: 8px; border-radius: 4px; margin: 4px 0; background: linear-gradient(90deg, var(--primary), var(--accent)); }
+    .reveal .emoji-big { font-size: 3em; display: block; text-align: center; margin-bottom: 10px; }
+    section { padding: 20px; }
   </style>
 </head>
 <body>
-<div class="reveal">
-<div class="slides">
+<div class="reveal"><div class="slides">
 
-<section data-background="radial-gradient(circle at 30% 50%, rgba(0,240,255,0.1), transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,0,85,0.08), transparent 50%)">
+<!-- SLIDE 1: TITLE -->
+<section data-background-gradient="linear-gradient(135deg, #0f111a 0%, #1a0a2e 50%, #0f111a 100%)">
   <h1>FCSTN</h1>
-  <h3>Fractal Cognitive Space-Time Networks</h3>
-  <p style="font-size:1.2em; color:#8b9bb4; margin-top:30px;">
-    A Framework for AI-Generated Cognitive Virtual Environments<br>
-    over NeuroDigital Infrastructure
-  </p>
+  <p style="font-size:1.3em; margin-top:-10px;">Fractal Cognitive Spacetime Network</p>
+  <p style="color:#888; margin-top:30px;">Fernando May &bull; ESCOM Summer School 2026</p>
+  <p style="font-size:0.7em; color:#555;">Instituto Polit&eacute;cnico Nacional &bull; M&eacute;xico</p>
+  <div style="margin-top:30px;">
+    <span class="tag">NEUROGAMING</span>
+    <span class="tag tag-a">BCI</span>
+    <span class="tag tag-g">FRACTALS</span>
+    <span class="tag">XR</span>
+  </div>
+</section>
+
+<!-- SLIDE 2: PROBLEM -->
+<section>
+  <h2>&iquest;Por qu&eacute; FCSTN?</h2>
+  <div class="grid-2" style="margin-top:30px;">
+    <div class="card">
+      <p class="emoji-big">🧠</p>
+      <h3>BCI Fragmentado</h3>
+      <p>Las interfaces cerebro-computadora existen pero est&aacute;n aisladas: m&eacute;dicas, caras, dif&iacute;ciles de programar.</p>
+    </div>
+    <div class="card">
+      <p class="emoji-big">🎮</p>
+      <h3>Sin Inmersi&oacute;n Real</h3>
+      <p>Los neurojuegos usan mec&aacute;nicas simples. Nadie mapea el cerebro completo a un universo generativo.</p>
+    </div>
+    <div class="card">
+      <p class="emoji-big">🔬</p>
+      <h3>Fractales + Relatividad</h3>
+      <p>La geometr&iacute;a fractal y la m&eacute;trica del espacio-tiempo nunca se han unido con se&ntilde;ales cerebrales reales.</p>
+    </div>
+    <div class="card">
+      <p class="emoji-big">🌐</p>
+      <h3>Multi-plataforma</h3>
+      <p>Una sola app Flutter + Unity + Web Dashboard = un ecosistema unificado.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 3: ARCHITECTURE -->
+<section>
+  <h2>Arquitectura</h2>
+  <div class="code" style="font-size:0.5em; text-align:left; line-height:1.5;">
+&boxur; FCSTN Server (Python / WebSocket)
+&brvbar;  &boxur; Fractal Engine &rarr; Mandelbrot multiscale + Julia
+&brvbar;  &boxur; Metric Tensor  &rarr; Minkowski / Schwarzschild
+&brvbar;  &boxur; BCI Processor  &rarr; EEG &rarr; Bandas &rarr; Cognici&oacute;n
+&brvbar;  &boxur; Coalition Game &rarr; Agentes aut&oacute;nomos + IA
+&brvbar;  &boxur; WebSocket      &rarr; ws://:8765 (20 fps)
+&boxur; Clientes
+ &brvbar;  &boxur; Flutter App  &rarr; Netlify (cross-platform)
+ &brvbar;  &boxur; Unity 3D     &rarr; Part&iacute;culas + Shake + Glitch
+ &brvbar;  &boxur; Dashboard    &rarr; FastAPI + Vis.js
+ &boxur; BCI Brain Server (ws://:8766)
+   &boxur; Generadores &rarr; Imagen / M&uacute;sica / Texto / Mapas / Sue&ntilde;os
+  </div>
+</section>
+
+<!-- SLIDE 4: FRACTAL ENGINE -->
+<section>
+  <h2>Motor Fractal</h2>
+  <div class="grid-2">
+    <div>
+      <p class="code" style="text-align:left;">
+z(n+1) = z(n)^2 + c<br>
+R = 2, L = 64..1024<br>
+D = -lim log(N(&epsilon;)) / log(&epsilon;)<br>
+Smooth coloring:<br>
+&mu; = n + 1 - log(log|z(n)|)/log(2)
+      </p>
+    </div>
+    <div>
+      <p>Dimensi&oacute;n fractal D modula el tensor m&eacute;trico y la complejidad del mapa de juego.</p>
+      <div class="card" style="margin-top:15px;">
+        <p><span class="hl-p">D &lt; 2.0:</span> Minimalista, suave</p>
+        <div class="bar" style="width:30%;"></div>
+        <p><span class="hl-p">D ~ 2.5:</span> Cl&aacute;sico Mandelbrot</p>
+        <div class="bar" style="width:60%;"></div>
+        <p><span class="hl-p">D &gt; 3.0:</span> Hiper-complejo, ca&oacute;tico</p>
+        <div class="bar" style="width:95%;"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 5: METRIC TENSOR -->
+<section>
+  <h2>Tensor M&eacute;trico</h2>
+  <p>Embedding del campo fractal en un espacio-tiempo 4D pseudo-Riemanniano</p>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <h3>Minkowski (plano)</h3>
+      <p class="code" style="font-size:0.7em;">
+g = diag(-1, a^2, a^2, a^2)<br>
+a = 1 + D &middot; &alpha;<br>
+&alpha; = &iacute;ndice de atenci&oacute;n
+      </p>
+    </div>
+    <div class="card">
+      <h3>Schwarzschild (curvo)</h3>
+      <p class="code" style="font-size:0.7em;">
+g_tt = -(1 - rs/r)<br>
+g_rr = (1 - rs/r)^(-1)<br>
+rs = f(engagement)
+      </p>
+    </div>
+  </div>
+  <p style="margin-top:20px; font-size:0.8em;">La curvatura del espacio-tiempo refleja el estado cognitivo del usuario en tiempo real.</p>
+</section>
+
+<!-- SLIDE 6: REAL BCI - HARDWARE -->
+<section>
+  <h2>Interfaz Cerebro-Real</h2>
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="card">
+      <p style="font-size:2em;">🎧</p>
+      <h3>Muse 2 / S</h3>
+      <p class="code" style="font-size:0.55em;">BLE via bleak<br>4 ch: TP9, AF7, AF8, TP10<br>256 Hz, 24-bit<br>UUID: 273e0003...</p>
+    </div>
+    <div class="card">
+      <p style="font-size:2em;">🔌</p>
+      <h3>OpenBCI</h3>
+      <p class="code" style="font-size:0.55em;">Serial 115200 baud<br>8-16 canales<br>24-bit ADS1299<br>Cyton / Daisy</p>
+    </div>
+    <div class="card">
+      <p style="font-size:2em;">💾</p>
+      <h3>Datos Grabados</h3>
+      <p class="code" style="font-size:0.55em;">30s EEG sint&eacute;tico<br>256 Hz, 4 ch<br>Todas las bandas<br>Para desarrollo</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: BCI SIGNAL PROCESSING -->
+<section>
+  <h2>Procesamiento en Tiempo Real</h2>
+  <div class="grid-2">
+    <div>
+      <p class="code" style="text-align:left; font-size:0.6em;">
+FFT solapada (75% overlap)<br>
+Ventana Hanning de 2s<br>
+
+Bandas can&oacute;nicas:
+&delta;  0.5-4 Hz (sue&ntilde;o profundo)
+&theta; 4-8 Hz (creatividad)
+&alpha; 8-13 Hz (calma)
+&beta; 13-30 Hz (atenci&oacute;n activa)
+&gamma; 30-50 Hz (cognici&oacute;n superior)
+      </p>
+    </div>
+    <div>
+      <p><span class="hl-p">M&eacute;tricas derivadas:</span></p>
+      <div class="card" style="margin-bottom:8px;">
+        <p><strong>Atenci&oacute;n:</strong> &beta;/(&theta;+&alpha;) &rarr; <span class="hl-p">0.05-0.95</span></p>
+        <div class="bar" style="width:70%;"></div>
+      </div>
+      <div class="card" style="margin-bottom:8px;">
+        <p><strong>Carga:</strong> (0.5&delta;+0.8&beta;)/&Sigma;P &rarr; <span class="hl-a">0.05-0.95</span></p>
+        <div class="bar" style="width:40%;"></div>
+      </div>
+      <div class="card" style="margin-bottom:8px;">
+        <p><strong>Valencia:</strong> log(P&alpha;^AF7/P&alpha;^AF8) &rarr; <span class="hl-g">asimetr&iacute;a frontal</span></p>
+      </div>
+      <div class="card">
+        <p><strong>Coherencia:</strong> sincron&iacute;a hemisf&eacute;rica &rarr; <span class="hl-w">0-1.0</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 8: MANDELBROT NAVIGATION -->
+<section>
+  <h2>Navegaci&oacute;n Fractal Cognitiva</h2>
+  <p>Las frecuencias cerebrales conducen la exploraci&oacute;n del conjunto de Mandelbrot</p>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <p><span class="hl-p">Zoom:</span> &Delta;z = f(Atenci&oacute;n) &middot; (&beta;/&alpha; - 1.5)</p>
+      <div class="bar" style="width:85%;"></div>
+      <p style="margin-top:10px;"><span class="hl-a">Paneo X:</span> (&gamma;/&beta; - 1.5) &middot; 0.05</p>
+      <div class="bar" style="width:55%;"></div>
+      <p style="margin-top:10px;"><span class="hl-g">Rotaci&oacute;n:</span> (&alpha;/&theta; - 1.0) &middot; 0.5 rad/s</p>
+    </div>
+    <div class="card">
+      <p><span class="hl-w">12 landmarks</span> pre-programados:</p>
+      <p class="code" style="font-size:0.55em; text-align:left;">
+(-0.5, 0.0, 1.0)         Cardioide<br>
+(-0.75, 0.0, 2.5)        Bulbo principal<br>
+(-0.155, 0.662, 50)      Seahorse valley<br>
+(-0.748, 0.092, 100)     Triple spiral<br>
+(-1.255, 0.063, 200)     Elephant valley
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9: MULTI-MODAL GENERATORS -->
+<section>
+  <h2>Generaci&oacute;n Multi-Modal</h2>
+  <div class="grid-4" style="margin-top:20px;">
+    <div class="card">
+      <p style="font-size:1.5em;">🖼️</p>
+      <h3>Imagen</h3>
+      <p style="font-size:0.65em;">Prompts para Stable Diffusion desde el estado cerebral</p>
+    </div>
+    <div class="card">
+      <p style="font-size:1.5em;">🎵</p>
+      <h3>M&uacute;sica</h3>
+      <p style="font-size:0.65em;">S&iacute;ntesis de audio: delta=bajo, theta=pad, alpha=melod&iacute;a, beta=ritmo, gamma=brillo</p>
+    </div>
+    <div class="card">
+      <p style="font-size:1.5em;">📝</p>
+      <h3>Texto</h3>
+      <p style="font-size:0.65em;">Narrativa po&eacute;tica en espa&ntilde;ol desde las frecuencias</p>
+    </div>
+    <div class="card">
+      <p style="font-size:1.5em;">🗺️</p>
+      <h3>Mapas de Juego</h3>
+      <p style="font-size:0.65em;">Terreno procedural 64x64, bioma adaptativo al estado cognitivo</p>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:10px;">
+    <div class="card">
+      <p style="font-size:1.5em;">💭</p>
+      <h3>Sue&ntilde;os</h3>
+      <p style="font-size:0.65em;">Par&aacute;metros de visualizaci&oacute;n on&iacute;rica: morph speed, surrealismo, lucidez, fragmentos narrativos</p>
+    </div>
+    <div class="card">
+      <p style="font-size:1.5em;">🎮</p>
+      <h3>Mundos Unity</h3>
+      <p style="font-size:0.65em;">Part&iacute;culas neuronales, glitch, camera shake, fractal mesh mutante</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10: LIVE DEMO -->
+<section>
+  <h2>Demo en Vivo ⚡</h2>
+  <div class="card" style="padding:30px;">
+    <p style="font-size:1.2em;">&#128640; <span class="hl-p">Pipeline completo funcionando ahora mismo</span></p>
+    <div class="grid-3" style="margin-top:20px;">
+      <div>
+        <p class="tag" style="font-size:0.7em;">FLUTTER WEB</p>
+        <p><a href="https://fcstn-app.netlify.app" target="_blank" style="color:var(--primary);">fcstn-app.netlify.app</a></p>
+      </div>
+      <div>
+        <p class="tag tag-a" style="font-size:0.7em;">WEBSOCKET</p>
+        <p><code>ws://localhost:8765</code><br><code>/ws</code> (deploy)</p>
+      </div>
+      <div>
+        <p class="tag tag-g" style="font-size:0.7em;">BCI</p>
+        <p><code>ws://localhost:8766</code><br><code>--source muse</code></p>
+      </div>
+    </div>
+  </div>
+  <div class="grid-2" style="margin-top:20px;">
+    <div class="card">
+      <p><span class="hl-p">Comandos de voz:</span></p>
+      <p class="code" style="font-size:0.55em;">
+explosion  &rarr; todas al m&aacute;ximo<br>
+calma      &rarr; carga baja<br>
+foco       &rarr; atenci&oacute;n m&aacute;xima<br>
+creativo   &rarr; valencia alta<br>
+viaje      &rarr; modo exploraci&oacute;n<br>
+reposo     &rarr; sistema en standby
+      </p>
+    </div>
+    <div class="card">
+      <p><span class="hl-w">M&eacute;tricas en vivo:</span></p>
+      <div class="code" style="font-size:0.55em; text-align:left;">
+attn=0.95  ████████████ 95%<br>
+eng=0.62   ████████░░░ 62%<br>
+load=0.67  ████████░░░ 67%<br>
+val=0.50   ██████░░░░░ 50%<br>
+coh=0.50   ██████░░░░░ 50%<br>
+zoom=4.8x  ████████████
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 11: RESULTS -->
+<section>
+  <h2>Resultados</h2>
+  <div class="grid-2">
+    <div class="card">
+      <p class="big" style="color:var(--green);">21/22</p>
+      <p>Tests pasan en suite automatizada</p>
+    </div>
+    <div class="card">
+      <p class="big" style="color:var(--primary);">20fps</p>
+      <p>Broadcast WebSocket a todos los clientes</p>
+    </div>
+    <div class="card">
+      <p class="big" style="color:var(--accent);">4.8&times;</p>
+      <p>Zoom fractal en 3s de streaming en vivo</p>
+    </div>
+    <div class="card">
+      <p class="big" style="color:var(--warn);">54</p>
+      <p>Sitios Netlify desplegados desde esta cuenta</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 12: TIMELINE -->
+<section>
+  <h2>Roadmap</h2>
+  <div class="card">
+    <table style="font-size:0.65em; width:100%;">
+      <tr><th>Fase</th><th>Logro</th><th>Estado</th></tr>
+      <tr><td>1</td><td>Motor fractal + Tensor m&eacute;trico</td><td><span class="hl-g">✅</span></td></tr>
+      <tr><td>2</td><td>BCI pipeline + WebSocket server</td><td><span class="hl-g">✅</span></td></tr>
+      <tr><td>3</td><td>Flutter app + Netlify deploy</td><td><span class="hl-g">✅</span></td></tr>
+      <tr><td>4</td><td>Unity 3D visualizer + glitch shader</td><td><span class="hl-g">✅</span></td></tr>
+      <tr><td>5</td><td>Multi-modal generators (img/music/text/map/dream)</td><td><span class="hl-g">✅</span></td></tr>
+      <tr><td>6</td><td>Render deployment + WSS support</td><td><span class="hl-p">🔄</span></td></tr>
+      <tr><td>7</td><td>Validaci&oacute;n con Muse f&iacute;sico</td><td><span class="hl-w">⏳</span></td></tr>
+      <tr><td>8</td><td>Neurofeedback multi-sesi&oacute;n cl&iacute;nico</td><td><span class="hl-w">🔮</span></td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- SLIDE 13: FUTURE -->
+<section>
+  <h2>Trabajo Futuro</h2>
+  <div class="grid-3" style="margin-top:20px;">
+    <div class="card">
+      <p style="font-size:2em;">🧪</p>
+      <h3>Validaci&oacute;n Cl&iacute;nica</h3>
+      <p style="font-size:0.7em;">Experimentos de neurofeedback con protocolos estandarizados para ansiedad, ADHD, rendimiento cognitivo.</p>
+    </div>
+    <div class="card">
+      <p style="font-size:2em;">👥</p>
+      <h3>Multi-usuario</h3>
+      <p style="font-size:0.7em;">Dos o m&aacute;s cerebros sincronizados en el mismo espacio fractal. Neurogaming colaborativo/competitivo.</p>
+    </div>
+    <div class="card">
+      <p style="font-size:2em;">🤖</p>
+      <h3>IA Generativa</h3>
+      <p style="font-size:0.7em;">Integraci&oacute;n con Stable Diffusion local, generaci&oacute;n de m&uacute;sica neural (RAVE, DDSP), video en tiempo real.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 14: THANK YOU -->
+<section data-background-gradient="linear-gradient(135deg, #0f111a 0%, #1a0a2e 50%, #0f111a 100%)">
+  <h1 style="font-size:4em;">Gracias 🙌</h1>
+  <p style="font-size:1.3em; margin-top:20px;">Preguntas y discusi&oacute;n</p>
   <div style="margin-top:40px;">
-    <p><strong>Fernando May Fuentes</strong></p>
-    <p style="font-size:0.8em; color:#8b9bb4;">IPN UPIITA | BUAA | Nexus Research Institute</p>
-    <p style="font-size:0.8em; color:#8b9bb4; margin-top:20px;">ESCOM Summer School · July 3, 2026</p>
-  </div>
-</section>
-
-<section>
-  <h2>The Vision</h2>
-  <div class="grid-2" style="margin-top:30px;">
-    <div class="card fragment">
-      <div class="emoji-big">🧠</div>
-      <h3>Cognitive Gap</h3>
-      <p style="font-size:0.8em;">Virtual environments cannot read your mind. They react blindly, ignoring your cognitive state, attention, and intent.</p>
-    </div>
-    <div class="card fragment">
-      <div class="emoji-big">🌌</div>
-      <h3>Our Solution</h3>
-      <p style="font-size:0.8em;">Environments that <span class="highlight-primary">adapt in real-time</span> to your brain activity using fractal geometry, relativistic metrics, and multi-agent coalitions.</p>
-    </div>
-  </div>
-  <div class="fragment" style="margin-top:30px; padding:20px; background: rgba(255,255,255,0.03); border-radius:12px;">
-    <p style="font-size:1.1em;">"What if the virtual world could <span class="highlight-accent">feel</span> your focus, <span class="highlight-primary">respond</span> to your fatigue, and <span class="highlight-warn">adapt</span> to your intent — in real time?"</p>
-  </div>
-</section>
-
-<section>
-  <h2>4-Layer Architecture</h2>
-  <div class="layer-diagram fragment">
-    <div class="layer layer-l1">L1 · Cognitive Layer<br><span style="font-weight:300; font-size:0.75em;">Human Users + XR Devices + AI Agents</span></div>
-    <div class="diagram-arrow">↓ Neural Signals ↑ Sensory Feedback</div>
-    <div class="layer layer-l2">L2 · Interface Layer (NDAN)<br><span style="font-weight:300; font-size:0.75em;">BCI Processing · Cognitive Feature Extraction · Feedback Control</span></div>
-    <div class="diagram-arrow">↓ Environment Parameters ↑ Geometry Data</div>
-    <div class="layer layer-l3">L3 · Geometry Engine<br><span style="font-weight:300; font-size:0.75em;">Fractal Generation · Metric Tensor · Geodesic Computation</span></div>
-    <div class="diagram-arrow">↓ Fractal Fields ↑ Topology</div>
-    <div class="layer layer-l4">L4 · Infrastructure<br><span style="font-weight:300; font-size:0.75em;">Coalition Formation · D2D Networking · Resource Management</span></div>
-  </div>
-</section>
-
-<section>
-  <h2>Fractal Generation Pipeline</h2>
-  <div class="grid-2" style="margin-top:30px;">
-    <div>
-      <div class="code" style="font-size:0.5em;">
-z_{n+1} = z_n² + c<br><br>
-for each pixel (x, y):<br>
-&nbsp;&nbsp;c = complex(x, y)<br>
-&nbsp;&nbsp;z = 0<br>
-&nbsp;&nbsp;for i in range(iterations):<br>
-&nbsp;&nbsp;&nbsp;&nbsp;z = z*z + c<br>
-&nbsp;&nbsp;&nbsp;&nbsp;if |z| > 2: return i<br>
-&nbsp;&nbsp;return max_iter
-      </div>
-    </div>
-    <div>
-      <div class="metric-box">
-        <div class="metric-value">60+</div>
-        <div class="metric-label">FPS at 1080p</div>
-      </div>
-      <div class="metric-box" style="margin-top:10px;">
-        <div class="metric-value">&lt; 20ms</div>
-        <div class="metric-label">Per Frame (GPU)</div>
-      </div>
-      <div class="metric-box" style="margin-top:10px;">
-        <div class="metric-value">∞</div>
-        <div class="metric-label">Infinite Detail</div>
-      </div>
-    </div>
-  </div>
-  <p class="fragment" style="font-size:0.8em; margin-top:20px;">
-    <span class="tag">GPU</span> <span class="tag">CUDA</span> <span class="tag tag-accent">Real-Time</span>
-  </p>
-</section>
-
-<section>
-  <h2>Relativistic Space-Time Geometry</h2>
-  <div style="margin-top:30px;">
-    <p style="font-size:0.9em;">ds² = g<sub>ij</sub> dxⁱ dxʲ</p>
-  </div>
-  <div class="grid-3" style="margin-top:30px;">
-    <div class="card">
-      <h3>Minkowski</h3>
-      <p style="font-size:0.7em;">Flat space-time baseline</p>
-      <div class="code" style="font-size:0.55em;">diag(-1, 1, 1, 1)</div>
-    </div>
-    <div class="card">
-      <h3>Schwarzschild</h3>
-      <p style="font-size:0.7em;">Black hole curvature</p>
-      <div class="code" style="font-size:0.5em;">factor = 1 - 2M/r</div>
-    </div>
-    <div class="card">
-      <h3>Adaptive</h3>
-      <p style="font-size:0.7em;">Fractal → Metric mapping</p>
-      <div class="code" style="font-size:0.5em;">g = f(density)</div>
-    </div>
-  </div>
-  <p class="fragment" style="font-size:0.8em; margin-top:20px;">
-    <span class="tag">Christoffel Symbols</span>
-    <span class="tag">Riemann Curvature</span>
-    <span class="tag">Geodesics</span>
-  </p>
-</section>
-
-<section>
-  <h2>NeuroDigital Adaptive Network</h2>
-  <div class="grid-2" style="margin-top:30px;">
-    <div>
-      <p style="font-size:0.8em;"><strong>Signal Pipeline</strong></p>
-      <div style="font-size:0.7em; line-height:1.8;">
-        <span class="highlight-primary">EEG/fNIRS</span> →<br>
-        Preprocessing (Filtering, ICA) →<br>
-        Band Power Extraction (α, β, θ, γ) →<br>
-        Cognitive State Estimation →<br>
-        <span class="highlight-accent">Environment Adaptation</span>
-      </div>
-    </div>
-    <div>
-      <p style="font-size:0.8em;"><strong>Cognitive Metrics</strong></p>
-      <div class="metric-box">
-        <div class="metric-value">Attention</div>
-        <div class="metric-label">β+γ / θ+α</div>
-      </div>
-      <div class="metric-box" style="margin-top:10px;">
-        <div class="metric-value">Engagement</div>
-        <div class="metric-label">β / (α+θ)</div>
-      </div>
-      <div class="metric-box" style="margin-top:10px;">
-        <div class="metric-value">Workload</div>
-        <div class="metric-label">θ / α</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Coalition Formation Network</h2>
-  <p style="font-size:0.8em;">Multi-agent D2D coordination via merge-and-split game theory</p>
-  <div class="grid-3" style="margin-top:30px;">
-    <div class="card">
-      <div class="emoji-big">👤</div>
-      <h4>Human Agent</h4>
-      <p style="font-size:0.6em;">Perception, Decision</p>
-    </div>
-    <div class="card">
-      <div class="emoji-big">🤖</div>
-      <h4>AI Agent</h4>
-      <p style="font-size:0.6em;">Inference, Adaptation</p>
-    </div>
-    <div class="card">
-      <div class="emoji-big">🥽</div>
-      <h4>XR Device</h4>
-      <p style="font-size:0.6em;">Rendering, Display</p>
-    </div>
-  </div>
-  <div class="fragment" style="margin-top:20px;">
-    <div class="code" style="font-size:0.55em;">
-v(S) = Σ resources(i) + synergy_bonus(types(S))
-    </div>
-    <p style="font-size:0.7em; margin-top:10px;">Convergence: <span class="highlight-primary">&lt; 2.3s</span> for 10 agents</p>
-  </div>
-</section>
-
-<section>
-  <h2>Real-Time Cognitive Feedback</h2>
-  <div style="text-align:center; font-size:1.5em; line-height:2; margin-top:20px;">
-    <span class="highlight-accent">Cognition</span>
-    <span style="color:#8b9bb4;"> → </span>
-    <span class="highlight-primary">NDAN</span>
-    <span style="color:#8b9bb4;"> → </span>
-    <span class="highlight-warn">Fractal Engine</span>
-    <span style="color:#8b9bb4;"> → </span>
-    <span class="highlight-primary">Metric Geometry</span>
-    <span style="color:#8b9bb4;"> → </span>
-    <span class="highlight-accent">XR Rendering</span>
-  </div>
-  <div class="grid-3" style="margin-top:30px;">
-    <div class="card">
-      <h3>Focused</h3>
-      <p style="font-size:0.7em;">↑ Complexity, ↑ Detail, ↑ Curvature</p>
-    </div>
-    <div class="card">
-      <h3>Fatigued</h3>
-      <p style="font-size:0.7em;">↓ Zoom, ↓ Iterations, ↓ Curvature</p>
-    </div>
-    <div class="card">
-      <h3>Stressed</h3>
-      <p style="font-size:0.7em;">Simplify geometry, reduce chaos</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Applications</h2>
-  <div class="grid-2" style="margin-top:30px;">
-    <div class="card">
-      <div class="emoji-big">🎮</div>
-      <h3>Neurogaming</h3>
-      <p style="font-size:0.75em;">Brain-responsive difficulty scaling. Implicit adaptation keeps players in flow state.</p>
-    </div>
-    <div class="card">
-      <div class="emoji-big">🌐</div>
-      <h3>XR Worlds</h3>
-      <p style="font-size:0.75em;">Infinite procedurally-generated universes that respond to your cognitive state.</p>
-    </div>
-    <div class="card">
-      <div class="emoji-big">🔄</div>
-      <h3>Digital Twins</h3>
-      <p style="font-size:0.75em;">Cognitive-aware virtual replicas combining IoT data with neural feedback.</p>
-    </div>
-    <div class="card">
-      <div class="emoji-big">🔬</div>
-      <h3>Scientific Sim</h3>
-      <p style="font-size:0.75em;">Interactive exploration of relativistic phenomena and fractal mathematics.</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Live Demo</h2>
-  <div class="grid-2" style="margin-top:20px;">
-    <div>
-      <div class="card">
-        <h3>FCSTN Platform</h3>
-        <div class="code" style="font-size:0.55em; text-align:left;">
-$ python fcstn_platform.py
-
-[1] Processing BCI signal...
-  Attention: 0.723
-  Engagement: 0.651
-  State: engaged
-
-[2] Adapting environment...
-  Fractal zoom: 2.45
-  Curvature scale: 2.30
-
-[3] Generating environment...
-  Time: 18.35 ms
-        </div>
-      </div>
-    </div>
-    <div>
-      <div class="card">
-        <h3>Web Dashboard</h3>
-        <p style="font-size:0.75em;">Real-time interactive control center</p>
-        <div class="code" style="font-size:0.55em;">
-$ uvicorn src.api.server:app
-
-→ http://localhost:8000/dashboard
-        </div>
-        <p style="font-size:0.7em; margin-top:10px;">
-          <span class="tag">Fractal Navigation</span>
-          <span class="tag">Live Metrics</span>
-          <span class="tag">Coalition Graph</span>
-        </p>
-      </div>
-    </div>
-  </div>
-  <p style="margin-top:20px; font-size:0.8em;" class="fragment">
-    <span class="tag-accent" style="padding:5px 15px;">22/22 Tests Passing</span>
-  </p>
-</section>
-
-<section>
-  <h2>Performance Benchmarks</h2>
-  <table style="width:100%; font-size:0.7em; margin-top:20px;">
-    <tr><th style="text-align:left; padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);">Metric</th><th style="text-align:center; padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);">Target</th><th style="text-align:center; padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);">Achieved</th><th style="text-align:center; padding:8px; border-bottom:1px solid rgba(255,255,255,0.1);">Status</th></tr>
-    <tr><td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05);">Fractal Rendering (1080p)</td><td style="text-align:center; padding:8px;">60 FPS</td><td style="text-align:center; padding:8px;">66 FPS</td><td style="text-align:center; padding:8px; color:var(--primary);">✅</td></tr>
-    <tr><td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05);">Metric Computation (64³)</td><td style="text-align:center; padding:8px;">&lt; 100ms</td><td style="text-align:center; padding:8px;">85ms</td><td style="text-align:center; padding:8px; color:var(--primary);">✅</td></tr>
-    <tr><td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05);">BCI Processing Latency</td><td style="text-align:center; padding:8px;">&lt; 100ms</td><td style="text-align:center; padding:8px;">45ms</td><td style="text-align:center; padding:8px; color:var(--primary);">✅</td></tr>
-    <tr><td style="padding:8px; border-bottom:1px solid rgba(255,255,255,0.05);">Coalition Formation</td><td style="text-align:center; padding:8px;">&lt; 5s</td><td style="text-align:center; padding:8px;">2.3s</td><td style="text-align:center; padding:8px; color:var(--primary);">✅</td></tr>
-    <tr><td style="padding:8px;">Code Coverage</td><td style="text-align:center; padding:8px;">&gt; 70%</td><td style="text-align:center; padding:8px;">&gt; 85%</td><td style="text-align:center; padding:8px; color:var(--primary);">✅</td></tr>
-  </table>
-</section>
-
-<section>
-  <h2>Development Roadmap</h2>
-  <div style="display:flex; justify-content:space-between; margin-top:30px;">
-    <div class="card" style="width:22%;">
-      <h3 style="font-size:0.8em;">Phase I</h3>
-      <p style="font-size:0.6em; color:var(--primary);">2026 Q3-Q4</p>
-      <p style="font-size:0.55em;">Foundation<br>✅ Fractal Engine<br>✅ Metric Pipeline<br>✅ Performance Baseline</p>
-    </div>
-    <div class="card" style="width:22%;">
-      <h3 style="font-size:0.8em;">Phase II</h3>
-      <p style="font-size:0.6em; color:var(--accent);">2027 Q1-Q2</p>
-      <p style="font-size:0.55em;">Neural Integration<br>🔄 BCI Processing<br>🔄 Adaptation Tests<br>🔄 User Studies</p>
-    </div>
-    <div class="card" style="width:22%;">
-      <h3 style="font-size:0.8em;">Phase III</h3>
-      <p style="font-size:0.6em; color:var(--warn);">2027 Q3-Q4</p>
-      <p style="font-size:0.55em;">Multi-Agent<br>🔄 Coalition Scaling<br>🔄 Distributed Compute<br>🔄 Latency Optimization</p>
-    </div>
-    <div class="card" style="width:22%;">
-      <h3 style="font-size:0.8em;">Phase IV</h3>
-      <p style="font-size:0.6em; color:#00ffaa;">2028 Q1+</p>
-      <p style="font-size:0.55em;">Full System<br>⏳ Multi-User XR<br>⏳ 90 FPS Target<br>⏳ Production Deploy</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Technical Stack</h2>
-  <div class="grid-2" style="margin-top:30px;">
-    <div>
-      <p><span class="tag">Python 3.9+</span> <span class="tag">NumPy</span> <span class="tag">SciPy</span></p>
-      <p><span class="tag">CuPy</span> <span class="tag">MNE</span> <span class="tag">scikit-learn</span></p>
-      <p><span class="tag">FastAPI</span> <span class="tag">WebSockets</span> <span class="tag">asyncio</span></p>
-    </div>
-    <div>
-      <p><span class="tag">SymPy</span> <span class="tag">Matplotlib</span></p>
-      <p><span class="tag">PyTorch</span> <span class="tag">vis.js</span></p>
-      <p><span class="tag">Pytest</span> <span class="tag">GitHub CI</span></p>
-    </div>
-  </div>
-  <p style="margin-top:30px;"><span class="tag-accent" style="font-size:0.8em; padding:4px 12px;">Open Source · MIT License</span></p>
-</section>
-
-<section>
-  <h2>Interactive Control Center</h2>
-  <div class="grid-2" style="margin-top:20px;">
-    <div class="card">
-      <h3>Fractal Explorer</h3>
-      <p style="font-size:0.7em;">Drag to pan · Scroll to zoom · Real-time GPU-accelerated rendering</p>
-    </div>
-    <div class="card">
-      <h3>Cognitive Override</h3>
-      <p style="font-size:0.7em;">Manual control of attention, engagement, and workload sliders</p>
-    </div>
-    <div class="card">
-      <h3>Coalition Graph</h3>
-      <p style="font-size:0.7em;">Live network visualization with add/remove agent controls</p>
-    </div>
-    <div class="card">
-      <h3>System Feed</h3>
-      <p style="font-size:0.7em;">Real-time terminal with cognitive state transitions and events</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2>Research Output</h2>
-  <div class="card" style="margin-top:30px;">
-    <p style="font-size:0.8em;">📄 <strong>Paper</strong></p>
-    <p style="font-size:0.65em; font-family:'JetBrains Mono', monospace;">
-"Fractal Cognitive Space-Time Networks: A Framework for AI-Generated<br>
-Cognitive Virtual Environments over NeuroDigital Infrastructure"
-    </p>
-    <div class="code" style="font-size:0.5em; margin-top:10px;">
-@article{may2026fcstn,<br>
-&nbsp;&nbsp;title={Fractal Cognitive Space-Time Networks...},<br>
-&nbsp;&nbsp;author={May Fuentes, Fernando},<br>
-&nbsp;&nbsp;journal={Nexus Research Institute Technical Report},<br>
-&nbsp;&nbsp;year={2026}<br>
-}
-    </div>
-  </div>
-</section>
-
-<section data-background="radial-gradient(circle at 30% 50%, rgba(0,240,255,0.1), transparent 50%), radial-gradient(circle at 70% 30%, rgba(255,0,85,0.08), transparent 50%)">
-  <h1>¡Gracias!</h1>
-  <h3 style="color:var(--warn);">¿Preguntas?</h3>
-  <div style="margin-top:40px; font-size:0.8em;">
-    <p>📧 fmayf1500@alumno.ipn.mx</p>
-    <p>🔗 <span style="color:var(--primary);">github.com/fmayf/fcstn</span></p>
-    <p>🏛 IPN UPIITA · BUAA · Nexus Research Institute</p>
+    <p><span class="hl-p">GitHub:</span> github.com/FernandoMay/fcstn</p>
+    <p><span class="hl-p">Netlify:</span> fcstn-app.netlify.app</p>
+    <p><span class="hl-p">Slides:</span> fcstn/docs/presentation.html</p>
+    <p><span class="hl-p">Paper:</span> fcstn/docs/paper.html</p>
   </div>
   <div style="margin-top:30px;">
-    <p style="font-size:0.6em; color:#8b9bb4;">"From cognition to cosmos — one fractal at a time." 🚀🧠</p>
+    <span class="tag">🧠 BCI</span>
+    <span class="tag tag-a">🌀 FRACTALES</span>
+    <span class="tag tag-g">🎮 NEUROGAMING</span>
+    <span class="tag">✨ XR</span>
   </div>
 </section>
 
-</div>
-</div>
+</div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
-<script>Reveal.initialize({ controls: true, progress: true, hash: true, slideNumber: true, transition: 'slide' });</script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    controls: true,
+    progress: true,
+    center: true,
+    autoPlayMedia: true,
+    plugins: [],
+  });
+</script>
 </body>
 </html>
