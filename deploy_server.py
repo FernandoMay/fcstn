@@ -1,24 +1,27 @@
 """FCSTN Live Server - Combined deployment for Render/Heroku.
-Serves Flutter web app + WebSocket + REST API + BCI integration.
+Serves Flutter web app + WebSocket + REST API + BCI integration + Fractal Renderer.
 """
-import os, sys, json, time, asyncio, logging
+import os, sys, json, time, asyncio, logging, io, math, threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from server.fcstn_server import FCSTNEngine, CognitiveState, KEYWORDS_MAP
 from shared.logger import get_logger, ROOT_LOG
+from server.fractal_renderer import (render_mandelbrot, render_terrain, render_julia,
+                                     render_multi_fractal, render_fractal_by_state,
+                                     PALETTES)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [FCSTN] %(message)s")
 log = get_logger("DEPLOY")
 
-app = FastAPI(title="FCSTN Live Server", version="2.0.0")
+app = FastAPI(title="FCSTN Live Server", version="2.1.0")
 engine = FCSTNEngine()
 
 flutter_dir = ROOT / "flutter_app" / "build" / "web"
@@ -152,6 +155,89 @@ async def get_logs(n: int = 100, level: str = ""):
     return {"count": len(entries), "logs": [{
         "t": e.timestamp, "l": e.level, "s": e.source, "m": e.message, "d": e.data
     } for e in entries]}
+
+# ---- Fractal image cache ----
+_fractal_cache = {}
+_fractal_cache_lock = threading.Lock()
+_FRACTAL_CACHE_TTL = 2.0  # seconds
+
+def _get_cached_fractal(key, render_func, *args, **kwargs):
+    now = time.time()
+    with _fractal_cache_lock:
+        cached = _fractal_cache.get(key)
+        if cached and (now - cached['time']) < _FRACTAL_CACHE_TTL:
+            return cached['image']
+    img = render_func(*args, **kwargs)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    with _fractal_cache_lock:
+        _fractal_cache[key] = {'image': buf.getvalue(), 'time': now}
+    return _fractal_cache[key]['image']
+
+@app.get("/api/palettes")
+async def list_palettes():
+    return {"palettes": list(PALETTES.keys())}
+
+@app.get("/api/fractal")
+async def fractal(
+    mode: str = Query("mandelbrot", description="mandelbrot, terrain, julia, multifractal"),
+    palette: str = Query("cyberpunk", description="Color palette name"),
+    width: int = Query(960, ge=64, le=3840),
+    height: int = Query(540, ge=64, le=2160),
+    zoom: float = Query(1.0, ge=0.01, le=1e6),
+    cx: float = Query(-0.5, description="Center X"),
+    cy: float = Query(0.0, description="Center Y"),
+    rotation: float = Query(0.0, description="Rotation in radians"),
+    max_iter: int = Query(256, ge=16, le=2048),
+    julia_cx: float = Query(0.285),
+    julia_cy: float = Query(0.01),
+    palette_offset: float = Query(0.0, ge=0.0, le=1.0),
+):
+    log.info("Fractal requested", {"mode": mode, "palette": palette, "zoom": zoom})
+    key = f"{mode}:{palette}:{width}:{height}:{zoom}:{cx}:{cy}:{rotation}:{max_iter}:{julia_cx}:{julia_cy}:{palette_offset}"
+    try:
+        if mode == "terrain":
+            img_data = _get_cached_fractal(key, render_terrain, width, height, palette, cx, cy, zoom, 60, 0.5)
+        elif mode == "julia":
+            img_data = _get_cached_fractal(key, render_julia, width, height, palette, max_iter, julia_cx, julia_cy, zoom, palette_offset)
+        elif mode == "multifractal":
+            img_data = _get_cached_fractal(key, render_multi_fractal, width, height, palette, "layers", cx, cy, zoom)
+        else:
+            img_data = _get_cached_fractal(key, render_mandelbrot, width, height, palette, max_iter, cx, cy, zoom, rotation, palette_offset)
+        return Response(content=img_data, media_type="image/png")
+    except Exception as e:
+        log.error("Fractal render failed", {"error": str(e), "mode": mode})
+        return Response(content=str(e), status_code=500)
+
+@app.get("/api/fractal/state")
+async def fractal_by_state(width: int = 960, height: int = 540):
+    """Render fractal dynamically based on current cognitive state."""
+    log.info("Fractal by state requested", {"state": engine.state.state_name})
+    key = f"state:{engine.state.state_name}:{engine.state.attention:.2f}:{engine.state.engagement:.2f}:{time.time()//2}"
+    state_dict = engine.state.to_dict()
+    img_data = _get_cached_fractal(key, render_fractal_by_state, state_dict, width, height)
+    return Response(content=img_data, media_type="image/png")
+
+@app.get("/api/fractal/map")
+async def fractal_map_tile(
+    zoom_level: int = Query(0, ge=0, le=8),
+    tile_x: int = Query(0),
+    tile_y: int = Query(0),
+    palette: str = Query("earth"),
+):
+    """Minecraft-style tile map of the Mandelbrot set (256x256 tiles)."""
+    log.info("Map tile requested", {"zoom": zoom_level, "x": tile_x, "y": tile_y})
+    from server.fractal_renderer import render_map_tile
+    try:
+        img = render_map_tile(zoom_level, tile_x, tile_y, palette)
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return Response(content=buf.getvalue(), media_type="image/png")
+    except Exception as e:
+        log.error("Map tile failed", {"error": str(e)})
+        return Response(content=str(e), status_code=500)
 
 @app.get("/health")
 async def health():
