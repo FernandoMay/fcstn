@@ -167,3 +167,6 @@ flutter_app/.flutter-plugins.dependencies
 # Temporary files
 *.tmp
 *.temp
+
+# Local Netlify folder
+.netlify
