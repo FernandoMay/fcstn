@@ -1,34 +1,31 @@
-FCSTN UNITY PROJECT — SETUP GUIDE
-====================================
+FCSTN UNITY PROJECT — STANDALONE DEMO
+======================================
 
 Prerequisites:
-  1. Unity Hub (already installed)
-  2. Unity Editor 2022.3 LTS — install via Unity Hub
+  1. Unity Hub
+  2. Unity Editor 2022.3 LTS (2022.3.20f1) — install via Unity Hub
 
-Steps:
-  1. Open Unity Hub
-  2. Click "Open" → select this folder (FCSTNProject)
-  3. If prompted, install Unity 2022.3.20f1 (or any 2022.3 LTS)
-  4. Once the project opens, go to Assets/Scenes and create a new scene (File → Save As → MainScene)
+Quick Start (2 minutes):
+  1. Open Unity Hub → Open → select this folder (FCSTNProject)
+  2. If prompted, install Unity 2022.3.20f1
+  3. Once the project loads, in the Project window go to Assets/Scenes/
+  4. Open MainScene.unity (if it exists) OR create a new scene:
+     File → New Scene → Save As → Assets/Scenes/MainScene.unity
+  5. In the Hierarchy, right-click → Create Empty → name it "GameManager"
+  6. Select GameManager → Add Component → search for "FCSTNClient"
+  7. Press Play — the demo starts immediately with synthetic cognitive data!
 
-Create the scene:
-  1. Right-click in Hierarchy → Create Empty → name it "GameManager"
-  2. Select GameManager → Add Component → FCSTNClient
-  3. Create objects and drag them into the FCSTNClient slots:
-     - fractalMesh: Create a 3D Object → Sphere (or import your fractal mesh)
-     - mainCamera: Main Camera (already exists)
-     - sceneLight: Directional Light (already exists)
-     - fractalParticles: Create → Effects → Particle System (name: "FractalParticles")
-       - Enable Noise module in the Inspector
-     - glitchParticles: Create → Effects → Particle System (name: "GlitchParticles")
-       - Set start color to red
-  4. Create Glitch Material:
-     - In Assets/Materials, right-click → Create → Material (name: "GlitchMat")
-     - In the Inspector, set Shader to "Hidden/FCSTNGlitch"
-     - Assign GlitchMat to FCSTNClient.glitchMaterial
-  5. Press Play — the client connects to ws://localhost:8765
+No server setup needed — the FCSTNClient auto-creates all objects
+(sphere mesh, particles, lights, line renderer, glitch material) and
+generates realistic cognitive data in demo mode.
 
-To connect to your running FCSTN server:
-  - Start the server: python deploy_server.py
-  - Or start the FCSTN server: python -m server.fcstn_server
-  - The Unity client auto-connects and starts receiving metrics
+Controls (in the Inspector with GameManager selected):
+  - demoMode: toggle ON (default) for standalone; OFF to connect to Python server
+  - demoSpeed: adjust simulation speed (0.1–5.0)
+  - glitchMaterial: assign a material using the "Hidden/FCSTNGlitch" shader
+    for post-processing effects (auto-generated if left unassigned)
+
+Live Server Mode (optional):
+  - Set demoMode = false
+  - Start the FCSTN Python server: python -m server.fcstn_server
+  - The client connects to ws://localhost:8765 and receives real BCI data

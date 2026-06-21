@@ -69,6 +69,17 @@ python launch.py present    # Open slides
 | `run.bat` | Windows launcher menu |
 | `outputs/*.png` | Pre-generated visuals |
 
+## Unity Demo
+
+### Unity Demo (Standalone)
+The FCSTN Unity project at `unity/FCSTNProject/` provides a real-time 3D visualization of cognitive data:
+- **Offline Demo Mode**: Press Play and it works immediately with synthetic cognitive data — no server needed
+- **Live Server Mode**: Connect to a running FCSTN Python backend via WebSocket
+- **Visual Feedback**: Fractal mesh animation, particle systems, dynamic lighting, camera shake, glitch post-processing, fractal dimension line graph
+- **Requirements**: Unity 2022.3.20f1 (install via Unity Hub)
+- **Quick Start**: Open Unity Hub → Open → select `unity/FCSTNProject/` → Press Play
+- **Controls**: Toggle `demoMode` in the FCSTNClient Inspector, adjust `demoSpeed`
+
 ---
 
 ## Quick Start
@@ -230,3 +241,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Coalition game theory research community
 - Open-source fractal visualization projects
 - BCI hardware and software communities
+
+## Design System
+
+### Fractal Deep Space Design System
+The FCSTN design system (`design/DESIGN.md`) is built for neuro-digital networking:
+- **Theme**: Dark technical with glassmorphism
+- **Colors**: Deep navy (#0A0E14) background, Electric cyan (#00F2FF) primary, Emerald (#10B981) secondary
+- **Typography**: Inter for headings, JetBrains Mono for data/metrics
+- **Visual Style**: Glassmorphism, luminous stacking, glitch effects, fractal geometry

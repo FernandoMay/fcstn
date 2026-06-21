@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'services/websocket_service.dart';
 import 'screens/demo_screen.dart';
+import 'theme/app_theme.dart';
 
 void main() {
   runApp(const FCSTNApp());
@@ -26,13 +27,7 @@ class FCSTNApp extends StatelessWidget {
     return MaterialApp(
       title: 'FCSTN',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark().copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.cyanAccent,
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: Colors.black,
-      ),
+      theme: AppTheme.dark,
       home: DemoScreen(
         service: WebSocketService(url: _detectWsUrl()),
       ),

@@ -41,7 +41,11 @@ public enum VisualState { Base, Transitional, Critical }
 
 public class FCSTNClient : MonoBehaviour
 {
-    [Header("Connection")]
+    [Header("Mode")]
+    public bool demoMode = true;
+    [Range(0.1f, 5f)] public float demoSpeed = 1f;
+
+    [Header("Connection (ignored in demoMode)")]
     public string serverUrl = "ws://localhost:8765";
 
     [Header("Target Objects")]
@@ -114,8 +118,120 @@ public class FCSTNClient : MonoBehaviour
     private float[] termChars;
     private float[] termBrightness;
 
+    void AutoSetup()
+    {
+        if (fractalMesh == null)
+        {
+            GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = "FractalMesh";
+            go.transform.localScale = Vector3.one * 2f;
+            Renderer r = go.GetComponent<Renderer>();
+            if (r != null)
+            {
+                r.material = new Material(Shader.Find("Standard"));
+                r.material.color = new Color(0.1f, 0.4f, 1.0f);
+                r.material.EnableKeyword("_EMISSION");
+                r.material.SetColor("_EmissionColor", new Color(0.05f, 0.2f, 0.5f));
+            }
+            fractalMesh = go.transform;
+            Debug.Log("[FCSTN] Auto-created FractalMesh sphere");
+        }
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+        }
+
+        if (sceneLight == null)
+        {
+            Light existing = FindObjectOfType<Light>();
+            if (existing != null)
+            {
+                sceneLight = existing;
+                Debug.Log("[FCSTN] Using existing Light: " + existing.name);
+            }
+            else
+            {
+                GameObject go = new GameObject("SceneLight");
+                sceneLight = go.AddComponent<Light>();
+                sceneLight.type = LightType.Directional;
+                sceneLight.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+                sceneLight.intensity = 1.2f;
+                Debug.Log("[FCSTN] Auto-created directional light");
+            }
+        }
+
+        if (fractalParticles == null)
+        {
+            GameObject go = new GameObject("FractalParticles");
+            fractalParticles = go.AddComponent<ParticleSystem>();
+            var main = fractalParticles.main;
+            main.startLifetime = 3f;
+            main.startSpeed = 1f;
+            main.startSize = 0.1f;
+            main.maxParticles = 2000;
+            var emission = fractalParticles.emission;
+            emission.rateOverTime = 100f;
+            var noise = fractalParticles.noise;
+            noise.enabled = true;
+            noise.strength = 0.5f;
+            fractalParticles.transform.SetParent(transform);
+            Debug.Log("[FCSTN] Auto-created FractalParticles");
+        }
+
+        if (glitchParticles == null)
+        {
+            GameObject go = new GameObject("GlitchParticles");
+            glitchParticles = go.AddComponent<ParticleSystem>();
+            var main = glitchParticles.main;
+            main.startLifetime = 0.5f;
+            main.startSpeed = 2f;
+            main.startSize = 0.05f;
+            main.startColor = Color.red;
+            main.maxParticles = 200;
+            var emission = glitchParticles.emission;
+            emission.rateOverTime = 20f;
+            glitchParticles.transform.SetParent(transform);
+            Debug.Log("[FCSTN] Auto-created GlitchParticles");
+        }
+
+        if (dimGraph == null)
+        {
+            GameObject go = new GameObject("DimGraph");
+            dimGraph = go.AddComponent<LineRenderer>();
+            dimGraph.startWidth = 0.04f;
+            dimGraph.endWidth = 0.01f;
+            dimGraph.material = new Material(Shader.Find("Sprites/Default"));
+            dimGraph.startColor = Color.cyan;
+            dimGraph.endColor = Color.magenta;
+            dimGraph.useWorldSpace = true;
+            dimGraph.transform.SetParent(transform);
+            Debug.Log("[FCSTN] Auto-created DimGraph LineRenderer");
+        }
+
+        if (glitchMaterial == null)
+        {
+            Shader shader = Shader.Find("Hidden/FCSTNGlitch");
+            if (shader != null)
+            {
+                glitchMaterial = new Material(shader);
+                Debug.Log("[FCSTN] Auto-created GlitchMaterial");
+            }
+        }
+
+        if (GetComponent<AudioSource>() == null)
+        {
+            AudioSource aud = gameObject.AddComponent<AudioSource>();
+            aud.playOnAwake = false;
+            aud.loop = true;
+            Debug.Log("[FCSTN] Auto-added AudioSource");
+        }
+    }
+
     async void Start()
     {
+        AutoSetup();
+
         if (mainCamera != null)
         {
             cameraOriginPosition = mainCamera.transform.localPosition;
@@ -162,8 +278,16 @@ public class FCSTNClient : MonoBehaviour
 
         InitTerminalOverlay();
 
-        cts = new CancellationTokenSource();
-        _ = ConnectAndListen();
+        if (demoMode)
+        {
+            Debug.Log("[FCSTN] DEMO MODE — generating synthetic cognitive data");
+            _ = RunDemoLoop();
+        }
+        else
+        {
+            cts = new CancellationTokenSource();
+            _ = ConnectAndListen();
+        }
     }
 
     void InitTerminalOverlay()
@@ -210,6 +334,61 @@ public class FCSTNClient : MonoBehaviour
 
     int _reconnectCount = 0;
     int _msgCount = 0;
+
+    // ---- Demo Mode ----
+    float _demoTime = 0f;
+    string[] _stateNames = new string[] { "resting", "focus", "excited", "meditative", "alert" };
+    Color[] _stateColors = new Color[] {
+        new Color(0.1f, 0.4f, 1.0f),  // resting - blue
+        new Color(0.0f, 0.9f, 0.5f),  // focus - green
+        new Color(1.0f, 0.3f, 0.3f),  // excited - red
+        new Color(0.6f, 0.2f, 0.8f),  // meditative - purple
+        new Color(1.0f, 0.8f, 0.0f)   // alert - yellow
+    };
+
+    async Task RunDemoLoop()
+    {
+        while (true)
+        {
+            _demoTime += Time.deltaTime * demoSpeed * 0.2f;
+            
+            float t = _demoTime;
+            float phase1 = Mathf.Sin(t * 0.7f) * 0.5f + 0.5f;
+            float phase2 = Mathf.Sin(t * 1.3f + 1.2f) * 0.5f + 0.5f;
+            float phase3 = Mathf.Sin(t * 0.4f + 2.8f) * 0.5f + 0.5f;
+            float phase4 = Mathf.Sin(t * 2.1f + 0.5f) * 0.5f + 0.5f;
+
+            int stateIdx = Mathf.FloorToInt((Mathf.Sin(t * 0.15f) * 0.5f + 0.5f) * (_stateNames.Length - 1));
+            stateIdx = Mathf.Clamp(stateIdx, 0, _stateNames.Length - 1);
+
+            float dim = Mathf.Lerp(2.1f, 3.2f, (phase2 + phase3) * 0.5f);
+            CognitiveData data = new CognitiveData
+            {
+                attention = Mathf.Lerp(0.3f, 0.95f, phase1),
+                engagement = Mathf.Lerp(0.2f, 0.9f, phase2),
+                load = Mathf.Lerp(0.1f, 0.8f, phase3),
+                workload = Mathf.Lerp(0.1f, 0.8f, phase3),
+                valence = Mathf.Lerp(0.3f, 0.9f, phase4),
+                coherence = Mathf.Lerp(0.2f, 0.95f, (phase1 + phase2) * 0.5f),
+                fractal_dimension = dim,
+                fractal_dim = dim,
+                state_name = _stateNames[stateIdx],
+                phase = "demo",
+                color = "#" + ColorUtility.ToHtmlStringRGB(_stateColors[stateIdx]),
+                complexity = Mathf.Lerp(0.3f, 0.9f, phase1),
+                instability = Mathf.Lerp(0.05f, 0.6f, phase3),
+                timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                narrative = "FCSTN Demo: " + _stateNames[stateIdx]
+            };
+
+            lock (pendingData)
+            {
+                pendingData.Enqueue(data);
+            }
+
+            await Task.Delay(Mathf.RoundToInt(100f / demoSpeed));
+        }
+    }
 
     async Task ConnectAndListen()
     {

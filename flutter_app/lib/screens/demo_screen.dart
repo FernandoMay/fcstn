@@ -38,14 +38,14 @@ class _DemoScreenState extends State<DemoScreen> {
     final state = widget.service.currentState;
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
+    final cs = Theme.of(context).colorScheme;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: Colors.black,
+        systemNavigationBarColor: cs.surface.toARGB32(),
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF050510),
         body: SafeArea(
           child: isLandscape ? _buildLandscape(state) : _buildPortrait(state),
         ),
@@ -72,6 +72,7 @@ class _DemoScreenState extends State<DemoScreen> {
   }
 
   Widget _buildCenter(CognitiveState state) {
+    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -85,25 +86,25 @@ class _DemoScreenState extends State<DemoScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          _buildNarrative(state),
+          _buildNarrative(state, cs),
         ],
       ),
     );
   }
 
-  Widget _buildNarrative(CognitiveState state) {
+  Widget _buildNarrative(CognitiveState state, ColorScheme cs) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: cs.onSurface.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
       ),
       child: Text(
         state.narrative.isNotEmpty ? state.narrative : 'Sintonizando red fractal...',
         style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
+          color: cs.onSurface.withValues(alpha: 0.5),
           fontSize: 11, fontFamily: 'monospace', fontStyle: FontStyle.italic,
         ),
       ),
@@ -111,32 +112,35 @@ class _DemoScreenState extends State<DemoScreen> {
   }
 
   Widget _buildSidebar(CognitiveState state) {
+    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: const Color(0xFF080818),
+        color: cs.surfaceContainerLow,
         border: Border(
-          right: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.1)),
+          right: BorderSide(color: cs.primary.withValues(alpha: 0.1)),
         ),
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(state),
+            _buildHeader(state, cs),
             const SizedBox(height: 8),
             MetricsDisplay(state: state),
             const SizedBox(height: 8),
             VoiceControls(service: widget.service),
             const SizedBox(height: 8),
-            _buildFooter(state),
+            _buildFooter(state, cs),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(CognitiveState state) {
+  Widget _buildHeader(CognitiveState state, ColorScheme cs) {
+    final connected = widget.service.connected;
+    final statusColor = connected ? cs.secondary : cs.error;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -154,11 +158,11 @@ class _DemoScreenState extends State<DemoScreen> {
           Container(
             width: 8, height: 8,
             decoration: BoxDecoration(
-              color: widget.service.connected ? Colors.greenAccent : Colors.redAccent,
+              color: statusColor,
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: (widget.service.connected ? Colors.greenAccent : Colors.redAccent).withValues(alpha: 0.5),
+                  color: statusColor.withValues(alpha: 0.5),
                   blurRadius: 8,
                 ),
               ],
@@ -176,9 +180,9 @@ class _DemoScreenState extends State<DemoScreen> {
             ),
           ),
           Text(
-            widget.service.connected ? '●' : '○',
+            connected ? '●' : '○',
             style: TextStyle(
-              color: widget.service.connected ? Colors.greenAccent : Colors.redAccent,
+              color: statusColor,
               fontSize: 10, fontFamily: 'monospace',
             ),
           ),
@@ -187,16 +191,16 @@ class _DemoScreenState extends State<DemoScreen> {
     );
   }
 
-  Widget _buildFooter(CognitiveState state) {
+  Widget _buildFooter(CognitiveState state, ColorScheme cs) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        color: cs.onSurface.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         'D=${state.fractalDimension.toStringAsFixed(2)} | ${widget.service.stats}',
-        style: const TextStyle(color: Colors.white24, fontSize: 8, fontFamily: 'monospace'),
+        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.38), fontSize: 8, fontFamily: 'monospace'),
       ),
     );
   }
