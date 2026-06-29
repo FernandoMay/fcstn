@@ -56,6 +56,25 @@ class CognitiveState:
         }
 
 
+EMOTION_MAP = {
+    "happy": {"valence": 0.90, "load": 0.20, "engagement": 0.75, "attention": 0.50,
+              "narrative": "Deteccion de alegria facial. Valencia emocional positiva alta. Expandiendo geometria con energia luminica."},
+    "sad": {"valence": 0.15, "load": 0.30, "engagement": 0.25, "attention": 0.35,
+            "narrative": "Deteccion de tristeza facial. Modulando espacio fractal hacia patrones contemplativos."},
+    "angry": {"valence": 0.10, "load": 0.85, "attention": 0.90, "engagement": 0.70,
+              "narrative": "Deteccion de ira facial. Sobrecarga cognitiva detectada. Activando modulacion caotica de emergencia."},
+    "fearful": {"valence": 0.15, "load": 0.80, "attention": 0.85, "engagement": 0.60,
+                "narrative": "Deteccion de miedo facial. Respuesta de alerta activada. Elevando vigilancia del sistema."},
+    "surprised": {"valence": 0.70, "load": 0.40, "attention": 0.90, "engagement": 0.80,
+                  "narrative": "Deteccion de sorpresa facial. Atencion maxima. Nuevos patrones fractales emergiendo del asombro."},
+    "disgusted": {"valence": 0.10, "load": 0.50, "attention": 0.60, "engagement": 0.30,
+                  "narrative": "Deteccion de disgusto facial. Respuesta de rechazo. Reconfigurando geometria."},
+    "neutral": {"valence": 0.50, "load": 0.25, "engagement": 0.40, "attention": 0.40,
+                "narrative": "Rostro neutro detectado. Homeostasis cognitiva. Monitoreo continuo del espacio facial."},
+    "away": {"valence": 0.30, "load": 0.10, "engagement": 0.15, "attention": 0.10,
+             "narrative": "Rostro no detectado. Red en espera atenta. Retornando a estado de reposo vigilante."},
+}
+
 KEYWORDS_MAP = {
     "caos": {"load": 0.95, "attention": 0.90, "engagement": 0.85, "narrative": "Modulacion caotica de espacio-tiempo. Inyectando entropia fractal."},
     "colapso": {"load": 0.95, "attention": 0.95, "engagement": 0.70, "narrative": "Colapso inminente detectado. Espacio-tiempo comprimiendose de golpe."},
@@ -243,6 +262,47 @@ class FCSTNEngine:
         }
         self.state.narrative = manual_narratives.get(self.state.state_name, "Control manual activo.")
         self.state.timestamp = time.time()
+        return self.state
+
+    def process_emotion(self, emotion_data: dict) -> CognitiveState:
+        """Process detected emotion from webcam face-api.js."""
+        self.time_step += 1
+        self._idle_counter = 0
+        emotion = emotion_data.get("emotion", "neutral")
+        prob = emotion_data.get("probability", 0.5)
+        ear = emotion_data.get("ear", 0.3)
+        mouth_ratio = emotion_data.get("mouthRatio", 0.1)
+        brow_raise = emotion_data.get("browRaise", 0.1)
+
+        log.info("Emotion detected", {"emotion": emotion, "probability": prob, "ear": ear})
+
+        mapping = EMOTION_MAP.get(emotion, EMOTION_MAP["neutral"])
+
+        # Blend based on probability confidence
+        confidence = min(1.0, prob * 1.5)
+        self.state.attention = self.state.attention * 0.4 + mapping.get("attention", 0.5) * 0.6 * confidence
+        self.state.engagement = self.state.engagement * 0.4 + mapping.get("engagement", 0.5) * 0.6 * confidence
+        self.state.workload = self.state.workload * 0.4 + mapping.get("load", 0.3) * 0.6 * confidence
+        self.state.valence = self.state.valence * 0.4 + mapping.get("valence", 0.5) * 0.6 * confidence
+
+        self.state.attention = max(0.05, min(0.95, self.state.attention))
+        self.state.engagement = max(0.05, min(0.95, self.state.engagement))
+        self.state.workload = max(0.05, min(0.95, self.state.workload))
+        self.state.valence = max(0.05, min(0.95, self.state.valence))
+
+        # Eye aspect ratio → coherence proxy (blinking = less coherent)
+        self.state.coherence = self.state.coherence * 0.7 + min(1.0, max(0.1, ear * 2.0)) * 0.3
+
+        # Mouth ratio → additional valence boost
+        if mouth_ratio > 0.3 and emotion in ("happy", "surprised"):
+            self.state.valence = min(0.95, self.state.valence + 0.1)
+
+        self._derive_state()
+        self.state.narrative = mapping.get("narrative", "Procesando senales faciales en tiempo real.")
+        self.state.timestamp = time.time()
+        self.history.append(self.state.to_dict())
+        if len(self.history) > 200:
+            self.history.pop(0)
         return self.state
 
     def idle_drift(self):

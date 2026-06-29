@@ -116,6 +116,10 @@ async def websocket_endpoint(ws: WebSocket):
                     text = msg.get("text", "")
                     log.info("Voice command", {"client": client_id, "text": text, "command": text.lower().strip()})
                     engine.process_input(text, float(msg.get("time_taken", 1.0)))
+                elif t == "emotion":
+                    emotion_data = msg.get("data", {})
+                    log.info("Emotion data", {"client": client_id, "emotion": emotion_data.get("emotion"), "prob": emotion_data.get("probability")})
+                    engine.process_emotion(emotion_data)
                 elif t in ("control", "set"):
                     params = {k: msg[k] for k in ("attention","engagement","load","valence","coherence","phase") if k in msg}
                     log.info("Manual set", {"client": client_id, **params})

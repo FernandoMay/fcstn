@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/websocket_service.dart';
+import '../services/camera_service.dart';
 import '../widgets/fractal_viewer.dart';
 import '../widgets/metrics_display.dart';
 import '../widgets/voice_controls.dart';
+import '../widgets/camera_overlay.dart';
 import '../models/cognitive_state.dart';
 
 class DemoScreen extends StatefulWidget {
@@ -15,10 +17,12 @@ class DemoScreen extends StatefulWidget {
 
 class _DemoScreenState extends State<DemoScreen> {
   FractalMode _fractalMode = FractalMode.auto;
+  late final CameraService _cameraService;
 
   @override
   void initState() {
     super.initState();
+    _cameraService = CameraService(widget.service);
     widget.service.addListener(_onStateChanged);
     widget.service.connect();
   }
@@ -30,6 +34,7 @@ class _DemoScreenState extends State<DemoScreen> {
   @override
   void dispose() {
     widget.service.removeListener(_onStateChanged);
+    _cameraService.dispose();
     super.dispose();
   }
 
@@ -38,12 +43,10 @@ class _DemoScreenState extends State<DemoScreen> {
     final state = widget.service.currentState;
     final size = MediaQuery.of(context).size;
     final isLandscape = size.width > size.height;
-    final cs = Theme.of(context).colorScheme;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        systemNavigationBarColor: cs.surface.toARGB32(),
+        systemNavigationBarColor: Colors.black,
       ),
       child: Scaffold(
         body: SafeArea(
@@ -86,25 +89,25 @@ class _DemoScreenState extends State<DemoScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          _buildNarrative(state, cs),
+            _buildNarrative(state),
         ],
       ),
     );
   }
 
-  Widget _buildNarrative(CognitiveState state, ColorScheme cs) {
+  Widget _buildNarrative(CognitiveState state) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: cs.onSurface.withValues(alpha: 0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
       child: Text(
         state.narrative.isNotEmpty ? state.narrative : 'Sintonizando red fractal...',
         style: TextStyle(
-          color: cs.onSurface.withValues(alpha: 0.5),
+          color: Colors.white.withValues(alpha: 0.5),
           fontSize: 11, fontFamily: 'monospace', fontStyle: FontStyle.italic,
         ),
       ),
@@ -112,35 +115,36 @@ class _DemoScreenState extends State<DemoScreen> {
   }
 
   Widget _buildSidebar(CognitiveState state) {
-    final cs = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerLow,
+        color: const Color(0xFF080818),
         border: Border(
-          right: BorderSide(color: cs.primary.withValues(alpha: 0.1)),
+          right: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.1)),
         ),
       ),
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(state, cs),
+            _buildHeader(state),
             const SizedBox(height: 8),
             MetricsDisplay(state: state),
             const SizedBox(height: 8),
+            CameraOverlay(cameraService: _cameraService, state: state),
+            const SizedBox(height: 8),
             VoiceControls(service: widget.service),
             const SizedBox(height: 8),
-            _buildFooter(state, cs),
+            _buildFooter(state),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader(CognitiveState state, ColorScheme cs) {
+  Widget _buildHeader(CognitiveState state) {
     final connected = widget.service.connected;
-    final statusColor = connected ? cs.secondary : cs.error;
+    final statusColor = connected ? Colors.greenAccent : Colors.redAccent;
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
@@ -191,16 +195,16 @@ class _DemoScreenState extends State<DemoScreen> {
     );
   }
 
-  Widget _buildFooter(CognitiveState state, ColorScheme cs) {
+  Widget _buildFooter(CognitiveState state) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        color: cs.onSurface.withValues(alpha: 0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         'D=${state.fractalDimension.toStringAsFixed(2)} | ${widget.service.stats}',
-        style: TextStyle(color: cs.onSurface.withValues(alpha: 0.38), fontSize: 8, fontFamily: 'monospace'),
+        style: const TextStyle(color: Colors.white24, fontSize: 8, fontFamily: 'monospace'),
       ),
     );
   }
