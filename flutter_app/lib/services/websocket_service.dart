@@ -24,6 +24,9 @@ class WebSocketService extends ChangeNotifier {
   int get messageCount => _messageCount;
   int get reconnectAttempts => _reconnectAttempts;
 
+  final List<CognitiveState> history = [];
+  static const int maxHistory = 120;
+
   final String _url;
   static const double _interpDuration = 0.05;
   static const double _interpStep = 0.15;
@@ -51,6 +54,8 @@ class WebSocketService extends ChangeNotifier {
             final json = jsonDecode(data as String) as Map<String, dynamic>;
             _previousState = _targetState;
             _targetState = CognitiveState.fromJson(json);
+            history.add(_targetState);
+            if (history.length > maxHistory) history.removeAt(0);
           } catch (e) {
             _parseErrors++;
             _log.warn('Parse error', {'error': '$e', 'raw': data.toString().substring(0, min(100, data.toString().length))});

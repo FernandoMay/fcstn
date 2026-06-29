@@ -6,6 +6,7 @@ import '../widgets/fractal_viewer.dart';
 import '../widgets/metrics_display.dart';
 import '../widgets/voice_controls.dart';
 import '../widgets/camera_overlay.dart';
+import '../widgets/history_chart.dart';
 import '../models/cognitive_state.dart';
 
 class DemoScreen extends StatefulWidget {
@@ -130,7 +131,9 @@ class _DemoScreenState extends State<DemoScreen> {
             _buildHeader(state),
             const SizedBox(height: 8),
             MetricsDisplay(state: state),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
+            HistoryChart(history: widget.service.history, currentState: state),
+            const SizedBox(height: 6),
             CameraOverlay(cameraService: _cameraService, state: state),
             const SizedBox(height: 8),
             VoiceControls(service: widget.service),
