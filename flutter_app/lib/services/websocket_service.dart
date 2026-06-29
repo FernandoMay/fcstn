@@ -97,7 +97,7 @@ class WebSocketService extends ChangeNotifier {
   void _startInterpolation() {
     _interpTimer?.cancel();
     _interpTimer = Timer.periodic(
-      Duration(milliseconds: (kReleaseMode ? 16 : 50)),
+      Duration(milliseconds: (kReleaseMode ? 33 : 100)),
       (_) {
         if (_previousState != null && _targetState != _previousState) {
           final t = _interpStep;

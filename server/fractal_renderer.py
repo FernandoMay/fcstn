@@ -45,7 +45,7 @@ def smooth_color(iterations, max_iter, z_value, palette, palette_offset=0.0):
     c0, c1 = palette[idx], palette[idx + 1]
     return tuple(int(a + (b - a) * frac) for a, b in zip(c0, c1))
 
-def render_mandelbrot(width, height, palette_name="cyberpunk", max_iter=256,
+def render_mandelbrot(width, height, palette_name="cyberpunk", max_iter=96,
                       center_x=-0.5, center_y=0.0, zoom=1.0, rotation=0.0,
                       palette_offset=0.0, julia=False, julia_cx=0.285, julia_cy=0.01):
     """Render a high-quality Mandelbrot or Julia set."""
@@ -171,8 +171,8 @@ def render_map_tile(zoom_level, tile_x, tile_y, palette_name="earth"):
     center_y = 0.0 + (tile_y - 2**(zoom_level-1)) * span
     return render_terrain(size, size, palette_name, center_x, center_y, 2.0 / span)
 
-def render_fractal_by_state(cognitive_state, width=960, height=540):
-    """Render fractal image based on current cognitive state for dynamic visual feedback."""
+def render_fractal_by_state(cognitive_state, width=640, height=360):
+    """Render fractal dynamically based on cognitive state."""
     attn = cognitive_state.get('attention', 0.5)
     eng = cognitive_state.get('engagement', 0.5)
     load = cognitive_state.get('load', 0.3)
@@ -180,9 +180,9 @@ def render_fractal_by_state(cognitive_state, width=960, height=540):
     coherence = cognitive_state.get('coherence', 0.5)
     state_name = cognitive_state.get('state_name', 'resting')
 
-    zoom = 1.0 + attn * 3.0 + eng * 2.0
+    zoom = 1.0 + attn * 2.0 + eng * 1.5
     rotation = val * math.pi * 2 - math.pi
-    offset = (1.0 - coherence) * 0.5
+    offset = (1.0 - coherence) * 0.3
     cx = -0.5 + (val - 0.5) * 0.3
     cy = 0.0 + (attn - 0.5) * 0.2
 
@@ -192,12 +192,11 @@ def render_fractal_by_state(cognitive_state, width=960, height=540):
         "curious": "aurora", "resting": "magnetic",
     }
     palette = palette_switching.get(state_name, "cyberpunk")
+    iters = min(96, 48 + int(attn * 48))
 
     if load > 0.8:
-        return render_mandelbrot(width, height, "fire", 128 + int(attn * 128),
-                                 cx, cy, zoom, rotation, offset)
+        return render_mandelbrot(width, height, "fire", iters, cx, cy, zoom, rotation, offset)
     elif coherence > 0.7:
-        return render_julia(width, height, palette, 256, cx, cy, zoom, offset)
+        return render_julia(width, height, palette, iters, cx, cy, zoom, offset)
     else:
-        return render_mandelbrot(width, height, palette, 128 + int(attn * 128),
-                                 cx, cy, zoom, rotation, offset)
+        return render_mandelbrot(width, height, palette, iters, cx, cy, zoom, rotation, offset)

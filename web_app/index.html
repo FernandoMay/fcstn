@@ -527,7 +527,7 @@ function connectWS() {
     ws.onopen = () => {
         setConnected(true);
         fetchFractal();
-        fractalInterval = setInterval(fetchFractal, 1000);
+        fractalInterval = setInterval(fetchFractal, 3000);
     };
     ws.onmessage = (e) => {
         try {
@@ -535,14 +535,12 @@ function connectWS() {
             let data = msg.data || msg;
             if (data.attention !== undefined) updateMetrics(data);
             if (msg.type === 'emotion') updateEmotion(msg.data);
-        } catch(err) {
-            // ignore
-        }
+        } catch(err) {}
     };
     ws.onclose = () => {
         setConnected(false);
         if (fractalInterval) clearInterval(fractalInterval);
-        setTimeout(connectWS, 3000);
+        setTimeout(connectWS, 5000);
     };
     ws.onerror = () => { ws.close(); };
 }
@@ -577,11 +575,12 @@ function setConnected(connected) {
 }
 
 // ============= FRACTAL API =============
+let _fractalUrl = '';
 function fetchFractal() {
-    const dim = currentState === 'focused' ? 2.8 : currentState === 'stressed' ? 2.2 : currentState === 'engaged' ? 3.0 : 2.5;
-    const palette = currentState === 'focused' ? 'cyberpunk' : currentState === 'stressed' ? 'fire' : 'magnetic';
-    const url = `${API_BASE}/api/fractal/state?width=960&height=540`;
-    fetch(url)
+    const url = `${API_BASE}/api/fractal/state?width=640&height=360`;
+    if (url === _fractalUrl) return; // skip duplicate requests
+    _fractalUrl = url;
+    fetch(url, { signal: AbortSignal.timeout(8000) })
         .then(r => r.blob())
         .then(blob => {
             const u = URL.createObjectURL(blob);
@@ -589,7 +588,7 @@ function fetchFractal() {
             document.getElementById('neuroFractalImg').src = u;
             document.getElementById('fractalLoader').style.display = 'none';
         })
-        .catch(() => {});
+        .catch(() => { _fractalUrl = ''; });
 }
 
 // ============= METRICS UPDATE =============

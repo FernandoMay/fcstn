@@ -171,13 +171,13 @@ async def get_logs(n: int = 100, level: str = ""):
 # ---- Fractal image cache ----
 _fractal_cache = {}
 _fractal_cache_lock = threading.Lock()
-_FRACTAL_CACHE_TTL = 2.0  # seconds
+_FRACTAL_CACHE_TTL = 30.0  # seconds — render takes 2-5s, avoid repeat work
 _fractal_executor = None
 
 def _get_fractal_executor():
     global _fractal_executor
     if _fractal_executor is None:
-        _fractal_executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+        _fractal_executor = concurrent.futures.ThreadPoolExecutor(max_workers=8)
     return _fractal_executor
 
 def _get_cached_fractal(key, render_func, *args, **kwargs):
@@ -188,9 +188,13 @@ def _get_cached_fractal(key, render_func, *args, **kwargs):
             return cached['image']
     img = render_func(*args, **kwargs)
     buf = io.BytesIO()
-    img.save(buf, format='PNG')
+    img.save(buf, format='PNG', optimize=True)
     buf.seek(0)
     with _fractal_cache_lock:
+        # Keep last 3 entries, drop oldest
+        if len(_fractal_cache) > 10:
+            oldest = min(_fractal_cache.keys(), key=lambda k: _fractal_cache[k]['time'])
+            del _fractal_cache[oldest]
         _fractal_cache[key] = {'image': buf.getvalue(), 'time': now}
     return _fractal_cache[key]['image']
 
@@ -235,11 +239,12 @@ async def fractal(
         return Response(content=str(e), status_code=500)
 
 @app.get("/api/fractal/state")
-async def fractal_by_state(width: int = 960, height: int = 540):
+async def fractal_by_state(width: int = 640, height: int = 360):
     """Render fractal dynamically based on current cognitive state."""
-    log.info("Fractal by state requested", {"state": engine.state.state_name})
-    key = f"state:{engine.state.state_name}:{engine.state.attention:.2f}:{engine.state.engagement:.2f}:{time.time()//2}"
-    state_dict = engine.state.to_dict()
+    s = engine.state
+    # Stable key — same state + quantized metrics = cache hit
+    key = f"state:{s.state_name}:{s.attention:.1f}:{s.engagement:.1f}:{s.fractal_dimension:.1f}"
+    state_dict = s.to_dict()
     loop = asyncio.get_event_loop()
     img_data = await loop.run_in_executor(_get_fractal_executor(), _get_cached_fractal, key, render_fractal_by_state, state_dict, width, height)
     return Response(content=img_data, media_type="image/png")

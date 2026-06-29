@@ -72,10 +72,10 @@ class _FractalViewerState extends State<FractalViewer> {
   void initState() {
     super.initState();
     _fetchImage();
-    _refreshTimer = Timer.periodic(const Duration(milliseconds: 500), (_) {
+    _refreshTimer = Timer.periodic(const Duration(milliseconds: 2000), (_) {
       _frameCount++;
       final url = _buildUrl();
-      if (url != _lastUrl || _frameCount % 4 == 0) {
+      if (url != _lastUrl) {
         _lastUrl = url;
         _fetchImage();
       }

@@ -182,5 +182,5 @@ class _GaugePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_GaugePainter old) => old.value != value || old.phase != phase;
+  bool shouldRepaint(_GaugePainter old) => (old.value - value).abs() > 0.01 || (old.phase - phase).abs() > 0.01;
 }
