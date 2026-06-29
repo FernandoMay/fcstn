@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/websocket_service.dart';
+import '../theme/app_colors.dart';
 
 class VoiceControls extends StatefulWidget {
   final WebSocketService service;
@@ -36,18 +37,26 @@ class _VoiceControlsState extends State<VoiceControls> {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.15)),
+        color: AppColors.surfaceContainerLow,
         borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Text('VOICE', style: TextStyle(color: Colors.cyanAccent.withValues(alpha: 0.7), fontSize: 9, fontFamily: 'monospace', fontWeight: FontWeight.w700, letterSpacing: 1)),
+              Text('VOICE',
+                style: TextStyle(
+                  color: AppColors.primary.withValues(alpha: 0.6),
+                  fontSize: 9, fontFamily: 'JetBrains Mono', fontWeight: FontWeight.w700, letterSpacing: 1,
+                ),
+              ),
               const Spacer(),
               if (_lastSent.isNotEmpty)
-                Text(_lastSent, style: const TextStyle(color: Colors.white24, fontSize: 8, fontFamily: 'monospace')),
+                Text(_lastSent,
+                  style: TextStyle(color: AppColors.onSurface.withValues(alpha: 0.25), fontSize: 8, fontFamily: 'JetBrains Mono'),
+                ),
             ],
           ),
           const SizedBox(height: 4),
@@ -61,14 +70,19 @@ class _VoiceControlsState extends State<VoiceControls> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        Colors.cyanAccent.withValues(alpha: 0.08),
-                        Colors.cyanAccent.withValues(alpha: 0.02),
+                        AppColors.primary.withValues(alpha: 0.08),
+                        AppColors.primary.withValues(alpha: 0.02),
                       ],
                     ),
-                    border: Border.all(color: Colors.cyanAccent.withValues(alpha: 0.2)),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                     borderRadius: BorderRadius.circular(3),
                   ),
-                  child: Text(e.$1, style: const TextStyle(color: Colors.cyanAccent, fontSize: 8, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+                  child: Text(e.$1,
+                    style: TextStyle(
+                      color: AppColors.primary,
+                      fontSize: 8, fontFamily: 'JetBrains Mono', fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               );
             }).toList(),
@@ -81,15 +95,19 @@ class _VoiceControlsState extends State<VoiceControls> {
                   height: 24,
                   child: TextField(
                     controller: _controller,
-                    style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace'),
+                    style: TextStyle(color: AppColors.onSurface, fontSize: 10, fontFamily: 'JetBrains Mono'),
                     decoration: InputDecoration(
                       hintText: 'command...',
-                      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.15), fontSize: 10, fontFamily: 'monospace'),
+                      hintStyle: TextStyle(color: AppColors.onSurface.withValues(alpha: 0.12), fontSize: 10, fontFamily: 'JetBrains Mono'),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
-                      border: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
-                      enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.outline.withValues(alpha: 0.15)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: AppColors.outline.withValues(alpha: 0.08)),
+                      ),
                       filled: true,
-                      fillColor: Colors.white.withValues(alpha: 0.03),
+                      fillColor: AppColors.surfaceContainer,
                     ),
                     onSubmitted: (v) {
                       if (v.trim().isNotEmpty) { _sendCommand(v.trim()); _controller.clear(); }
@@ -105,10 +123,10 @@ class _VoiceControlsState extends State<VoiceControls> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: Colors.cyanAccent.withValues(alpha: 0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(3),
                   ),
-                  child: const Icon(Icons.bolt, size: 12, color: Colors.cyanAccent),
+                  child: Icon(Icons.bolt, size: 12, color: AppColors.primary),
                 ),
               ),
             ],

@@ -10,6 +10,7 @@ sys.path.insert(0, str(ROOT))
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Query
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from server.fcstn_server import FCSTNEngine, CognitiveState, KEYWORDS_MAP
@@ -22,6 +23,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [FCSTN] %(message)s"
 log = get_logger("DEPLOY")
 
 app = FastAPI(title="FCSTN Live Server", version="2.1.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 engine = FCSTNEngine()
 
 flutter_dir = ROOT / "flutter_app" / "build" / "web"

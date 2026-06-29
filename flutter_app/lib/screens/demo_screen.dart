@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/websocket_service.dart';
@@ -7,6 +8,9 @@ import '../widgets/metrics_display.dart';
 import '../widgets/voice_controls.dart';
 import '../widgets/camera_overlay.dart';
 import '../widgets/history_chart.dart';
+import '../widgets/state_log.dart';
+import '../widgets/scanline_overlay.dart';
+import '../theme/app_colors.dart';
 import '../models/cognitive_state.dart';
 
 class DemoScreen extends StatefulWidget {
@@ -19,6 +23,9 @@ class DemoScreen extends StatefulWidget {
 class _DemoScreenState extends State<DemoScreen> {
   FractalMode _fractalMode = FractalMode.auto;
   late final CameraService _cameraService;
+  String _lastStateName = '';
+  final _stateChangeController = StreamController<String>.broadcast();
+  Stream<String> get stateChanges => _stateChangeController.stream;
 
   @override
   void initState() {
@@ -26,16 +33,24 @@ class _DemoScreenState extends State<DemoScreen> {
     _cameraService = CameraService(widget.service);
     widget.service.addListener(_onStateChanged);
     widget.service.connect();
+    _lastStateName = widget.service.currentState.stateName;
   }
 
   void _onStateChanged() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    final newState = widget.service.currentState.stateName;
+    if (newState != _lastStateName && _lastStateName.isNotEmpty) {
+      _stateChangeController.add(newState);
+    }
+    _lastStateName = newState;
+    setState(() {});
   }
 
   @override
   void dispose() {
     widget.service.removeListener(_onStateChanged);
     _cameraService.dispose();
+    _stateChangeController.close();
     super.dispose();
   }
 
@@ -50,8 +65,13 @@ class _DemoScreenState extends State<DemoScreen> {
         systemNavigationBarColor: Colors.black,
       ),
       child: Scaffold(
-        body: SafeArea(
-          child: isLandscape ? _buildLandscape(state) : _buildPortrait(state),
+        body: Stack(
+          children: [
+            SafeArea(
+              child: isLandscape ? _buildLandscape(state) : _buildPortrait(state),
+            ),
+            const ScanlineOverlay(),
+          ],
         ),
       ),
     );
@@ -60,7 +80,7 @@ class _DemoScreenState extends State<DemoScreen> {
   Widget _buildLandscape(CognitiveState state) {
     return Row(
       children: [
-        SizedBox(width: 220, child: _buildSidebar(state)),
+        SizedBox(width: 300, child: _buildSidebar(state)),
         Expanded(child: _buildCenter(state)),
       ],
     );
@@ -69,14 +89,13 @@ class _DemoScreenState extends State<DemoScreen> {
   Widget _buildPortrait(CognitiveState state) {
     return Column(
       children: [
-        Expanded(child: _buildCenter(state)),
-        SizedBox(height: 200, child: _buildSidebar(state)),
+        Expanded(flex: 3, child: _buildCenter(state)),
+        Expanded(flex: 2, child: _buildSidebar(state)),
       ],
     );
   }
 
   Widget _buildCenter(CognitiveState state) {
-    final cs = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.all(8),
       child: Column(
@@ -90,7 +109,9 @@ class _DemoScreenState extends State<DemoScreen> {
             ),
           ),
           const SizedBox(height: 6),
-            _buildNarrative(state),
+          _buildNarrative(state),
+          const SizedBox(height: 6),
+          StateLog(stateChanges: stateChanges),
         ],
       ),
     );
@@ -99,17 +120,20 @@ class _DemoScreenState extends State<DemoScreen> {
   Widget _buildNarrative(CognitiveState state) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
+        gradient: LinearGradient(colors: [
+          _stateColor(state).withValues(alpha: 0.06),
+          AppColors.surfaceContainerLow,
+        ]),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+        border: Border.all(color: _stateColor(state).withValues(alpha: 0.15)),
       ),
       child: Text(
         state.narrative.isNotEmpty ? state.narrative : 'Sintonizando red fractal...',
         style: TextStyle(
-          color: Colors.white.withValues(alpha: 0.5),
-          fontSize: 11, fontFamily: 'monospace', fontStyle: FontStyle.italic,
+          color: AppColors.onSurface.withValues(alpha: 0.5),
+          fontSize: 11, fontFamily: 'Inter', fontStyle: FontStyle.italic,
         ),
       ),
     );
@@ -117,11 +141,11 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildSidebar(CognitiveState state) {
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: const Color(0xFF080818),
+        color: AppColors.surfaceContainerLowest,
         border: Border(
-          right: BorderSide(color: Colors.cyanAccent.withValues(alpha: 0.1)),
+          right: BorderSide(color: AppColors.primary.withValues(alpha: 0.1)),
         ),
       ),
       child: SingleChildScrollView(
@@ -129,11 +153,11 @@ class _DemoScreenState extends State<DemoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(state),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             MetricsDisplay(state: state),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             HistoryChart(history: widget.service.history, currentState: state),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             CameraOverlay(cameraService: _cameraService, state: state),
             const SizedBox(height: 8),
             VoiceControls(service: widget.service),
@@ -147,51 +171,47 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildHeader(CognitiveState state) {
     final connected = widget.service.connected;
-    final statusColor = connected ? Colors.greenAccent : Colors.redAccent;
+    final statusColor = connected ? AppColors.secondary : AppColors.error;
+    final stateColor = _stateColor(state);
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            _stateColor(state).withValues(alpha: 0.15),
-            Colors.transparent,
-          ],
-        ),
+        gradient: LinearGradient(colors: [
+          stateColor.withValues(alpha: 0.12),
+          stateColor.withValues(alpha: 0.02),
+        ]),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: _stateColor(state).withValues(alpha: 0.2)),
+        border: Border.all(color: stateColor.withValues(alpha: 0.2)),
       ),
-      child: Row(
+      child: Column(
         children: [
-          Container(
-            width: 8, height: 8,
-            decoration: BoxDecoration(
-              color: statusColor,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: statusColor.withValues(alpha: 0.5),
-                  blurRadius: 8,
+          Row(
+            children: [
+              Container(
+                width: 10, height: 10,
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  shape: BoxShape.circle,
+                  boxShadow: [BoxShadow(color: statusColor.withValues(alpha: 0.6), blurRadius: 10)],
                 ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              state.stateName.toUpperCase(),
-              style: TextStyle(
-                color: _stateColor(state),
-                fontSize: 13, fontFamily: 'monospace', fontWeight: FontWeight.w700,
-                letterSpacing: 2,
               ),
-            ),
-          ),
-          Text(
-            connected ? '●' : '○',
-            style: TextStyle(
-              color: statusColor,
-              fontSize: 10, fontFamily: 'monospace',
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  state.stateName.toUpperCase(),
+                  style: TextStyle(
+                    color: stateColor,
+                    fontSize: 18, fontFamily: 'JetBrains Mono', fontWeight: FontWeight.w900,
+                    letterSpacing: 3,
+                    shadows: [Shadow(color: stateColor.withValues(alpha: 0.4), blurRadius: 12)],
+                  ),
+                ),
+              ),
+              Text(
+                connected ? '●' : '○',
+                style: TextStyle(color: statusColor, fontSize: 12, fontFamily: 'JetBrains Mono'),
+              ),
+            ],
           ),
         ],
       ),
@@ -200,26 +220,25 @@ class _DemoScreenState extends State<DemoScreen> {
 
   Widget _buildFooter(CognitiveState state) {
     return Container(
-      padding: const EdgeInsets.all(6),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.03),
-        borderRadius: BorderRadius.circular(4),
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         'D=${state.fractalDimension.toStringAsFixed(2)} | ${widget.service.stats}',
-        style: const TextStyle(color: Colors.white24, fontSize: 8, fontFamily: 'monospace'),
+        style: TextStyle(color: AppColors.onSurface.withValues(alpha: 0.35), fontSize: 8, fontFamily: 'JetBrains Mono'),
       ),
     );
   }
 
-  Color _stateColor(CognitiveState state) {
-    switch (state.stateName) {
-      case 'focused': return const Color(0xFFFF0055);
-      case 'stressed': return const Color(0xFFFF4400);
-      case 'fatigued': return const Color(0xFF4488FF);
-      case 'engaged': return const Color(0xFF00F0FF);
-      case 'curious': return const Color(0xFF00FF88);
-      default: return const Color(0xFF9933FF);
-    }
-  }
+  Color _stateColor(CognitiveState state) => switch (state.stateName) {
+    'focused' => AppColors.primaryContainer,
+    'stressed' => AppColors.error,
+    'fatigued' => const Color(0xFF4488FF),
+    'engaged' => AppColors.primary,
+    'curious' => AppColors.secondary,
+    _ => AppColors.tertiaryContainer,
+  };
 }

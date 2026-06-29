@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FCSTN COMMAND CENTER</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+<style>
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+@keyframes pulse-cyan {
+    0%, 100% { opacity: 0.8; box-shadow: 0 0 5px rgba(0, 219, 231, 0.4); }
+    50% { opacity: 1; box-shadow: 0 0 15px rgba(0, 219, 231, 0.8); }
+}
+@keyframes glitch-slide {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+@keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+@keyframes radar-spin {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+.glass-panel {
+    background: rgba(16, 20, 26, 0.4);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(58, 73, 75, 0.3);
+}
+.glass-panel-light {
+    background: rgba(16, 20, 26, 0.25);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(58, 73, 75, 0.15);
+}
+.data-grid-bg {
+    background-image: radial-gradient(circle, rgba(0, 219, 231, 0.08) 1px, transparent 1px);
+    background-size: 24px 24px;
+}
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #3a494b; border-radius: 10px; }
+.metric-bar-fill {
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hud-scanline {
+    background: linear-gradient(to bottom, transparent 50%, rgba(0, 219, 231, 0.04) 50%);
+    background-size: 100% 4px;
+}
+</style>
+<script>
+tailwind.config = {
+    darkMode: "class",
+    theme: {
+        extend: {
+            colors: {
+                "tertiary-container": "#d8d7ff","inverse-surface": "#dfe2eb","on-surface": "#dfe2eb",
+                "secondary-fixed-dim": "#4edea3","surface-variant": "#31353c","background": "#10141a",
+                "surface-container-high": "#262a31","secondary-fixed": "#6ffbbe","on-primary": "#00363a",
+                "tertiary-fixed": "#e1e0ff","primary-fixed": "#74f5ff","on-secondary-fixed-variant": "#005236",
+                "surface-dim": "#10141a","primary-container": "#00f2ff","inverse-on-surface": "#2d3137",
+                "surface-container": "#1c2026","outline-variant": "#3a494b","on-tertiary-fixed-variant": "#2f2ebe",
+                "on-surface-variant": "#b9cacb","surface-tint": "#00dbe7","inverse-primary": "#00696f",
+                "on-primary-fixed": "#002022","error-container": "#93000a","secondary-container": "#00a572",
+                "on-primary-container": "#006a71","surface-bright": "#353940","tertiary-fixed-dim": "#c0c1ff",
+                "on-secondary-container": "#00311f","surface-container-highest": "#31353c",
+                "surface-container-low": "#181c22","on-tertiary-container": "#4a4cd7",
+                "surface": "#10141a","on-secondary-fixed": "#002113","tertiary": "#f9f5ff",
+                "on-secondary": "#003824","surface-container-lowest": "#0a0e14","outline": "#849495",
+                "on-error": "#690005","on-primary-fixed-variant": "#004f54","on-tertiary-fixed": "#07006c",
+                "primary": "#e1fdff","secondary": "#4edea3","on-tertiary": "#1000a9",
+                "on-error-container": "#ffdad6","on-background": "#dfe2eb","error": "#ffb4ab",
+                "primary-fixed-dim": "#00dbe7"
+            },
+            borderRadius: { DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem" },
+            fontFamily: {
+                "mono-label": ["JetBrains Mono"], "headline-md": ["Inter"], "body-md": ["Inter"],
+                "body-sm": ["Inter"], "mono-data": ["JetBrains Mono"]
+            }
+        }
+    }
+}
+</script>
+</head>
+<body class="bg-background text-on-surface font-body-md selection:bg-primary-container/30 overflow-hidden h-screen">
+
+<!-- ============ TOP BAR ============ -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-6 h-16 bg-surface/40 backdrop-blur-xl border-b border-outline-variant/30 shadow-[0_0_15px_rgba(0,219,231,0.2)]">
+    <div class="flex items-center gap-6">
+        <div class="font-mono-label text-[13px] font-bold uppercase tracking-widest text-primary-fixed">FCSTN COMMAND</div>
+        <nav class="hidden md:flex gap-4">
+            <a class="text-primary-fixed font-bold border-b border-primary-fixed font-mono-label text-[13px] px-2" href="#" onclick="switchView('command')">DASHBOARD</a>
+            <a class="text-on-surface-variant font-mono-label text-[13px] hover:text-primary-fixed transition-colors duration-200 px-2" href="#" onclick="switchView('neuro')">ANALYTICS</a>
+        </nav>
+    </div>
+    <div class="flex items-center gap-4">
+        <span id="connectionDot" class="relative flex h-3 w-3">
+            <span id="pingAnim" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+            <span id="dotCore" class="relative inline-flex rounded-full h-3 w-3 bg-secondary"></span>
+        </span>
+        <span class="font-mono-data text-[10px] text-on-surface-variant" id="latencyDisplay">LATENCY: --ms</span>
+    </div>
+</header>
+
+<!-- ============ LAYOUT ============ -->
+<main class="flex h-screen pt-16 pb-10">
+    <!-- SIDEBAR -->
+    <aside class="fixed left-0 top-16 bottom-10 z-40 flex flex-col w-64 bg-surface-container-lowest/60 backdrop-blur-md border-r border-outline-variant/20">
+        <div class="p-6 border-b border-outline-variant/10">
+            <div class="flex items-center gap-3 mb-1">
+                <span class="material-symbols-outlined text-secondary text-[20px]">psychology</span>
+                <span class="font-mono-label text-[13px] text-primary tracking-tighter">NEURAL_CORE</span>
+            </div>
+            <div id="statusLine" class="text-[10px] font-mono-data text-on-surface-variant/60 uppercase">System Integrity: Nominal</div>
+        </div>
+        <nav class="flex-1 py-4">
+            <div class="bg-secondary-container/20 text-secondary border-r-2 border-secondary p-4 flex items-center gap-3 cursor-pointer" onclick="switchView('command')">
+                <span class="material-symbols-outlined">psychology</span>
+                <span class="font-mono-label text-[13px]">NEURAL_CORE</span>
+            </div>
+            <div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer" onclick="switchView('command')">
+                <span class="material-symbols-outlined">hub</span>
+                <span class="font-mono-label text-[13px]">FRACTAL_VIZ</span>
+            </div>
+            <div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer" onclick="switchView('neuro')">
+                <span class="material-symbols-outlined">videogame_asset</span>
+                <span class="font-mono-label text-[13px]">SIM_ENGINE</span>
+            </div>
+            <div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined">inventory_2</span>
+                <span class="font-mono-label text-[13px]">ARCHIVE</span>
+            </div>
+            <div class="text-on-surface-variant hover:text-secondary hover:bg-surface-variant/10 p-4 flex items-center gap-3 transition-colors cursor-pointer">
+                <span class="material-symbols-outlined">terminal</span>
+                <span class="font-mono-label text-[13px]">SYSTEM_LOG</span>
+            </div>
+        </nav>
+        <div class="p-4 mt-auto">
+            <button class="w-full py-3 bg-transparent border border-secondary text-secondary font-mono-label text-[11px] uppercase tracking-widest hover:bg-secondary/10 active:scale-95 transition-all">
+                INITIATE NEURAL LINK
+            </button>
+            <div class="mt-4 flex flex-col gap-2 opacity-60">
+                <div class="flex items-center gap-2 font-mono-data text-[12px]">
+                    <span class="material-symbols-outlined text-[14px]">sensors</span>
+                    <span id="netStatus">NETWORK_UP</span>
+                </div>
+                <div class="flex items-center gap-2 font-mono-data text-[12px]">
+                    <span class="material-symbols-outlined text-[14px]">speed</span>
+                    <span id="latencySidebar">LATENCY: --ms</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="flex-1 ml-64 flex flex-col lg:flex-row p-6 gap-6 relative overflow-y-auto">
+
+        <!-- ====== COMMAND CENTER VIEW ====== -->
+        <div id="commandView" class="flex flex-col lg:flex-row gap-6 w-full">
+            <!-- Central Viewport -->
+            <section class="flex-[2] relative rounded-lg overflow-hidden glass-panel min-h-[400px]">
+                <div class="absolute top-4 left-4 z-20 flex items-center gap-3">
+                    <div id="liveBadge" class="bg-primary-container text-on-primary-container px-3 py-1 font-mono-label text-[10px] rounded-full flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-on-primary-container opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-on-primary-container"></span>
+                        </span>
+                        LIVE_VIZ: <span id="vizMode">METRIC_TENSOR_CURVATURE</span>
+                    </div>
+                    <div class="glass-panel border-none px-3 py-1 font-mono-data text-[10px] text-primary" id="coordDisplay">COORD: 0.000 / 0.000 / 0.000</div>
+                </div>
+                <div class="absolute inset-0 z-0 flex items-center justify-center bg-[#0a0a1a]" id="fractalContainer">
+                    <img id="fractalImg" class="w-full h-full object-cover" alt="Fractal visualization"/>
+                    <div id="fractalLoader" class="absolute inset-0 flex items-center justify-center">
+                        <div class="font-mono-data text-[10px] text-primary/40 uppercase tracking-widest animate-pulse">RENDERIZANDO...</div>
+                    </div>
+                </div>
+                <div class="absolute bottom-4 left-4 z-20 flex flex-col gap-1">
+                    <div class="font-mono-label text-[12px] text-primary-fixed/80" id="recursionDepth">RECURSION_DEPTH: --</div>
+                    <div class="w-48 h-1 bg-outline-variant/30 rounded-full overflow-hidden">
+                        <div id="recursionBar" class="h-full bg-primary shadow-[0_0_8px_#00dbe7] w-[50%] transition-all duration-1000"></div>
+                    </div>
+                </div>
+                <div class="absolute inset-0 pointer-events-none hud-scanline opacity-20"></div>
+            </section>
+
+            <!-- Right Panel Cluster -->
+            <section class="flex-1 flex flex-col gap-6 overflow-y-auto pr-2 max-w-[480px]">
+                <!-- Neural Core Status -->
+                <div class="glass-panel p-4 rounded-lg flex flex-col gap-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <h3 class="font-mono-label text-[13px] text-primary uppercase">Neural Core Status</h3>
+                            <span class="text-[10px] font-mono-data text-on-surface-variant">Real-time fNIRS/EEG Telemetry</span>
+                        </div>
+                        <span class="text-[10px] font-mono-data text-secondary" id="uptimeDisplay">T+00:00:00</span>
+                    </div>
+                    <div class="h-24 relative overflow-hidden bg-surface-container-low/50 rounded border border-outline-variant/20" id="waveformContainer">
+                        <canvas id="waveformCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                        <div class="absolute inset-0 pointer-events-none data-grid-bg opacity-30"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-2 border border-outline-variant/10 bg-surface-container/30">
+                            <div class="text-[10px] font-mono-data text-on-surface-variant">COGNITIVE_STATE</div>
+                            <div id="stateDisplay" class="font-mono-label text-secondary flex items-center gap-2">
+                                <span id="statePulse" class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+                                RESTING
+                            </div>
+                        </div>
+                        <div class="p-2 border border-outline-variant/10 bg-surface-container/30">
+                            <div class="text-[10px] font-mono-data text-on-surface-variant">FRACTAL_DIM</div>
+                            <div class="font-mono-label text-primary-fixed" id="fractalDimDisplay">2.500</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Geometry -->
+                <div class="glass-panel p-4 rounded-lg flex flex-col gap-4">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <h3 class="font-mono-label text-[13px] text-primary uppercase">Metric Geometry</h3>
+                            <span class="text-[10px] font-mono-data text-on-surface-variant">Topology Evolution Metrics</span>
+                        </div>
+                        <span class="material-symbols-outlined text-primary text-[18px]">account_tree</span>
+                    </div>
+                    <div id="metricsContainer" class="space-y-3">
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] font-mono-data">
+                                <span class="text-on-surface-variant">ATTENTION</span>
+                                <span class="text-primary" id="attnVal">0.500</span>
+                            </div>
+                            <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
+                                <div id="attnBar" class="metric-bar-fill h-full bg-primary-fixed-dim w-[50%] shadow-[0_0_10px_rgba(0,219,231,0.5)]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] font-mono-data">
+                                <span class="text-on-surface-variant">ENGAGEMENT</span>
+                                <span class="text-secondary" id="engVal">0.500</span>
+                            </div>
+                            <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
+                                <div id="engBar" class="metric-bar-fill h-full bg-secondary w-[50%] shadow-[0_0_10px_rgba(78,222,163,0.5)]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] font-mono-data">
+                                <span class="text-on-surface-variant">LOAD</span>
+                                <span class="text-error" id="loadVal">0.300</span>
+                            </div>
+                            <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
+                                <div id="loadBar" class="metric-bar-fill h-full bg-error w-[30%] shadow-[0_0_10px_rgba(255,180,171,0.5)]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] font-mono-data">
+                                <span class="text-on-surface-variant">VALENCE</span>
+                                <span class="text-[#ffb800]" id="valVal">0.500</span>
+                            </div>
+                            <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
+                                <div id="valBar" class="metric-bar-fill h-full bg-[#ffb800] w-[50%] shadow-[0_0_10px_rgba(255,184,0,0.5)]"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center text-[11px] font-mono-data">
+                                <span class="text-on-surface-variant">COHERENCE</span>
+                                <span class="text-[#9933FF]" id="cohVal">0.500</span>
+                            </div>
+                            <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
+                                <div id="cohBar" class="metric-bar-fill h-full bg-[#9933FF] w-[50%] shadow-[0_0_10px_rgba(153,51,255,0.5)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 h-24 glass-panel border-dashed border-outline-variant/30 flex items-center justify-center relative overflow-hidden">
+                        <span class="relative z-10 font-mono-data text-[10px] text-primary/40 uppercase tracking-widest">TOPOLOGY_STREAM</span>
+                        <div class="absolute inset-0 data-grid-bg opacity-20"></div>
+                    </div>
+                </div>
+
+                <!-- State Log -->
+                <div class="glass-panel p-4 rounded-lg flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <h3 class="font-mono-label text-[13px] text-primary uppercase">State Log</h3>
+                            <span class="text-[10px] font-mono-data text-on-surface-variant">Cognitive State Transitions</span>
+                        </div>
+                        <span class="material-symbols-outlined text-primary text-[18px]">history</span>
+                    </div>
+                    <div id="stateLogContainer" class="space-y-1 max-h-[200px] overflow-y-auto">
+                        <div class="text-[10px] font-mono-data text-on-surface-variant/30 text-center py-4">Esperando señales...</div>
+                    </div>
+                </div>
+
+                <!-- Voice Controls -->
+                <div class="glass-panel p-4 rounded-lg flex flex-col gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-[18px]">mic</span>
+                        <h3 class="font-mono-label text-[13px] text-primary uppercase">Voice Command</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('foco')">FOCUS</button>
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('explosion')">EXPLODE</button>
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('calma')">CALM</button>
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('creativo')">CREATE</button>
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('caos')">CHAOS</button>
+                        <button class="px-3 py-1.5 font-mono-label text-[10px] uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="sendVoice('reposo')">REST</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input id="voiceInput" type="text" class="flex-1 bg-surface-container text-on-surface font-mono-data text-[11px] px-3 py-1.5 border border-outline-variant/20 rounded focus:outline-none focus:border-primary/50" placeholder="custom command..." onkeydown="if(event.key==='Enter'){sendVoice(this.value);this.value=''}"/>
+                        <button class="px-3 py-1.5 bg-primary/10 text-primary border border-primary/30 rounded hover:bg-primary/20 transition-all active:scale-95" onclick="const i=document.getElementById('voiceInput');sendVoice(i.value);i.value=''">
+                            <span class="material-symbols-outlined text-[14px]">bolt</span>
+                        </button>
+                    </div>
+                    <div id="lastVoiceCmd" class="text-[10px] font-mono-data text-on-surface-variant/30 min-h-[14px]"></div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ====== NEUROGAMING VIEW ====== -->
+        <div id="neuroView" class="flex-col md:flex-row gap-6 w-full" style="display:none">
+            <section class="relative flex-1 min-h-[400px] rounded-lg overflow-hidden glass-panel">
+                <div class="absolute inset-0 bg-black overflow-hidden">
+                    <div class="absolute inset-0 flex items-center justify-center" id="neuroFractalContainer">
+                        <img id="neuroFractalImg" class="w-full h-full object-cover" alt="XR Fractal"/>
+                    </div>
+                    <div class="absolute inset-0 pointer-events-none hud-scanline opacity-20"></div>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center opacity-60">
+                        <div class="w-4 h-px bg-primary-fixed"></div>
+                        <div class="h-4 w-px bg-primary-fixed absolute"></div>
+                        <div class="absolute inset-0 border border-primary-fixed/20 rounded-full scale-125"></div>
+                    </div>
+                    <div class="absolute top-6 left-6 flex flex-col gap-1">
+                        <h2 class="font-mono-label text-[13px] text-primary-fixed bg-primary/10 px-3 py-1 border border-primary/30">LENS_01: XR_CORE</h2>
+                    </div>
+                    <div class="absolute bottom-12 left-12">
+                        <div class="flex flex-col gap-1">
+                            <span class="font-mono-label text-[10px] text-on-surface-variant" id="neuroCoord">LOC: 0.000 / 0.000 / 0.0</span>
+                            <span id="neuroFlux" class="font-mono-label text-[10px] text-error flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[14px]" style="font-variation-settings:'FILL'1;">warning</span>
+                                REALITY_FLUX_DETECTED
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="flex-none w-full md:w-[480px] bg-surface-container-low overflow-y-auto p-6 space-y-6 rounded-lg">
+                <div class="flex justify-between items-end border-b border-outline-variant/30 pb-4">
+                    <div>
+                        <h2 class="font-headline-md text-[24px] text-primary-fixed">BCI FEEDBACK</h2>
+                        <p class="font-mono-label text-[11px] text-on-surface-variant uppercase" id="bciSubject">Subject: Fuentes_Fm | Protocol: 4.2_Cognitive</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-secondary" id="liveIndicator">
+                        <span class="material-symbols-outlined text-[20px]">monitor_heart</span>
+                        <span class="font-mono-data text-sm font-bold">LIVE</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl border-primary/20">
+                    <div class="flex justify-between mb-3">
+                        <span class="font-mono-label text-xs uppercase text-on-surface-variant">Cognitive Loop</span>
+                        <span class="font-mono-data text-xs text-primary-fixed" id="adaptDisplay">ADAPTATION: 50%</span>
+                    </div>
+                    <div class="h-2 w-full bg-surface-variant/40 rounded-full overflow-hidden">
+                        <div id="adaptBar" class="metric-bar-fill h-full bg-primary-container shadow-[0_0_10px_rgba(0,242,255,0.5)]" style="width:50%"></div>
+                    </div>
+                    <div class="flex justify-between mt-3 text-[10px] font-mono-data text-on-surface-variant">
+                        <span>DIFFICULTY: DYNAMIC</span>
+                        <span id="throughput">THROUGHPUT: -- MB/s</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass-panel p-4 rounded-xl">
+                        <span class="font-mono-label text-[10px] uppercase text-on-surface-variant mb-4 block">EEG_ALPHA</span>
+                        <div class="flex items-end gap-1 h-12" id="alphaBars">
+                            <div class="flex-1 bg-secondary/40 rounded-t-sm" style="height:40%"></div>
+                            <div class="flex-1 bg-secondary/60 rounded-t-sm" style="height:70%"></div>
+                            <div class="flex-1 bg-secondary/30 rounded-t-sm" style="height:25%"></div>
+                            <div class="flex-1 bg-secondary rounded-t-sm" style="height:90%"></div>
+                            <div class="flex-1 bg-secondary/50 rounded-t-sm" style="height:60%"></div>
+                        </div>
+                        <div class="mt-2 text-right"><span class="font-mono-data text-xs text-secondary" id="alphaFreq">-- Hz</span></div>
+                    </div>
+                    <div class="glass-panel p-4 rounded-xl">
+                        <span class="font-mono-label text-[10px] uppercase text-on-surface-variant mb-4 block">EEG_BETA</span>
+                        <div class="flex items-end gap-1 h-12" id="betaBars">
+                            <div class="flex-1 bg-primary/40 rounded-t-sm" style="height:70%"></div>
+                            <div class="flex-1 bg-primary/60 rounded-t-sm" style="height:45%"></div>
+                            <div class="flex-1 bg-primary/30 rounded-t-sm" style="height:60%"></div>
+                            <div class="flex-1 bg-primary rounded-t-sm" style="height:30%"></div>
+                            <div class="flex-1 bg-primary/50 rounded-t-sm" style="height:85%"></div>
+                        </div>
+                        <div class="mt-2 text-right"><span class="font-mono-data text-xs text-primary-fixed" id="betaFreq">-- Hz</span></div>
+                    </div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-error text-[18px]">opacity</span>
+                        <span class="font-mono-label text-xs uppercase text-on-surface-variant">fNIRS Oxygenation</span>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4">
+                            <span class="font-mono-data text-[10px] w-8">L_HEM</span>
+                            <div class="flex-1 h-1 bg-surface-variant/40 rounded-full relative">
+                                <div id="lHemBar" class="absolute left-0 top-0 h-full bg-error rounded-full shadow-[0_0_8px_rgba(255,180,171,0.6)]" style="width:50%"></div>
+                                <div id="lHemDot" class="absolute left-[50%] -top-1 w-3 h-3 bg-error rounded-full border border-background"></div>
+                            </div>
+                            <span class="font-mono-data text-[10px] text-error w-8 text-right" id="lHemVal">50%</span>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-mono-data text-[10px] w-8">R_HEM</span>
+                            <div class="flex-1 h-1 bg-surface-variant/40 rounded-full relative">
+                                <div id="rHemBar" class="absolute left-0 top-0 h-full bg-error rounded-full shadow-[0_0_8px_rgba(255,180,171,0.6)]" style="width:50%"></div>
+                                <div id="rHemDot" class="absolute left-[50%] -top-1 w-3 h-3 bg-error rounded-full border border-background"></div>
+                            </div>
+                            <span class="font-mono-data text-[10px] text-error w-8 text-right" id="rHemVal">50%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-panel p-4 rounded-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="font-mono-label text-xs uppercase text-on-surface-variant">Spatial Curvature</span>
+                        <div class="w-2 h-2 rounded-full bg-primary animate-ping"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center"><span class="font-mono-data text-[9px] text-on-surface-variant">G_xx</span><span class="font-mono-data text-xs text-primary-fixed" id="gxx">1.000</span></div>
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center bg-primary/10"><span class="font-mono-data text-[9px] text-primary-fixed">G_xy</span><span class="font-mono-data text-xs text-primary-fixed" id="gxy">0.000</span></div>
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center"><span class="font-mono-data text-[9px] text-on-surface-variant">G_xz</span><span class="font-mono-data text-xs text-primary-fixed" id="gxz">0.000</span></div>
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center"><span class="font-mono-data text-[9px] text-on-surface-variant">G_yx</span><span class="font-mono-data text-xs text-primary-fixed" id="gyx">0.000</span></div>
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center"><span class="font-mono-data text-[9px] text-on-surface-variant">G_yy</span><span class="font-mono-data text-xs text-primary-fixed" id="gyy">1.000</span></div>
+                        <div class="border border-outline-variant/30 p-2 flex flex-col items-center"><span class="font-mono-data text-[9px] text-on-surface-variant">G_yz</span><span class="font-mono-data text-xs text-primary-fixed" id="gyz">0.000</span></div>
+                    </div>
+                    <div class="mt-4 p-3 bg-surface-container-high border-l-2 border-primary-fixed">
+                        <p class="font-mono-data text-[10px] text-on-surface leading-tight" id="eventLog">EVENT_LOG: System initialized.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-4 border border-outline-variant/20 rounded-xl">
+                        <span class="block text-[10px] font-mono-label text-on-surface-variant mb-1">FRACTAL_DIM</span>
+                        <span class="text-xl font-headline-md text-on-surface" id="neuroDim">2.500</span>
+                    </div>
+                    <div class="p-4 border border-outline-variant/20 rounded-xl">
+                        <span class="block text-[10px] font-mono-label text-on-surface-variant mb-1">LATENCY_BCI</span>
+                        <span class="text-xl font-headline-md text-secondary" id="neuroLatency">--ms</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="fixed bottom-0 w-full flex justify-between items-center px-6 py-2 z-50 bg-background/80 border-t border-outline-variant/10 backdrop-blur-md">
+    <div class="flex items-center gap-6 overflow-hidden">
+        <div class="flex items-center gap-3 border-r border-outline-variant/20 pr-6 shrink-0">
+            <span class="material-symbols-outlined text-[16px] text-secondary">check_circle</span>
+            <span class="font-mono-data text-[12px] text-on-surface-variant">State: <span id="footerState" class="text-secondary">RESTING</span></span>
+        </div>
+        <div class="flex items-center gap-3 border-r border-outline-variant/20 pr-6 shrink-0">
+            <span class="material-symbols-outlined text-[16px] text-primary">analytics</span>
+            <span class="font-mono-data text-[12px] text-on-surface-variant">Fractal Dim: <span id="footerDim" class="text-primary">2.500</span></span>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+            <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-secondary"></span>
+            </span>
+            <span class="font-mono-data text-[12px] text-secondary">ESCOM Summer School 2026: ACTIVE</span>
+        </div>
+    </div>
+    <div class="flex items-center gap-6">
+        <div class="font-mono-label text-[10px] text-on-surface-variant/40 tracking-tighter">© 2026 FCSTN ARCHITECTURE | COGNITIVE_PROTOCOL_v4.2</div>
+    </div>
+</footer>
+
+<!-- HUD OVERLAY -->
+<div class="fixed inset-0 pointer-events-none z-[100] border-[20px] border-transparent opacity-10">
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="w-full h-1 bg-primary/20 animate-[scanline_8s_linear_infinite]"></div>
+    </div>
+</div>
+
+<script>
+// ============= CONFIG =============
+const WS_URL = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? 'ws://localhost:8765' : 'wss://fcstn.onrender.com/ws';
+const API_BASE = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+    ? '' : 'https://fcstn.onrender.com';
+
+// ============= STATE =============
+let currentState = 'resting';
+let prevState = '';
+let sessionStart = Date.now();
+let stateHistory = [];
+let ws = null;
+let fractalInterval = null;
+let stateColors = {
+    focused: '#00f2ff', stressed: '#ffb4ab', fatigued: '#4488FF',
+    engaged: '#00f2ff', curious: '#10b981', resting: '#d8d7ff'
+};
+const canvas = document.getElementById('waveformCanvas');
+const ctx = canvas?.getContext('2d');
+let waveformData = new Array(60).fill(0.5);
+let emotionInterval = null;
+
+// ============= VIEW SWITCH =============
+function switchView(view) {
+    document.getElementById('commandView').style.display = view === 'command' ? 'flex' : 'none';
+    document.getElementById('neuroView').style.display = view === 'neuro' ? 'flex' : 'none';
+}
+
+// ============= WEBSOCKET =============
+function connectWS() {
+    if (ws) try { ws.close(); } catch(e) {}
+    ws = new WebSocket(WS_URL);
+    ws.onopen = () => {
+        setConnected(true);
+        fetchFractal();
+        fractalInterval = setInterval(fetchFractal, 1000);
+    };
+    ws.onmessage = (e) => {
+        try {
+            const msg = JSON.parse(e.data);
+            let data = msg.data || msg;
+            if (data.attention !== undefined) updateMetrics(data);
+            if (msg.type === 'emotion') updateEmotion(msg.data);
+        } catch(err) {
+            // ignore
+        }
+    };
+    ws.onclose = () => {
+        setConnected(false);
+        if (fractalInterval) clearInterval(fractalInterval);
+        setTimeout(connectWS, 3000);
+    };
+    ws.onerror = () => { ws.close(); };
+}
+
+function sendVoice(text) {
+    if (!text || !text.trim()) return;
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({type: 'voice', text: text.trim()}));
+        document.getElementById('lastVoiceCmd').textContent = '→ ' + text.trim();
+    }
+    document.getElementById('voiceInput').value = '';
+}
+
+// ============= CONNECTION STATUS =============
+function setConnected(connected) {
+    const dot = document.getElementById('connectionDot');
+    const ping = document.getElementById('pingAnim');
+    const core = document.getElementById('dotCore');
+    if (connected) {
+        ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75';
+        core.className = 'relative inline-flex rounded-full h-3 w-3 bg-secondary';
+        document.getElementById('netStatus').textContent = 'NETWORK_UP';
+        document.getElementById('latencySidebar').textContent = 'LATENCY: <100ms';
+        document.getElementById('latencyDisplay').textContent = 'LATENCY: <100ms';
+    } else {
+        ping.className = 'absolute inline-flex h-full w-full rounded-full bg-error opacity-75';
+        core.className = 'relative inline-flex rounded-full h-3 w-3 bg-error';
+        document.getElementById('netStatus').textContent = 'NETWORK_DOWN';
+        document.getElementById('latencySidebar').textContent = 'LATENCY: --ms';
+        document.getElementById('latencyDisplay').textContent = 'LATENCY: --ms';
+    }
+}
+
+// ============= FRACTAL API =============
+function fetchFractal() {
+    const dim = currentState === 'focused' ? 2.8 : currentState === 'stressed' ? 2.2 : currentState === 'engaged' ? 3.0 : 2.5;
+    const palette = currentState === 'focused' ? 'cyberpunk' : currentState === 'stressed' ? 'fire' : 'magnetic';
+    const url = `${API_BASE}/api/fractal/state?width=960&height=540`;
+    fetch(url)
+        .then(r => r.blob())
+        .then(blob => {
+            const u = URL.createObjectURL(blob);
+            document.getElementById('fractalImg').src = u;
+            document.getElementById('neuroFractalImg').src = u;
+            document.getElementById('fractalLoader').style.display = 'none';
+        })
+        .catch(() => {});
+}
+
+// ============= METRICS UPDATE =============
+function updateMetrics(data) {
+    const attn = data.attention ?? 0.5;
+    const eng = data.engagement ?? 0.5;
+    const load = data.load ?? 0.3;
+    const val = data.valence ?? 0.5;
+    const coh = data.coherence ?? 0.5;
+    const dim = data.fractal_dimension ?? 2.5;
+    const state = data.state_name || data.phase || 'resting';
+    const narrative = data.narrative || '';
+
+    document.getElementById('attnVal').textContent = attn.toFixed(3);
+    document.getElementById('attnBar').style.width = (attn * 100).toFixed(1) + '%';
+    document.getElementById('engVal').textContent = eng.toFixed(3);
+    document.getElementById('engBar').style.width = (eng * 100).toFixed(1) + '%';
+    document.getElementById('loadVal').textContent = load.toFixed(3);
+    document.getElementById('loadBar').style.width = (load * 100).toFixed(1) + '%';
+    document.getElementById('valVal').textContent = val.toFixed(3);
+    document.getElementById('valBar').style.width = (val * 100).toFixed(1) + '%';
+    document.getElementById('cohVal').textContent = coh.toFixed(3);
+    document.getElementById('cohBar').style.width = (coh * 100).toFixed(1) + '%';
+
+    document.getElementById('fractalDimDisplay').textContent = dim.toFixed(3);
+    document.getElementById('neuroDim').textContent = dim.toFixed(3);
+    document.getElementById('footerDim').textContent = dim.toFixed(3);
+    document.getElementById('coordDisplay').textContent = `COORD: ${(attn-0.5).toFixed(3)} / ${(val-0.5).toFixed(3)} / ${(dim-2).toFixed(3)}`;
+    document.getElementById('neuroCoord').textContent = `LOC: ${(attn-0.5).toFixed(2)} / ${(val-0.5).toFixed(2)} / 0.0`;
+    document.getElementById('recursionDepth').textContent = `RECURSION_DEPTH: ${Math.round(dim * 500)}`;
+    document.getElementById('recursionBar').style.width = ((dim - 2) * 50).toFixed(1) + '%';
+    document.getElementById('adaptDisplay').textContent = `ADAPTATION: ${Math.round(eng * 100)}%`;
+    document.getElementById('adaptBar').style.width = `${Math.round(eng * 100)}%`;
+    document.getElementById('throughput').textContent = `THROUGHPUT: ${(attn * 2 + 0.5).toFixed(1)} MB/s`;
+
+    // g_xy from val
+    document.getElementById('gxx').textContent = (1 + attn * 0.1).toFixed(3);
+    document.getElementById('gyy').textContent = (1 + eng * 0.1).toFixed(3);
+    document.getElementById('gxy').textContent = ((val - 0.5) * 0.2).toFixed(3);
+    document.getElementById('gyx').textContent = ((val - 0.5) * 0.2).toFixed(3);
+    document.getElementById('gxz').textContent = ((attn - 0.5) * 0.1).toFixed(3);
+    document.getElementById('gyz').textContent = ((eng - 0.5) * 0.1).toFixed(3);
+
+    // fNIRS
+    const lHem = 50 + (attn - 0.5) * 40;
+    const rHem = 50 + (eng - 0.5) * 40;
+    document.getElementById('lHemBar').style.width = lHem.toFixed(1) + '%';
+    document.getElementById('lHemDot').style.left = lHem.toFixed(1) + '%';
+    document.getElementById('lHemVal').textContent = Math.round(lHem) + '%';
+    document.getElementById('rHemBar').style.width = rHem.toFixed(1) + '%';
+    document.getElementById('rHemDot').style.left = rHem.toFixed(1) + '%';
+    document.getElementById('rHemVal').textContent = Math.round(rHem) + '%';
+
+    // EEG bars
+    animateEEGBars('alphaBars', 0.3 + attn * 0.5);
+    animateEEGBars('betaBars', 0.2 + eng * 0.6);
+    document.getElementById('alphaFreq').textContent = (8 + attn * 6).toFixed(1) + ' Hz';
+    document.getElementById('betaFreq').textContent = (18 + eng * 10).toFixed(1) + ' Hz';
+
+    // narrative
+    if (narrative) {
+        document.getElementById('eventLog').textContent = 'EVENT_LOG: ' + narrative;
+    }
+
+    // state change
+    if (state && state !== currentState) {
+        prevState = currentState;
+        currentState = state;
+        onStateChange(state);
+    }
+
+    // waveform
+    waveformData.shift();
+    waveformData.push(attn);
+    drawWaveform();
+
+    // uptime
+    const upt = Math.floor((Date.now() - sessionStart) / 1000);
+    const h = String(Math.floor(upt / 3600)).padStart(2, '0');
+    const m = String(Math.floor((upt % 3600) / 60)).padStart(2, '0');
+    const s = String(upt % 60).padStart(2, '0');
+    document.getElementById('uptimeDisplay').textContent = `T+${h}:${m}:${s}`;
+}
+
+function animateEEGBars(containerId, level) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const bars = container.children;
+    for (let i = 0; i < bars.length; i++) {
+        const h = 20 + Math.sin(Date.now() / 1000 + i * 1.5) * 15 + level * 40;
+        bars[i].style.height = Math.min(h, 100) + '%';
+    }
+}
+
+function drawWaveform() {
+    if (!ctx || !canvas) return;
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(0, 219, 231, 0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    const step = w / (waveformData.length - 1);
+    for (let i = 0; i < waveformData.length; i++) {
+        const x = i * step;
+        const y = h - waveformData[i] * h;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = 'rgba(0, 219, 231, 0.08)';
+    ctx.beginPath();
+    ctx.moveTo(0, h);
+    for (let i = 0; i < waveformData.length; i++) {
+        const x = i * step;
+        const y = h - waveformData[i] * h;
+        ctx.lineTo(x, y);
+    }
+    ctx.lineTo(w, h);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// ============= STATE CHANGE =============
+function onStateChange(newState) {
+    const sc = stateColors[newState] || '#d8d7ff';
+    document.getElementById('stateDisplay').innerHTML =
+        `<span id="statePulse" class="w-1.5 h-1.5 rounded-full animate-pulse" style="background:${sc}"></span> ${newState.toUpperCase()}`;
+    document.getElementById('footerState').textContent = newState.toUpperCase();
+    document.getElementById('footerState').style.color = sc;
+    document.getElementById('statusLine').textContent = `Current State: ${newState.toUpperCase()}`;
+    document.getElementById('statusLine').style.color = sc;
+
+    // State log
+    addStateLog(newState, sc);
+
+    // Visual feedback
+    const badges = ['liveBadge'];
+    badges.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.style.transition = 'all 0.3s ease';
+            el.style.boxShadow = `0 0 20px ${sc}40`;
+            setTimeout(() => { if (el) el.style.boxShadow = ''; }, 600);
+        }
+    });
+}
+
+function addStateLog(state, color) {
+    const ts = new Date();
+    const time = `${String(ts.getHours()).padStart(2,'0')}:${String(ts.getMinutes()).padStart(2,'0')}:${String(ts.getSeconds()).padStart(2,'0')}`;
+    stateHistory.unshift({state, color, time});
+    if (stateHistory.length > 20) stateHistory.pop();
+
+    const container = document.getElementById('stateLogContainer');
+    container.innerHTML = stateHistory.map((e, i) =>
+        `<div class="flex items-center gap-3 px-2 py-1.5 rounded ${i === 0 ? 'bg-primary-container/10 border border-primary-container/20' : ''}">
+            <span class="font-mono-data text-[9px] text-on-surface-variant/50 w-14">${e.time}</span>
+            <span class="w-1.5 h-1.5 rounded-full" style="background:${e.color}"></span>
+            <span class="font-mono-label text-[11px]" style="color:${e.color}; font-weight:${i === 0 ? '700' : '400'}">${e.state.toUpperCase()}</span>
+            ${i === 0 ? '<span class="material-symbols-outlined text-[12px] ml-auto" style="color:' + e.color + '">arrow_back</span>' : ''}
+        </div>`
+    ).join('');
+}
+
+// ============= CAMERA / EMOTION =============
+let cameraStream = null;
+let cameraOn = false;
+
+async function initCamera() {
+    try {
+        if (typeof faceapi === 'undefined') return;
+        await faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights');
+        await faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights');
+    } catch(e) {}
+}
+
+function updateEmotion(data) {
+    // Update neuro view with emotion
+    const emotion = data.emotion || 'neutral';
+    const prob = data.probability || 0;
+    const ec = emotion === 'happy' ? '#4edea3' : emotion === 'sad' ? '#4488FF' : emotion === 'angry' ? '#ffb4ab' : '#00dbe7';
+    document.getElementById('liveIndicator').innerHTML =
+        `<span class="material-symbols-outlined text-[20px]" style="color:${ec}">monitor_heart</span>
+         <span class="font-mono-data text-sm font-bold" style="color:${ec}">${emotion.toUpperCase()} ${(prob*100).toFixed(0)}%</span>`;
+}
+
+// ============= INIT =============
+window.addEventListener('load', () => {
+    canvas.width = canvas.parentElement.offsetWidth;
+    canvas.height = canvas.parentElement.offsetHeight;
+    initCamera();
+    connectWS();
+
+    // Resize handler
+    window.addEventListener('resize', () => {
+        if (canvas) {
+            canvas.width = canvas.parentElement.offsetWidth;
+            canvas.height = canvas.parentElement.offsetHeight;
+        }
+    });
+
+    // Simulate initial state log entry
+    addStateLog('resting', '#d8d7ff');
+});
+</script>
+</body>
+</html>

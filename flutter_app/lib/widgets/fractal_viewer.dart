@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../models/cognitive_state.dart';
+import '../theme/app_colors.dart';
 
 enum FractalMode { auto, mandelbrot, terrain, julia }
 
@@ -87,12 +88,7 @@ class _FractalViewerState extends State<FractalViewer> {
       final uri = Uri.parse(url);
       final response = await http.get(uri);
       if (response.statusCode == 200) {
-        if (mounted) {
-          setState(() {
-            _nextImage = response.bodyBytes;
-            _crossfade = 0.0;
-          });
-        }
+        if (mounted) setState(() { _nextImage = response.bodyBytes; _crossfade = 0.0; });
       }
     } catch (_) {}
   }
@@ -107,10 +103,7 @@ class _FractalViewerState extends State<FractalViewer> {
   Widget build(BuildContext context) {
     if (_nextImage != null && _crossfade < 1.0) {
       _crossfade = (_crossfade + 0.05).clamp(0.0, 1.0);
-      if (_crossfade >= 1.0) {
-        _currentImage = _nextImage;
-        _nextImage = null;
-      }
+      if (_crossfade >= 1.0) { _currentImage = _nextImage; _nextImage = null; }
     }
 
     return ClipRRect(
@@ -118,7 +111,7 @@ class _FractalViewerState extends State<FractalViewer> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Container(color: const Color(0xFF0a0a1a)),
+          Container(color: AppColors.background),
           if (_currentImage != null)
             Image.memory(_currentImage!, fit: BoxFit.cover, gaplessPlayback: true),
           if (_nextImage != null)
@@ -127,7 +120,7 @@ class _FractalViewerState extends State<FractalViewer> {
               child: Image.memory(_nextImage!, fit: BoxFit.cover, gaplessPlayback: true),
             ),
           if (_currentImage == null && _nextImage == null)
-            const Center(child: CircularProgressIndicator(color: Colors.cyanAccent)),
+            Center(child: CircularProgressIndicator(color: AppColors.primary)),
           Positioned(
             top: 8, left: 8,
             child: _ModeSelector(current: widget.mode, onChanged: widget.onModeChanged),
@@ -137,11 +130,13 @@ class _FractalViewerState extends State<FractalViewer> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.black54, borderRadius: BorderRadius.circular(4),
+                color: AppColors.surfaceContainerLow,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: AppColors.outline.withValues(alpha: 0.15)),
               ),
               child: Text(
                 widget.mode.name.toUpperCase(),
-                style: const TextStyle(color: Colors.cyanAccent, fontSize: 9, fontFamily: 'monospace'),
+                style: TextStyle(color: AppColors.primary, fontSize: 9, fontFamily: 'JetBrains Mono'),
               ),
             ),
           ),
@@ -161,7 +156,9 @@ class _ModeSelector extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.black54, borderRadius: BorderRadius.circular(8),
+        color: AppColors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.outline.withValues(alpha: 0.1)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -172,14 +169,14 @@ class _ModeSelector extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
               decoration: BoxDecoration(
-                color: active ? Colors.cyanAccent.withValues(alpha: 0.2) : null,
+                color: active ? AppColors.primary.withValues(alpha: 0.15) : null,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 m.name[0].toUpperCase() + m.name.substring(1),
                 style: TextStyle(
-                  color: active ? Colors.cyanAccent : Colors.white38,
-                  fontSize: 9, fontFamily: 'monospace',
+                  color: active ? AppColors.primary : AppColors.onSurface.withValues(alpha: 0.3),
+                  fontSize: 9, fontFamily: 'JetBrains Mono',
                   fontWeight: active ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
