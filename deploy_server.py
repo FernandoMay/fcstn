@@ -18,6 +18,7 @@ from shared.logger import get_logger, ROOT_LOG
 from server.fractal_renderer import (render_mandelbrot, render_terrain, render_julia,
                                      render_multi_fractal, render_fractal_by_state,
                                      PALETTES)
+from server.neural_profile import NeuralProfile
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [FCSTN] %(message)s")
 log = get_logger("DEPLOY")
@@ -269,6 +270,55 @@ async def fractal_map_tile(
     except Exception as e:
         log.error("Map tile failed", {"error": str(e)})
         return Response(content=str(e), status_code=500)
+
+# ---- Neural DNA Profile ----
+_profile_cache = {}
+
+@app.get("/api/profile")
+async def get_profile(user_id: str = "anonymous"):
+    """Generate a neural DNA profile for a user."""
+    if user_id not in _profile_cache:
+        _profile_cache[user_id] = NeuralProfile(user_id)
+    p = _profile_cache[user_id]
+    params = p.get_journey_params(0)
+    return {
+        "user_id": p.user_id,
+        "dna": p.dna,
+        "seed": p.seed,
+        "hue_shift": round(p.hue_shift, 2),
+        "waypoints": [
+            {"cx": round(w[0], 4), "cy": round(w[1], 4), "zoom": round(w[2], 2), "label": w[3]}
+            for w in p.waypoints
+        ],
+        "neural_nodes": p.neural_nodes,
+        "journey": params,
+    }
+
+@app.get("/api/fractal/journey")
+async def fractal_journey(
+    user_id: str = "anonymous",
+    step: float = 0.0,
+    width: int = 640,
+    height: int = 360,
+):
+    """Render a Mandelbrot frame along the user's neural DNA journey."""
+    if user_id not in _profile_cache:
+        _profile_cache[user_id] = NeuralProfile(user_id)
+    p = _profile_cache[user_id]
+    params = p.get_journey_params(step)
+    palette = "cyberpunk"
+    # Shift palette by hue
+    state_dict = engine.state.to_dict()
+    state_dict["attention"] = 0.5 + (params["zoom"] / 10.0)
+    state_dict["engagement"] = 0.5 + (params["cx"] + 0.5)
+    img_data = await _render_fractal_async(
+        f"journey:{user_id}:{step:.1f}:{width}:{height}",
+        render_mandelbrot,
+        width, height, palette, 96,
+        params["cx"], params["cy"], max(0.5, params["zoom"]),
+        0.0, 0.0,
+    )
+    return Response(content=img_data, media_type="image/png")
 
 @app.get("/health")
 async def health():

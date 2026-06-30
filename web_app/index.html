@@ -148,19 +148,28 @@ tailwind.config = {
                 <span class="font-mono-label text-[13px]">SYSTEM_LOG</span>
             </div>
         </nav>
-        <div class="p-4 mt-auto">
-            <button class="w-full py-3 bg-transparent border border-secondary text-secondary font-mono-label text-[11px] uppercase tracking-widest hover:bg-secondary/10 active:scale-95 transition-all">
-                INITIATE NEURAL LINK
-            </button>
-            <div class="mt-4 flex flex-col gap-2 opacity-60">
-                <div class="flex items-center gap-2 font-mono-data text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">sensors</span>
-                    <span id="netStatus">NETWORK_UP</span>
-                </div>
-                <div class="flex items-center gap-2 font-mono-data text-[12px]">
-                    <span class="material-symbols-outlined text-[14px]">speed</span>
-                    <span id="latencySidebar">LATENCY: --ms</span>
-                </div>
+        <div class="p-4 mt-auto space-y-3">
+            <!-- DNA Profile -->
+            <div class="glass-panel-light p-3 rounded">
+                <div class="text-[9px] font-mono-data text-on-surface-variant/60 mb-1">NEURAL DNA</div>
+                <input id="dnaInput" type="text" class="w-full bg-surface-container text-on-surface font-mono-data text-[10px] px-2 py-1 border border-outline-variant/20 rounded focus:outline-none focus:border-secondary/50 mb-2" placeholder="your neural ID..." value="fernando" maxlength="32"/>
+                <button class="w-full py-2 bg-secondary/20 text-secondary font-mono-label text-[10px] uppercase tracking-widest hover:bg-secondary/30 transition-all active:scale-95 rounded" onclick="loadProfile()">
+                    INITIATE NEURAL LINK
+                </button>
+                <div id="dnaDisplay" class="text-[8px] font-mono-data text-on-surface-variant/40 mt-1 text-center hidden"></div>
+            </div>
+            <!-- Journey Controls -->
+            <div class="glass-panel-light p-2 rounded flex items-center gap-2">
+                <span class="material-symbols-outlined text-[14px] text-secondary">explore</span>
+                <span class="font-mono-data text-[9px] text-on-surface-variant flex-1" id="waypointLabel">ORIGIN</span>
+                <button class="px-2 py-1 bg-primary/10 text-primary font-mono-label text-[8px] rounded hover:bg-primary/20" onclick="journeyStep(-1)">◀</button>
+                <button class="px-2 py-1 bg-primary/10 text-primary font-mono-label text-[8px] rounded hover:bg-primary/20" onclick="journeyStep(1)">▶</button>
+            </div>
+            <div class="flex items-center gap-2 font-mono-data text-[10px] opacity-60">
+                <span class="material-symbols-outlined text-[12px]">sensors</span>
+                <span id="netStatus">NETWORK_UP</span>
+                <span class="flex-1"></span>
+                <span id="latencySidebar">--ms</span>
             </div>
         </div>
     </aside>
@@ -184,6 +193,7 @@ tailwind.config = {
                 </div>
                 <div class="absolute inset-0 z-0 flex items-center justify-center bg-[#0a0a1a]" id="fractalContainer">
                     <img id="fractalImg" class="w-full h-full object-cover" alt="Fractal visualization"/>
+                    <canvas id="neuralOverlay" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
                     <div id="fractalLoader" class="absolute inset-0 flex items-center justify-center">
                         <div class="font-mono-data text-[10px] text-primary/40 uppercase tracking-widest animate-pulse">RENDERIZANDO...</div>
                     </div>
@@ -281,6 +291,28 @@ tailwind.config = {
                             <div class="w-full h-1 bg-outline-variant/20 rounded-full overflow-hidden mt-1">
                                 <div id="cohBar" class="metric-bar-fill h-full bg-[#9933FF] w-[50%] shadow-[0_0_10px_rgba(153,51,255,0.5)]"></div>
                             </div>
+                        </div>
+                    </div>
+                    <!-- Color Customization -->
+                    <div class="glass-panel-light p-2 rounded">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="material-symbols-outlined text-[12px] text-primary">palette</span>
+                            <span class="font-mono-data text-[9px] text-on-surface-variant">PALETTE</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1" id="paletteSwatches">
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#0a0028,#ff3232)" onclick="setPalette('cyberpunk')" title="cyberpunk"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#001e3c,#78e4ff)" onclick="setPalette('oceanic')" title="oceanic"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#140000,#ffb400)" onclick="setPalette('fire')" title="fire"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#00140a,#7fff3c)" onclick="setPalette('aurora')" title="aurora"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#000000,#c8ff00)" onclick="setPalette('neon')" title="neon"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#0a2806,#f0dcb4)" onclick="setPalette('earth')" title="earth"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#0a000a,#c8f0ff)" onclick="setPalette('magnetic')" title="magnetic"></button>
+                            <button class="w-5 h-5 rounded border border-outline/30" style="background:linear-gradient(135deg,#001400,#f0ff00)" onclick="setPalette('toxic')" title="toxic"></button>
+                        </div>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span class="font-mono-data text-[8px] text-on-surface-variant/40">HUE</span>
+                            <input id="hueSlider" type="range" min="0" max="360" value="0" class="flex-1 h-1 accent-primary" oninput="updateHue(this.value)"/>
+                            <span class="font-mono-data text-[8px] text-on-surface-variant/40 w-6 text-right" id="hueValue">0°</span>
                         </div>
                     </div>
                     <div class="mt-2 h-24 glass-panel border-dashed border-outline-variant/30 flex items-center justify-center relative overflow-hidden">
@@ -776,12 +808,120 @@ function updateEmotion(data) {
          <span class="font-mono-data text-sm font-bold" style="color:${ec}">${emotion.toUpperCase()} ${(prob*100).toFixed(0)}%</span>`;
 }
 
+// ============= NEURAL DNA PROFILE =============
+let _profile = null;
+let _journeyStep = 0;
+let _neuralNodes = [];
+let _selectedPalette = 'cyberpunk';
+let _hueShift = 0;
+
+function loadProfile() {
+    const uid = document.getElementById('dnaInput').value.trim() || 'anonymous';
+    fetch(`${API_BASE}/api/profile?user_id=${encodeURIComponent(uid)}`)
+        .then(r => r.json())
+        .then(p => {
+            _profile = p;
+            _journeyStep = 0;
+            _neuralNodes = p.neural_nodes || [];
+            _hueShift = p.hue_shift || 0;
+            document.getElementById('hueSlider').value = _hueShift;
+            document.getElementById('hueValue').textContent = Math.round(_hueShift) + '°';
+            const dd = document.getElementById('dnaDisplay');
+            dd.classList.remove('hidden');
+            dd.textContent = `DNA: ${p.dna} | SEED: ${p.seed}`;
+            document.getElementById('waypointLabel').textContent = p.journey.label || 'ORIGIN';
+            drawNeuralOverlay();
+            loadProfileFractal();
+            addStateLog(`NEURAL_LINK:${uid.toUpperCase().slice(0,8)}`, '#4edea3');
+        })
+        .catch(() => {});
+}
+
+function loadProfileFractal() {
+    if (!_profile) return;
+    const uid = document.getElementById('dnaInput').value.trim() || 'anonymous';
+    const url = `${API_BASE}/api/fractal/journey?user_id=${encodeURIComponent(uid)}&step=${_journeyStep}&width=640&height=360`;
+    fetch(url, { signal: AbortSignal.timeout(8000) })
+        .then(r => r.blob())
+        .then(blob => {
+            const u = URL.createObjectURL(blob);
+            document.getElementById('fractalImg').src = u;
+            document.getElementById('neuroFractalImg').src = u;
+            document.getElementById('fractalLoader').style.display = 'none';
+        })
+        .catch(() => {});
+}
+
+function journeyStep(delta) {
+    _journeyStep = Math.max(0, _journeyStep + delta);
+    if (_profile) {
+        document.getElementById('waypointLabel').textContent =
+            _profile.waypoints[Math.floor(_journeyStep) % _profile.waypoints.length]?.label || 'JOURNEY';
+    }
+    loadProfileFractal();
+    drawNeuralOverlay();
+}
+
+function setPalette(name) {
+    _selectedPalette = name;
+    fetchFractal();
+}
+
+function updateHue(val) {
+    _hueShift = parseFloat(val);
+    document.getElementById('hueValue').textContent = Math.round(_hueShift) + '°';
+    // Apply hue shift to CSS
+    document.querySelectorAll('.text-primary, .text-primary-fixed, .text-primary-fixed-dim').forEach(el => {
+        el.style.color = `hsl(${_hueShift}, 100%, 60%)`;
+    });
+}
+
+function drawNeuralOverlay() {
+    const canvas = document.getElementById('neuralOverlay');
+    if (!canvas || !_neuralNodes.length) return;
+    const parent = canvas.parentElement;
+    canvas.width = parent.offsetWidth;
+    canvas.height = parent.offsetHeight;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+
+    // Draw connections
+    _neuralNodes.forEach((node, i) => {
+        (node.connections || []).forEach(targetIdx => {
+            const target = _neuralNodes[targetIdx];
+            if (!target) return;
+            ctx.beginPath();
+            ctx.moveTo(node.x * w, node.y * h);
+            ctx.lineTo(target.x * w, target.y * h);
+            ctx.strokeStyle = `hsla(${_hueShift + i * 15}, 80%, 60%, 0.15)`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        });
+    });
+
+    // Draw nodes
+    _neuralNodes.forEach((node, i) => {
+        const pulse = Math.sin(Date.now() / 1000 + i) * 0.3 + 0.7;
+        const r = (node.r || 4) * pulse;
+        ctx.beginPath();
+        ctx.arc(node.x * w, node.y * h, r, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${_hueShift + i * 20}, 80%, 65%, ${0.3 * pulse})`;
+        ctx.fill();
+        ctx.strokeStyle = `hsla(${_hueShift + i * 20}, 80%, 70%, ${0.5 * pulse})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    });
+}
+
 // ============= INIT =============
 window.addEventListener('load', () => {
     canvas.width = canvas.parentElement.offsetWidth;
     canvas.height = canvas.parentElement.offsetHeight;
     initCamera();
     connectWS();
+    // Auto-load default profile
+    setTimeout(loadProfile, 500);
 
     // Resize handler
     window.addEventListener('resize', () => {
@@ -789,9 +929,13 @@ window.addEventListener('load', () => {
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
         }
+        drawNeuralOverlay();
     });
 
-    // Simulate initial state log entry
+    // Animate neural overlay
+    setInterval(drawNeuralOverlay, 1000);
+
+    // Initial state log entry
     addStateLog('resting', '#d8d7ff');
 });
 </script>
