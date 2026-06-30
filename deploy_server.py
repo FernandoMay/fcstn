@@ -33,13 +33,6 @@ app.add_middleware(
 )
 engine = FCSTNEngine()
 
-flutter_dir = ROOT / "flutter_app" / "build" / "web"
-if flutter_dir.exists():
-    app.mount("/", StaticFiles(directory=str(flutter_dir), html=True), name="flutter")
-    log.info("Serving Flutter app", {"dir": str(flutter_dir)})
-else:
-    log.warn("Flutter build not found", {"hint": "cd flutter_app && flutter build web"})
-
 class WSManager:
     def __init__(self):
         self.clients = {}
@@ -327,6 +320,13 @@ def _palette_for_state(state_name):
 @app.get("/health")
 async def health():
     return {"status": "alive", "clients": len(manager.clients), "phase": engine.state.state_name}
+
+# Mount static files AFTER all API routes to avoid shadowing
+flutter_dir = ROOT / "flutter_app" / "build" / "web"
+if flutter_dir.exists():
+    app.mount("/", StaticFiles(directory=str(flutter_dir), html=True), name="flutter")
+else:
+    log.warn("Flutter build not found", {"hint": "cd flutter_app && flutter build web"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8765))
