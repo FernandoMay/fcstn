@@ -158,12 +158,17 @@ tailwind.config = {
                 </button>
                 <div id="dnaDisplay" class="text-[8px] font-mono-data text-on-surface-variant/40 mt-1 text-center hidden"></div>
             </div>
-            <!-- Journey Controls -->
-            <div class="glass-panel-light p-2 rounded flex items-center gap-2">
-                <span class="material-symbols-outlined text-[14px] text-secondary">explore</span>
-                <span class="font-mono-data text-[9px] text-on-surface-variant flex-1" id="waypointLabel">ORIGIN</span>
-                <button class="px-2 py-1 bg-primary/10 text-primary font-mono-label text-[8px] rounded hover:bg-primary/20" onclick="journeyStep(-1)">◀</button>
-                <button class="px-2 py-1 bg-primary/10 text-primary font-mono-label text-[8px] rounded hover:bg-primary/20" onclick="journeyStep(1)">▶</button>
+            <!-- Frequency Spectrum -->
+            <div class="glass-panel-light p-2 rounded">
+                <div class="text-[8px] font-mono-data text-on-surface-variant/60 mb-1">FREQUENCY SPECTRUM → MANDELBROT</div>
+                <div class="space-y-1" id="freqBands">
+                    <div class="flex items-center gap-2"><span class="font-mono-data text-[8px] text-[#666] w-6">δ</span><div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden"><div class="h-full bg-[#667] w-[20%] transition-all duration-400" id="freqDelta"></div></div></div>
+                    <div class="flex items-center gap-2"><span class="font-mono-data text-[8px] text-[#88a] w-6">θ</span><div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden"><div class="h-full bg-[#88a] w-[20%] transition-all duration-400" id="freqTheta"></div></div></div>
+                    <div class="flex items-center gap-2"><span class="font-mono-data text-[8px] text-primary w-6">α</span><div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden"><div class="h-full bg-primary w-[20%] transition-all duration-400" id="freqAlpha"></div></div></div>
+                    <div class="flex items-center gap-2"><span class="font-mono-data text-[8px] text-secondary w-6">β</span><div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden"><div class="h-full bg-secondary w-[20%] transition-all duration-400" id="freqBeta"></div></div></div>
+                    <div class="flex items-center gap-2"><span class="font-mono-data text-[8px] text-[#f80] w-6">γ</span><div class="flex-1 h-1.5 bg-outline-variant/20 rounded-full overflow-hidden"><div class="h-full bg-[#f80] w-[20%] transition-all duration-400" id="freqGamma"></div></div></div>
+                </div>
+                <div class="mt-1 text-[8px] font-mono-data text-on-surface-variant/40 text-center" id="mbLabel">M→ α: -0.500 / β: 0.150 / z: 2.00</div>
             </div>
             <div class="flex items-center gap-2 font-mono-data text-[10px] opacity-60">
                 <span class="material-symbols-outlined text-[12px]">sensors</span>
@@ -697,6 +702,30 @@ function updateMetrics(data) {
     waveformData.push(attn);
     drawWaveform();
 
+    // Frequency spectrum (derived from cognitive metrics)
+    const freqDelta = Math.max(0, 1.0 - attn * 1.2);
+    const freqTheta = Math.max(0, 1.0 - eng * 1.2);
+    const freqAlpha = attn * (1.0 - load * 0.5);
+    const freqBeta  = eng * (0.5 + val * 0.5);
+    const freqGamma = load * coh;
+    document.getElementById('freqDelta').style.width = (freqDelta * 100) + '%';
+    document.getElementById('freqTheta').style.width = (freqTheta * 100) + '%';
+    document.getElementById('freqAlpha').style.width = (freqAlpha * 100) + '%';
+    document.getElementById('freqBeta').style.width = (freqBeta * 100) + '%';
+    document.getElementById('freqGamma').style.width = (freqGamma * 100) + '%';
+
+    // Map frequencies → Mandelbrot coords (client-side preview)
+    const tw = 1.5*freqDelta + 0.6*freqTheta + 1.0*freqAlpha + 0.8*freqBeta + 0.4*freqGamma;
+    const mbCx = tw > 0 ? (-1.5*freqDelta -1.0*freqTheta -0.5*freqAlpha -0.75*freqBeta -0.16*freqGamma) / tw : -0.5;
+    const mbCy = tw > 0 ? (0.0*freqDelta +0.3*freqTheta +0.0*freqAlpha +0.15*freqBeta +1.04*freqGamma) / tw : 0.0;
+    const mbZoom = tw > 0 ? 1.0 + (0.5*freqDelta +1.0*freqTheta +2.0*freqAlpha +4.0*freqBeta +6.0*freqGamma) / tw : 2.0;
+    document.getElementById('mbLabel').textContent =
+        `M→ α: ${mbCx.toFixed(3)} / β: ${mbCy.toFixed(3)} / z: ${mbZoom.toFixed(2)}`;
+
+    // Track route trail
+    _freqHistory.push({cx: mbCx, cy: mbCy, zoom: mbZoom, t: Date.now()});
+    if (_freqHistory.length > 50) _freqHistory.shift();
+
     // uptime
     const upt = Math.floor((Date.now() - sessionStart) / 1000);
     const h = String(Math.floor(upt / 3600)).padStart(2, '0');
@@ -810,10 +839,10 @@ function updateEmotion(data) {
 
 // ============= NEURAL DNA PROFILE =============
 let _profile = null;
-let _journeyStep = 0;
 let _neuralNodes = [];
 let _selectedPalette = 'cyberpunk';
 let _hueShift = 0;
+let _freqHistory = [];
 
 function loadProfile() {
     const uid = document.getElementById('dnaInput').value.trim() || 'anonymous';
@@ -821,7 +850,6 @@ function loadProfile() {
         .then(r => r.json())
         .then(p => {
             _profile = p;
-            _journeyStep = 0;
             _neuralNodes = p.neural_nodes || [];
             _hueShift = p.hue_shift || 0;
             document.getElementById('hueSlider').value = _hueShift;
@@ -829,7 +857,6 @@ function loadProfile() {
             const dd = document.getElementById('dnaDisplay');
             dd.classList.remove('hidden');
             dd.textContent = `DNA: ${p.dna} | SEED: ${p.seed}`;
-            document.getElementById('waypointLabel').textContent = p.journey.label || 'ORIGIN';
             drawNeuralOverlay();
             loadProfileFractal();
             addStateLog(`NEURAL_LINK:${uid.toUpperCase().slice(0,8)}`, '#4edea3');
@@ -840,7 +867,7 @@ function loadProfile() {
 function loadProfileFractal() {
     if (!_profile) return;
     const uid = document.getElementById('dnaInput').value.trim() || 'anonymous';
-    const url = `${API_BASE}/api/fractal/journey?user_id=${encodeURIComponent(uid)}&step=${_journeyStep}&width=640&height=360`;
+    const url = `${API_BASE}/api/fractal/journey?user_id=${encodeURIComponent(uid)}&width=640&height=360`;
     fetch(url, { signal: AbortSignal.timeout(8000) })
         .then(r => r.blob())
         .then(blob => {
@@ -850,16 +877,6 @@ function loadProfileFractal() {
             document.getElementById('fractalLoader').style.display = 'none';
         })
         .catch(() => {});
-}
-
-function journeyStep(delta) {
-    _journeyStep = Math.max(0, _journeyStep + delta);
-    if (_profile) {
-        document.getElementById('waypointLabel').textContent =
-            _profile.waypoints[Math.floor(_journeyStep) % _profile.waypoints.length]?.label || 'JOURNEY';
-    }
-    loadProfileFractal();
-    drawNeuralOverlay();
 }
 
 function setPalette(name) {
@@ -929,7 +946,6 @@ window.addEventListener('load', () => {
             canvas.width = canvas.parentElement.offsetWidth;
             canvas.height = canvas.parentElement.offsetHeight;
         }
-        drawNeuralOverlay();
     });
 
     // Animate neural overlay

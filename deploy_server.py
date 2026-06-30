@@ -271,7 +271,7 @@ async def fractal_map_tile(
         log.error("Map tile failed", {"error": str(e)})
         return Response(content=str(e), status_code=500)
 
-# ---- Neural DNA Profile ----
+# ---- Neural DNA Profile (frequency-based routing) ----
 _profile_cache = {}
 
 @app.get("/api/profile")
@@ -280,45 +280,49 @@ async def get_profile(user_id: str = "anonymous"):
     if user_id not in _profile_cache:
         _profile_cache[user_id] = NeuralProfile(user_id)
     p = _profile_cache[user_id]
-    params = p.get_journey_params(0)
+    # Compute current journey from real cognitive state
+    freqs = p.cognitive_to_frequencies(engine.state.to_dict())
+    journey = p.freq_to_journey(freqs)
     return {
         "user_id": p.user_id,
         "dna": p.dna,
         "seed": p.seed,
         "hue_shift": round(p.hue_shift, 2),
-        "waypoints": [
-            {"cx": round(w[0], 4), "cy": round(w[1], 4), "zoom": round(w[2], 2), "label": w[3]}
-            for w in p.waypoints
-        ],
-        "neural_nodes": p.neural_nodes,
-        "journey": params,
+        "neural_nodes": p.neural_nodes(),
+        "journey": journey,
+        "frequencies": freqs,
     }
 
 @app.get("/api/fractal/journey")
 async def fractal_journey(
     user_id: str = "anonymous",
-    step: float = 0.0,
     width: int = 640,
     height: int = 360,
 ):
-    """Render a Mandelbrot frame along the user's neural DNA journey."""
+    """Render a Mandelbrot frame at the frequency-mapped coordinates."""
     if user_id not in _profile_cache:
         _profile_cache[user_id] = NeuralProfile(user_id)
     p = _profile_cache[user_id]
-    params = p.get_journey_params(step)
-    palette = "cyberpunk"
-    # Shift palette by hue
-    state_dict = engine.state.to_dict()
-    state_dict["attention"] = 0.5 + (params["zoom"] / 10.0)
-    state_dict["engagement"] = 0.5 + (params["cx"] + 0.5)
+    # Real-time frequency mapping from current cognitive state
+    freqs = p.cognitive_to_frequencies(engine.state.to_dict())
+    params = p.freq_to_journey(freqs)
+    palette = _palette_for_state(engine.state.state_name)
+    cx = max(-2.0, min(2.0, params["cx"]))
+    cy = max(-2.0, min(2.0, params["cy"]))
+    zoom = max(0.5, min(100.0, params["zoom"]))
+    key = f"freq-journey:{user_id}:{cx:.3f}:{cy:.3f}:{zoom:.2f}:{width}:{height}"
     img_data = await _render_fractal_async(
-        f"journey:{user_id}:{step:.1f}:{width}:{height}",
-        render_mandelbrot,
-        width, height, palette, 96,
-        params["cx"], params["cy"], max(0.5, params["zoom"]),
-        0.0, 0.0,
+        key, render_mandelbrot,
+        width, height, palette, 96, cx, cy, zoom, 0.0, 0.0,
     )
     return Response(content=img_data, media_type="image/png")
+
+def _palette_for_state(state_name):
+    return {
+        "focused": "cyberpunk", "stressed": "fire",
+        "fatigued": "oceanic", "engaged": "neon",
+        "curious": "aurora", "resting": "magnetic",
+    }.get(state_name, "cyberpunk")
 
 @app.get("/health")
 async def health():
