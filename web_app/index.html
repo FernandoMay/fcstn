@@ -170,6 +170,12 @@ tailwind.config = {
                 </div>
                 <div class="mt-1 text-[8px] font-mono-data text-on-surface-variant/40 text-center" id="mbLabel">M→ α: -0.500 / β: 0.150 / z: 2.00</div>
             </div>
+            <!-- Mandelbrot Coordinate Map -->
+            <div class="glass-panel-light p-2 rounded">
+                <div class="text-[8px] font-mono-data text-on-surface-variant/60 mb-1">MANDELBROT MAP</div>
+                <canvas id="coordMapCanvas" class="w-full rounded" height="80" style="background:#0A0E14;"></canvas>
+                <div class="mt-1 text-[7px] font-mono-data text-on-surface-variant/30 text-center" id="mapRegion">current region: --</div>
+            </div>
             <div class="flex items-center gap-2 font-mono-data text-[10px] opacity-60">
                 <span class="material-symbols-outlined text-[12px]">sensors</span>
                 <span id="netStatus">NETWORK_UP</span>
@@ -320,9 +326,18 @@ tailwind.config = {
                             <span class="font-mono-data text-[8px] text-on-surface-variant/40 w-6 text-right" id="hueValue">0°</span>
                         </div>
                     </div>
-                    <div class="mt-2 h-24 glass-panel border-dashed border-outline-variant/30 flex items-center justify-center relative overflow-hidden">
-                        <span class="relative z-10 font-mono-data text-[10px] text-primary/40 uppercase tracking-widest">TOPOLOGY_STREAM</span>
-                        <div class="absolute inset-0 data-grid-bg opacity-20"></div>
+                    <div class="mt-2 glass-panel border-dashed border-outline-variant/30 p-2 relative overflow-hidden">
+                        <div class="text-[8px] font-mono-data text-on-surface-variant/60 mb-1">ALL PALETTES @ CURRENT POSITION</div>
+                        <div class="grid grid-cols-4 gap-1" id="paletteCompareGrid">
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="cyberpunk"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="oceanic"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="fire"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="aurora"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="neon"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="earth"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="magnetic"></canvas></div>
+                            <div class="aspect-[4/3] bg-surface-container/40 rounded overflow-hidden"><canvas class="w-full h-full" data-palette="toxic"></canvas></div>
+                        </div>
                     </div>
                 </div>
 
@@ -826,6 +841,9 @@ function updateMetrics(data) {
     const m = String(Math.floor((upt % 3600) / 60)).padStart(2, '0');
     const s = String(upt % 60).padStart(2, '0');
     document.getElementById('uptimeDisplay').textContent = `T+${h}:${m}:${s}`;
+
+    drawCoordMap();
+    schedulePaletteCompare();
 }
 
 function animateEEGBars(containerId, level) {
@@ -976,6 +994,8 @@ function loadProfileFractal() {
                 }
                 document.getElementById('fractalLoader').style.display = 'none';
                 if (!_tunnelAnimId) startTunnelAnim();
+                drawCoordMap();
+                updatePaletteCompare();
             };
             img.src = u;
         })
@@ -1034,6 +1054,103 @@ function drawNeuralOverlay() {
     });
 }
 
+// ============= COORDINATE MAP =============
+const REGIONS = [
+    {label:'δ', cx:-1.5, cy:0.0, zoom:0.5, color:'#667'},
+    {label:'θ', cx:-1.0, cy:0.3, zoom:1.0, color:'#88a'},
+    {label:'α', cx:-0.5, cy:0.0, zoom:2.0, color:'#00dbe7'},
+    {label:'β', cx:-0.75,cy:0.15,zoom:4.0, color:'#4edea3'},
+    {label:'γ', cx:-0.16,cy:1.04,zoom:6.0, color:'#f80'},
+];
+function drawCoordMap() {
+    const canvas = document.getElementById('coordMapCanvas');
+    if (!canvas) return;
+    const rect = canvas.parentElement.getBoundingClientRect();
+    canvas.width = rect.width * 0.95;
+    canvas.height = 80;
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const pad = 14;
+    // Map: cx[-1.8, 0.6] -> x, cy[-0.4, 1.2] -> y
+    const xMin=-1.8, xMax=0.6, yMin=-0.4, yMax=1.2;
+    const toX = c => pad + (c - xMin)/(xMax - xMin)*(w - 2*pad);
+    const toY = c => pad + (1.0 - (c - yMin)/(yMax - yMin))*(h - 2*pad);
+    ctx.clearRect(0,0,w,h);
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    for (let g=-1.5; g<=0.5; g+=0.5) { ctx.beginPath();ctx.moveTo(toX(g),pad);ctx.lineTo(toX(g),h-pad);ctx.stroke(); }
+    for (let g=-0.2; g<=1.0; g+=0.4) { ctx.beginPath();ctx.moveTo(pad,toY(g));ctx.lineTo(w-pad,toY(g));ctx.stroke(); }
+    // Regions
+    REGIONS.forEach(r => {
+        const x=toX(r.cx), y=toY(r.cy);
+        ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2);
+        ctx.fillStyle = r.color; ctx.fill();
+        ctx.strokeStyle = r.color+'88'; ctx.lineWidth=0.5;
+        ctx.stroke();
+        ctx.fillStyle = r.color+'aa';
+        ctx.font = '6px JetBrains Mono, monospace';
+        ctx.fillText(r.label, x+4, y+3);
+    });
+    // Trail
+    if (_freqHistory.length > 1) {
+        ctx.strokeStyle = 'rgba(0,219,231,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath();
+        _freqHistory.forEach((p,i) => {
+            const x=toX(p.cx), y=toY(p.cy);
+            i===0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+        });
+        ctx.stroke();
+    }
+    // Current position
+    if (_lastCoord) {
+        const cx=toX(_lastCoord.cx), cy=toY(_lastCoord.cy);
+        const pulse = Math.sin(Date.now()/500)*0.3+0.7;
+        ctx.beginPath(); ctx.arc(cx,cy,5,0,Math.PI*2);
+        ctx.fillStyle = `rgba(0,219,231,${pulse})`;
+        ctx.fill();
+        ctx.strokeStyle = `rgba(78,222,163,${0.3*pulse})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // Region label
+        document.getElementById('mapRegion').textContent =
+            `${_lastCoord.cx.toFixed(3)}, ${_lastCoord.cy.toFixed(3)} @ ${_lastCoord.zoom.toFixed(1)}x`;
+    }
+}
+
+// ============= PALETTE COMPARISON =============
+let _paletteCompareTimer = null;
+function updatePaletteCompare() {
+    if (!_lastCoord) return;
+    const cx=_lastCoord.cx, cy=_lastCoord.cy, zoom=_lastCoord.zoom;
+    const canvases = document.querySelectorAll('#paletteCompareGrid canvas');
+    canvases.forEach(c => {
+        const pal = c.dataset.palette;
+        const url = `${API_BASE}/api/fractal?mode=mandelbrot&palette=${pal}&cx=${cx.toFixed(4)}&cy=${cy.toFixed(4)}&zoom=${zoom.toFixed(2)}&width=80&height=60&max_iter=48`;
+        c.parentElement.style.background = '#0A0E14';
+        fetch(url, { signal: AbortSignal.timeout(5000) })
+            .then(r => r.blob())
+            .then(blob => {
+                const img = new Image();
+                img.onload = () => {
+                    const ctx = c.getContext('2d');
+                    if (!ctx) return;
+                    c.width = c.parentElement.offsetWidth || 80;
+                    c.height = c.parentElement.offsetHeight || 60;
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    URL.revokeObjectURL(img.src);
+                };
+                img.src = URL.createObjectURL(blob);
+            })
+            .catch(() => {});
+    });
+}
+// Debounced palette compare update (every 6s)
+function schedulePaletteCompare() {
+    if (_paletteCompareTimer) clearTimeout(_paletteCompareTimer);
+    _paletteCompareTimer = setTimeout(updatePaletteCompare, 6000);
+}
+
 // ============= INIT =============
 window.addEventListener('load', () => {
     canvas.width = canvas.parentElement.offsetWidth;
@@ -1047,6 +1164,8 @@ window.addEventListener('load', () => {
         {cx: -0.7453, cy: 0.1127, zoom: 12.0},
     ];
     _lastCoord = STARTS[Math.floor(Math.random() * STARTS.length)];
+    drawCoordMap();
+    schedulePaletteCompare();
     // Size tunnel canvas
     const tc = document.getElementById('tunnelCanvas');
     if (tc && tc.parentElement) {
@@ -1069,6 +1188,7 @@ window.addEventListener('load', () => {
             tc.width = tc.parentElement.offsetWidth;
             tc.height = tc.parentElement.offsetHeight;
         }
+        drawCoordMap();
     });
 
     // Animate neural overlay
