@@ -97,7 +97,7 @@ class NeuralProfile:
         """
         attn = cognitive_state.get("attention", 0.5)
         eng = cognitive_state.get("engagement", 0.5)
-        load = cognitive_state.get("workload", 0.3)
+        load = cognitive_state.get("load", cognitive_state.get("workload", 0.3))
         val = cognitive_state.get("valence", 0.5)
         coh = cognitive_state.get("coherence", 0.5)
 

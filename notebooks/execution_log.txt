@@ -1,0 +1,4 @@
+﻿Notebook executed successfully at 2026-07-01 14:42:34
+File: notebooks/fcstn_demo_executed.ipynb
+Size: 4186416 bytes
+Result: All 13 cells executed without errors

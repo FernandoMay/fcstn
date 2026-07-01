@@ -822,11 +822,12 @@ function updateMetrics(data) {
     document.getElementById('freqBeta').style.width = (freqBeta * 100) + '%';
     document.getElementById('freqGamma').style.width = (freqGamma * 100) + '%';
 
-    // Map frequencies → Mandelbrot coords (client-side preview)
-    const tw = 1.5*freqDelta + 0.6*freqTheta + 1.0*freqAlpha + 0.8*freqBeta + 0.4*freqGamma;
-    const mbCx = tw > 0 ? (-1.5*freqDelta -1.0*freqTheta -0.5*freqAlpha -0.75*freqBeta -0.16*freqGamma) / tw : -0.5;
-    const mbCy = tw > 0 ? (0.0*freqDelta +0.3*freqTheta +0.0*freqAlpha +0.15*freqBeta +1.04*freqGamma) / tw : 0.0;
-    const mbZoom = tw > 0 ? 1.0 + (0.5*freqDelta +1.0*freqTheta +2.0*freqAlpha +4.0*freqBeta +6.0*freqGamma) / tw : 2.0;
+    // Map frequencies → Mandelbrot coords (matches server freq_to_journey EXACTLY)
+    const wDelta = 0.5 * freqDelta, wTheta = 0.6 * freqTheta, wAlpha = 1.0 * freqAlpha, wBeta = 0.8 * freqBeta, wGamma = 0.4 * freqGamma;
+    const total = wDelta + wTheta + wAlpha + wBeta + wGamma;
+    const mbCx = total > 0 ? (-1.5*wDelta - 1.0*wTheta - 0.5*wAlpha - 0.75*wBeta - 0.16*wGamma) / total : -0.5;
+    const mbCy = total > 0 ? (0.0*wDelta + 0.3*wTheta + 0.0*wAlpha + 0.15*wBeta + 1.04*wGamma) / total : 0.0;
+    const mbZoom = total > 0 ? Math.max(0.5, (1.0 - 0.5*wDelta + 0*wTheta + 1.0*wAlpha + 3.0*wBeta + 5.0*wGamma) / total) : 2.0;
     document.getElementById('mbLabel').textContent =
         `M→ α: ${mbCx.toFixed(3)} / β: ${mbCy.toFixed(3)} / z: ${mbZoom.toFixed(2)}`;
     _lastCoord = {cx: mbCx, cy: mbCy, zoom: mbZoom};
